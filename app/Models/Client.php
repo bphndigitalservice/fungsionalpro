@@ -26,12 +26,12 @@ class Client extends Model
 
     public function crole(): BelongsTo
     {
-        return $this->belongsTo(CRole::class);
+        return $this->belongsTo(CRole::class, 'c_role_id', 'id');
     }
 
     public function croleLevel(): BelongsTo
     {
-        return $this->belongsTo(CRoleLevel::class)->orderBy('id', 'asc');
+        return $this->belongsTo(CRoleLevel::class, 'c_role_level_id', 'id')->orderBy('id', 'asc');
     }
 
     public function detail(): HasOne

@@ -12,9 +12,10 @@ return new class extends Migration {
     {
         Schema::create('client_education', function (Blueprint $table) {
             $table->id();
-            $table->foreignUlid('client_id',26);
+            $table->foreignUlid('client_id', 26);
             $table->string('university_name');
             $table->string('program_name');
+            $table->float('gpa');
             $table->string('certificate');
             $table->timestamps();
 
