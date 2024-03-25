@@ -13,15 +13,16 @@ return new class extends Migration {
         Schema::create('client_details', function (Blueprint $table) {
             $table->id();
             $table->foreignUlid('client_id');
-            $table->date('tmt_cpns')->nullable();
-            $table->date('tmt_jf')->nullable();
-            $table->date('nomor_sk_jf')->nullable();
-            $table->date('nomor_sk_jabatan')->nullable();
-            $table->date('file_bukti_angkat')->nullable();
-            $table->string('file_sk_cpns')->nullable();
-            $table->string('file_sk_pns')->nullable();
+            $table->date('sk_cpns_tmt')->nullable();
+            $table->string('sk_cpns_file')->nullable();
+            $table->string('sk_pns_file')->nullable();
+            $table->string('sk_latest_jf_no')->nullable();
+            $table->date('sk_latest_jf_tmt')->nullable();
+            $table->date('sk_latest_grade_tmt')->nullable();
+            $table->string('sk_latest_grade_file')->nullable();
+            $table->string('file_assignation_evd')->nullable();
             $table->string('file_sk_jf')->nullable();
-            $table->date('file_kartu_pegawai')->nullable();
+            $table->string('file_employee_card')->nullable();
 
             $table->timestamps();
 

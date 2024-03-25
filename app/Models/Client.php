@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Enums\ClientCluster;
+use App\Models\Enums\ClientStatus;
+use App\Models\Enums\CRoleAssignation;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +17,9 @@ class Client extends Model
     use HasFactory, HasUlids;
 
     protected $casts = [
-        'type' => ClientCluster::class
+        'type' => ClientCluster::class,
+        'status' => ClientStatus::class,
+        'assignation_type' => CRoleAssignation::class,
     ];
 
 
@@ -52,5 +56,10 @@ class Client extends Model
     public function agenciable(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'agency_type', 'agency_id');
+    }
+
+    public function echelonable(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'echelon_type', 'echelon_id');
     }
 }

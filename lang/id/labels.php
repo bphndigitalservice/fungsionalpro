@@ -6,7 +6,7 @@ return [
         'system' => 'Sistem',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
-        'references_province' => 'Wilayah Administrasi',
+        'references_province' => 'Provinsi',
         'references_regency' => 'Kota / Kabupaten',
         'references_department' => 'Kementerian & Lembaga',
     ],
@@ -21,6 +21,6 @@ return [
             'name' => 'Jabatan',
             'level' => 'Jenjang'
         ],
-        'client_cluster' => 'Type ASN'
+        'client_cluster' => 'Kluster ASN'
     ],
 ];

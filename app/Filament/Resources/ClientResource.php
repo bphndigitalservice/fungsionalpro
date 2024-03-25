@@ -19,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use PHPUnit\Metadata\Group;
 
@@ -66,31 +67,41 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID'),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('c_role_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('id')
+                    ->toggleable()
+                    ->toggledHiddenByDefault()
+                    ->label('id'),
                 Tables\Columns\TextColumn::make('nip')
+                    ->label('NIP')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('identity.name')
+                    ->label('Nama')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('crole.role_name')
+                    ->label('Jabatan')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('croleLevel.level')
+                    ->label('Jenjang')
+                    ->numeric()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('type')
+                    ->label('Kluster ASN')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('agency_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('agency_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('echelon_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('echelon_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('agenciable.name')
+                    ->label('Instansi')
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('echelonable.name')
+                    ->label('Unit Kerja')
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('echelon_x_text')
+                    ->label('Unit Kerja - Typed')
+                    ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('assignation_type')
+                    ->label('Pengangkatan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -174,7 +185,7 @@ class ClientResource extends Resource
                         ->options(ClientCluster::class)
                         ->afterStateUpdated(function (?string $state, Forms\Set $set) {
                             if ($state == "central") {
-                                $set("echelon_type", RegDepartment::class);
+                                $set("echelon_type", RegDepartmentEchelon1::class);
                             }
                         })
                         ->live()
@@ -189,40 +200,38 @@ class ClientResource extends Resource
                 ->options(CRoleAssignation::class)
                 ->label('Jenis Pengangkatan')
                 ->required(),
-            Forms\Components\Select::make('agency_id')
-                ->label('Provinsi')
-                ->live()
-                ->searchable()
-                ->required(fn(Forms\Get $get) => $get('type') == 'local_province')
-                ->hidden(fn(Forms\Get $get): bool => $get('type') != 'local_province')
-                ->options(RegProvince::query()->pluck('name', 'id')),
-            Forms\Components\Select::make('agency_id')
-                ->label('Kota/Kabupaten')
-                ->live()
-                ->searchable()
-                ->required(fn(Forms\Get $get) => $get('type') == 'local_regency')
-                ->hidden(fn(Forms\Get $get) => $get('type') != 'local_regency')
-                ->options(RegRegency::query()->pluck('name', 'id')),
-            Forms\Components\Select::make('agency_id')
-                ->label('Kementerian/Lembaga')
-                ->live()
-                ->searchable()
-                ->required(fn(Forms\Get $get) => $get('type') == 'central')
-                ->hidden(fn(Forms\Get $get) => $get('type') != 'central')
-                ->options(RegDepartment::query()->pluck('name', 'id')),
             Forms\Components\Group::make()
                 ->schema([
-                    Forms\Components\TextInput::make('echelon_type')
-                        ->readOnly()
+                    Forms\Components\Select::make('agency_id')
+                        ->label('Instansi')
+                        ->live()
+                        ->searchable()
+                        ->required(fn(Forms\Get $get) => $get('type') == 'local_province')
+                        ->hidden(fn(Forms\Get $get): bool => $get('type') != 'local_province')
+                        ->options(RegProvince::query()->pluck('name', 'id')),
+                    Forms\Components\Select::make('agency_id')
+                        ->label('Instansi')
+                        ->live()
+                        ->searchable()
+                        ->required(fn(Forms\Get $get) => $get('type') == 'local_regency')
+                        ->hidden(fn(Forms\Get $get) => $get('type') != 'local_regency')
+                        ->options(RegRegency::query()->pluck('name', 'id')),
+                    Forms\Components\Select::make('agency_id')
+                        ->label('Instansi')
+                        ->live()
+                        ->searchable()
                         ->required(fn(Forms\Get $get) => $get('type') == 'central')
-                        ->maxLength(255),
+                        ->hidden(fn(Forms\Get $get) => $get('type') != 'central')
+                        ->options(RegDepartment::query()->pluck('name', 'id')),
+                    Forms\Components\TextInput::make('echelon_x_text')
+                        ->label('Unit Kerja')
+                        ->required(fn(Forms\Get $get) => $get('type') != 'central')
+                        ->hidden(fn(Forms\Get $get) => $get('type') == 'central'),
                     Forms\Components\Select::make('echelon_id')
                         ->label('Unit Kerja')
                         ->options(fn(Forms\Get $get) => RegDepartmentEchelon1::query()->where('department_id', $get('agency_id'))->pluck('name', 'id'))
                         ->required(fn(Forms\Get $get) => $get('type') == 'central'),
-                ])
-                ->hidden(fn(Forms\Get $get) => $get('type') != 'central' || $get('type') == "")
-                ->columns(2),
+                ])->columns(2),
         ];
     }
 
@@ -261,6 +270,7 @@ class ClientResource extends Resource
                         ->maxSize(config('fungsional-pro.max_media_file_size'))
                         ->acceptedFileTypes(config('fungsional-pro.accepted_media_type'))
                         ->directory('photos')
+                        ->image()
                         ->downloadable()
                         ->required()
                 ])
@@ -300,6 +310,27 @@ class ClientResource extends Resource
                         ])->columns(2)
                 ])
                 ->relationship('education')
+        ];
+    }
+
+    public static function getDetailedClientForm(): array
+    {
+        return [
+
+        ];
+    }
+
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nip', 'identity.name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Nama' => $record->identity->name,
+            'NIP' => $record->nip
         ];
     }
 }

@@ -14,6 +14,7 @@ class RegProvince extends Model
 
     public $timestamps = false;
 
+
     public function regencies(): HasMany
     {
         return $this->hasMany(RegRegency::class, 'province_id', 'id');
@@ -22,6 +23,11 @@ class RegProvince extends Model
     public function agency(): MorphOne
     {
         return $this->morphOne(Client::class, "agency");
+    }
+
+    public function echelon1s(): HasMany
+    {
+        return $this->hasMany(RegProvinceEchelon1::class);
     }
 
 }
