@@ -49,10 +49,4 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'password' => 'hashed',
         ];
     }
-
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true;
-    }
 }

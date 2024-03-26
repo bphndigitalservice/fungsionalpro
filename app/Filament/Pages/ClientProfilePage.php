@@ -1,0 +1,261 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Filament\Resources\ClientResource;
+use App\Models\Client;
+use App\Models\Enums\ClientCluster;
+use App\Models\RegDepartment;
+use App\Models\RegDepartmentEchelon1;
+use App\Models\RegProvince;
+use App\Models\RegRegency;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Filament\Actions\Action;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Infolists\Concerns\InteractsWithInfolists;
+use Filament\Infolists\Contracts\HasInfolists;
+use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\CanUseDatabaseTransactions;
+use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
+use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
+use Filament\Forms;
+use Filament\Support\Exceptions\Halt;
+use Illuminate\Contracts\Support\Htmlable;
+
+
+/**
+ * @property Form $form
+ */
+class ClientProfilePage extends Page implements HasForms, HasInfolists
+{
+    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithForms, InteractsWithInfolists, InteractsWithFormActions;
+    use CanUseDatabaseTransactions;
+
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    protected static string $view = 'filament.pages.client-profile-page';
+    public ?Client $record;
+    public ?array $data = [];
+    public string $previousUrl;
+
+
+    public function mount(): void
+    {
+        $this->getRecord();
+        $this->fillForm();
+        $this->previousUrl = url()->previous();
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Tabs::make()
+                    ->schema([
+                        Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_info'))
+                            ->schema([
+                                Forms\Components\Section::make()
+                                    ->heading(__('labels.form.client.heading.client_identity'))
+                                    ->description(__('labels.form.client.heading.client_identity_description'))
+                                    ->collapsible()
+                                    ->schema([
+                                        Forms\Components\Group::make()
+                                            ->schema(ClientResource::getClientIdentityForm())
+                                            ->columnSpan(5),
+                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                Forms\Components\Section::make()
+                                    ->heading(__('labels.form.client.heading.client_education'))
+                                    ->description(__('labels.form.client.heading.client_education_description'))
+                                    ->collapsible()
+                                    ->schema([
+                                        Forms\Components\Group::make()
+                                            ->schema(ClientResource::getClientEducationForm())
+                                            ->columnSpan(5),
+                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                Forms\Components\Section::make()
+                                    ->heading(__('labels.form.client.heading.client_employee_information'))
+                                    ->description(__('labels.form.client.heading.client_employee_information_description'))
+                                    ->collapsible()
+                                    ->schema([
+                                        Forms\Components\Group::make()
+                                            ->schema(ClientResource::getClientBasicInformationForm())
+                                            ->columnSpan(5),
+                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+
+                            ]),
+                        Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
+                            ->schema(ClientResource::getDetailedClientForm()),
+                    ])->columnSpan(5)
+            ]);
+
+    }
+
+    protected function fillForm(): void
+    {
+        $this->fillFormWithData();
+    }
+
+    protected function fillFormWithData(): void
+    {
+        $data = $this->resolveRecord();
+        $this->form->fill($data);
+    }
+
+
+    protected function resolveRecord(): array
+    {
+        if (is_null($this->record)) {
+            return [];
+        }
+
+        return [
+            ...$this->record->attributesToArray(),
+            'identity' => $this->record->identity->attributesToArray() ?? [],
+            'education' => $this->record->education->attributesToArray() ?? [],
+            'detail' => $this->record->detail->attributesToArray() ?? []
+        ];
+    }
+
+
+    protected function getForms(): array
+    {
+        return [
+            'form' => $this->form($this->makeForm()
+                ->operation('submit')
+                ->model(Client::class)
+                ->statePath($this->getFormStatePath())
+            )
+        ];
+    }
+
+    public function getFormActions(): array
+    {
+        return [
+            $this->saveClientProfileAction()
+        ];
+    }
+
+    public function submit(): void
+    {
+        try {
+            $data = $this->form->getState();
+            $data = $this->mutateFormDataBeforeSave($data);
+            $this->record = $this->handleSave($data);
+        } catch (Halt $exception) {
+            return;
+        }
+
+        $this->rememberData();
+        $this->getClientProfileSavedNotification()?->send();
+    }
+
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['user_id'] = auth('web')->user()->id;
+
+        $data['agency_type'] = match ($data['type']) {
+            ClientCluster::Central->value => RegDepartment::class,
+            ClientCluster::LocalProvince->value => RegProvince::class,
+            ClientCluster::LocalRegency->value => RegRegency::class,
+        };
+
+        $data['echelon_type'] = match ($data['type']) {
+            ClientCluster::Central->value => RegDepartmentEchelon1::class,
+            ClientCluster::LocalProvince->value => RegProvince::class,
+            ClientCluster::LocalRegency->value => RegRegency::class,
+        };
+
+        $data['echelon_x_text'] = $data['type'] == ClientCluster::Central->value ? null : $data['type'];
+
+
+        return $data;
+    }
+
+    protected function mutateDataBeforeFill(array $data): array
+    {
+        if (is_null($this->record)) {
+            $data['name'] = auth('web')->user()->name;
+        }
+
+        return $data;
+    }
+
+    protected function handleSave(array $data): Client
+    {
+        $this->authorizeAccess();
+
+        $record = new Client($data);
+        $record->save();
+
+        $this->form->model($this->getRecord())->saveRelationships();
+
+        return $record;
+
+    }
+
+    public function getClientProfileSavedNotification(): ?Notification
+    {
+        $title = $this->getClientProfileSavedNotificationTitle();
+        if (blank($title)) {
+            return null;
+        }
+
+        return Notification::make()
+            ->success()
+            ->title($title);
+    }
+
+    protected function getRecord(): ?Client
+    {
+        $record = Client::with(['education', 'identity', 'detail'])->where('user_id', auth('web')->user()->id)->first();
+        $this->record = $record;
+
+        return $this->record;
+    }
+
+    public function saveClientProfileAction(): Action
+    {
+        return Action::make('submit')
+            ->action(fn() => $this->submit())
+            ->label(__('submit'))
+            ->keyBindings(['mod+s']);
+    }
+
+    protected function authorizeAccess(): void
+    {
+        abort_unless(auth('web')->user()->can(['create_client', 'update_client']), 403);
+    }
+
+
+    protected function getClientProfileSavedNotificationTitle(): ?string
+    {
+        return "Profil telah disimpan";
+    }
+
+    public function getFormStatePath(): ?string
+    {
+        return 'data';
+    }
+
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '/' => 'Dasbor',
+        ];
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Data Diri');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('Data Diri');
+    }
+}

@@ -29,9 +29,9 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('/')
             ->login()
-            ->registration(Register::class)
+            ->registration()
             ->emailVerification()
             ->passwordReset()
             ->profile(isSimple: false)
@@ -74,6 +74,8 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
-            ])->unsavedChangesAlerts();
+            ])
+            ->databaseTransactions()
+            ->unsavedChangesAlerts();
     }
 }

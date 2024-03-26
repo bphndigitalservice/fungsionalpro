@@ -19,7 +19,7 @@ return [
         ],
 
         'open_user_menu' => [
-            'label' => 'User menu',
+            'label' => 'Client menu',
         ],
 
         'sidebar' => [

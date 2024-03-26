@@ -281,7 +281,6 @@ class ClientResource extends Resource
                         ->label(__('labels.form.client.fields.address'))
                         ->required(),
                     Forms\Components\FileUpload::make('photo')
-                        ->previewable()
                         ->label(__('labels.form.client.fields.photo'))
                         ->maxSize(config('fungsional-pro.max_media_file_size'))
                         ->acceptedFileTypes(config('fungsional-pro.accepted_media_type'))
@@ -316,13 +315,13 @@ class ClientResource extends Resource
                                 ->numeric()
                                 ->required(),
                             Forms\Components\FileUpload::make('certificate')
-                                ->previewable()
                                 ->label(__('labels.form.client.fields.certificate'))
                                 ->required()
                                 ->maxFiles(1)
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->directory('education_certificate')
+                                ->getUploadedFileUsing(fn())
                                 ->downloadable()
                         ])->columns(2)
                 ])

@@ -40,7 +40,11 @@ class Register extends BaseRegister
         $user = $this->wrapInDatabaseTransaction(function () {
             $data = $this->form->getState();
 
-            return $this->getUserModel()::create($data);
+            $user = $this->getUserModel()::create($data);
+
+            $user->assignRole(['client','panel_user']);
+
+            return $user;
         });
 
         event(new Registered($user));
@@ -57,7 +61,7 @@ class Register extends BaseRegister
     public function sendEmailVerificationNotification(Model $user): void
     {
 
-        if (! $user instanceof MustVerifyEmail) {
+        if (!$user instanceof MustVerifyEmail) {
             return;
         }
 
@@ -65,7 +69,7 @@ class Register extends BaseRegister
             return;
         }
 
-        if (! method_exists($user, 'notify')) {
+        if (!method_exists($user, 'notify')) {
             $userClass = $user::class;
 
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
