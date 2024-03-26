@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\Auth\EditProfile;
+use App\Filament\Auth\Register;
 use App\Filament\Navigations\Navigation;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,10 +31,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->registration()
-            ->passwordReset()
+            ->registration(Register::class)
             ->emailVerification()
-            /*->profile(page: EditProfile::class,isSimple: true)*/
+            ->passwordReset()
+            ->profile(isSimple: false)
             ->colors([
                 'primary' => Color::Fuchsia,
             ])
@@ -73,6 +74,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
-            ]);
+            ])->unsavedChangesAlerts();
     }
 }

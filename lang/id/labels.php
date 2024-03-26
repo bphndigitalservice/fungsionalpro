@@ -6,6 +6,7 @@ return [
         'system' => 'Sistem',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
+        'references_grade' => 'Pangkat/Golongan',
         'references_province' => 'Provinsi',
         'references_regency' => 'Kota / Kabupaten',
         'references_department' => 'Kementerian & Lembaga',
@@ -49,7 +50,8 @@ return [
         ],
         'client' => [
             'tab_info' => 'Identitas ASN',
-            'tab_file' => 'Dokumen Prasyarat',
+            'tab_file' => 'Rincian',
+            'tab_user' => 'Pengguna Terkait',
             'heading' => [
                 'client_identity' => 'Data Pribadi',
                 'client_identity_description' => 'Nama, Alamat, Gender',
@@ -77,7 +79,14 @@ return [
                 'assignation_type' => 'Jenis Pengangkatan',
                 'agency' => 'Instansi',
                 'echelon' => 'Unit Kerja',
+                'grade' => 'Pangkat/Golongan'
 
+            ]
+        ],
+        'grade'=>[
+            'fields' => [
+                'grade_name' => 'Pangkat',
+                'grade_code' => 'Golongan/Ruang'
             ]
         ],
         'crole' => [

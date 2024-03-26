@@ -19,7 +19,11 @@ return new class extends Migration {
             $table->string('certificate');
             $table->timestamps();
 
-            $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('client_id')
+                ->references('id')
+                ->on('clients')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

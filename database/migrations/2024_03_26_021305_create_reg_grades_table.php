@@ -10,17 +10,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('client_files', function (Blueprint $table) {
-            $table->id();
-            $table->foreignUlid('client_id');
-            $table->string('name');
-            $table->string('file');
+        Schema::create('reg_grades', function (Blueprint $table) {
+            $table->id()->autoIncrement();
+            $table->string('grade_name');
+            $table->string('grade_code');
             $table->timestamps();
+        });
 
-            $table->foreign('client_id')
-                ->on('clients')
+        Schema::table("clients", function (Blueprint $table) {
+            $table->foreign('reg_grade_id')
+                ->on('reg_grades')
                 ->references('id')
-                ->onDelete('cascade')
+                ->onDelete('set null')
                 ->onUpdate('cascade');
         });
     }
@@ -30,6 +31,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('client_files');
+        Schema::dropIfExists('reg_grades');
     }
 };

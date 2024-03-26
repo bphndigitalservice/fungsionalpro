@@ -18,15 +18,20 @@ return new class extends Migration {
             $table->string('sk_pns_file')->nullable();
             $table->string('sk_latest_jf_no')->nullable();
             $table->date('sk_latest_jf_tmt')->nullable();
+            $table->string('sk_latest_jf_file')->nullable();
+            $table->date('sk_latest_grade_no')->nullable();
             $table->date('sk_latest_grade_tmt')->nullable();
             $table->string('sk_latest_grade_file')->nullable();
             $table->string('file_assignation_evd')->nullable();
-            $table->string('file_sk_jf')->nullable();
             $table->string('file_employee_card')->nullable();
 
             $table->timestamps();
 
-            $table->foreign('client_id')->on('clients')->references('id')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('client_id')
+                ->on('clients')
+                ->references('id')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

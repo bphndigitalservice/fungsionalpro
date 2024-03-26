@@ -15,7 +15,6 @@ use App\Models\RegProvince;
 use App\Models\RegRegency;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Components\Tab;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -67,7 +66,14 @@ class ClientResource extends Resource
 
                             ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
-                            ->schema([])
+                            ->schema(static::getDetailedClientForm()),
+                        Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_user'))
+                            ->schema([
+                                Forms\Components\Select::make('user_id')
+                                    ->searchable()
+                                    ->required()
+                                    ->relationship('user', 'name'),
+                            ])
                     ])->columnSpan(5)
             ]);
     }
@@ -165,14 +171,15 @@ class ClientResource extends Resource
         return [
             Forms\Components\Group::make()
                 ->schema([
-                    Forms\Components\Select::make('user_id')
-                        ->searchable()
-                        ->required()
-                        ->relationship('user', 'name'),
                     Forms\Components\TextInput::make('nip')
                         ->label(__('labels.form.client.fields.nip'))
+                        ->unique(Client::class)
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(18),
+                    Forms\Components\Select::make('reg_grade_id')
+                        ->label(__('labels.form.client.fields.grade'))
+                        ->relationship('grade', 'grade_code')
+                        ->required(),
                 ])->columns(2),
             Forms\Components\Group::make()
                 ->schema([
@@ -274,6 +281,7 @@ class ClientResource extends Resource
                         ->label(__('labels.form.client.fields.address'))
                         ->required(),
                     Forms\Components\FileUpload::make('photo')
+                        ->previewable()
                         ->label(__('labels.form.client.fields.photo'))
                         ->maxSize(config('fungsional-pro.max_media_file_size'))
                         ->acceptedFileTypes(config('fungsional-pro.accepted_media_type'))
@@ -308,6 +316,7 @@ class ClientResource extends Resource
                                 ->numeric()
                                 ->required(),
                             Forms\Components\FileUpload::make('certificate')
+                                ->previewable()
                                 ->label(__('labels.form.client.fields.certificate'))
                                 ->required()
                                 ->maxFiles(1)
@@ -324,7 +333,53 @@ class ClientResource extends Resource
     public static function getDetailedClientForm(): array
     {
         return [
-
+            Forms\Components\Group::make()
+                ->schema([
+                    Forms\Components\Section::make('CPNS & PNS')
+                        ->description('Data terkait CPNS & PNS')
+                        ->schema([
+                            Forms\Components\DatePicker::make('sk_cpns_tmt')
+                                ->label('TMT CPNS'),
+                            Forms\Components\FileUpload::make('sk_cpns_file')
+                                ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->maxFiles(1)
+                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                            Forms\Components\FileUpload::make('sk_pns_file')
+                                ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->maxFiles(1)
+                                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                        ]),
+                    Forms\Components\Section::make('Jabatan')
+                        ->description('Data terkait jabatan')
+                        ->schema([
+                            Forms\Components\Group::make()
+                                ->schema([
+                                    Forms\Components\DatePicker::make('sk_latest_jf_tmt')
+                                        ->label('TMT Jabatan Fungsional'),
+                                    Forms\Components\TextInput::make('sk_latest_jf_no')
+                                        ->label('Nomor SK'),
+                                ])->columns(2),
+                            Forms\Components\FileUpload::make('sk_latest_jf_file')
+                                ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->maxFiles(1)
+                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                        ]),
+                    Forms\Components\Section::make('Pangkat')
+                        ->description('Data terkait pangkat')
+                        ->schema([
+                            Forms\Components\Group::make()
+                                ->schema([
+                                    Forms\Components\DatePicker::make('sk_latest_grade_tmt')
+                                        ->label('TMT Pangkat'),
+                                    Forms\Components\TextInput::make('sk_latest_grade_no')
+                                        ->label('Nomor SK'),
+                                ])->columns(2),
+                            Forms\Components\FileUpload::make('sk_latest_grade_file')
+                                ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->maxFiles(1)
+                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                        ]),
+                ])->relationship('detail')
         ];
     }
 

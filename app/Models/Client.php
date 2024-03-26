@@ -28,6 +28,11 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(RegGrade::class, 'reg_grade_id', 'id')->orderBy('id', 'asc');
+    }
+
     public function crole(): BelongsTo
     {
         return $this->belongsTo(CRole::class, 'c_role_id', 'id');

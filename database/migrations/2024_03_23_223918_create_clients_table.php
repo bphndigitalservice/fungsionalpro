@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('c_role_id');
             $table->unsignedBigInteger('c_role_level_id');
-            $table->string('nip');
+            $table->string('nip')->unique();
+            $table->unsignedBigInteger('reg_grade_id');
             $table->enum('type', ['central', 'local_province', 'local_regency']);
             $table->string('agency_type');
             $table->bigInteger('agency_id');
@@ -39,7 +40,6 @@ return new class extends Migration {
                 ->references('id')
                 ->onDelete('set null')
                 ->onUpdate('cascade');
-
         });
     }
 
