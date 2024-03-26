@@ -22,11 +22,12 @@ class CRoleResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('role_name')
-                    ->label(__('labels.table.crole.name'))
+                    ->label(__('labels.form.crole.fields.role_name'))
                     ->required()
                     ->maxLength(255)
                     ->default('Analis Hukum'),
                 Forms\Components\Toggle::make('active')
+                    ->label(__('labels.form.crole.fields.active'))
                     ->required(),
             ]);
     }
