@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Models\Enums;
+namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum CRoleAssignation: string implements HasLabel
+enum ClientPointSubmissionType: string implements HasLabel
 {
-    //CPNS, Inpassing, PDJL, Penyetaraan
-    case CPNS = "cpns";
     case Inpassing = "inpassing";
-    case PDJL = "pdjl";
     case Penyetaraan = "penyetaraan";
+    case Permenkumham1Tahun2023 = "permenkumham_1_2023";
+    case SKP = "skp";
 
+    //
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::CPNS => 'CPNS',
             self::Inpassing => 'Inpassing',
-            self::PDJL => 'PDJL',
             self::Penyetaraan => 'Penyetaraan',
+            self::Permenkumham1Tahun2023 => 'Permenkumham No. 1 Tahun 2023',
+            self::SKP => 'SKP'
         };
     }
 }

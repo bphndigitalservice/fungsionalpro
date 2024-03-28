@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('sk_latest_jf_no')->nullable();
             $table->date('sk_latest_jf_tmt')->nullable();
             $table->string('sk_latest_jf_file')->nullable();
-            $table->date('sk_latest_grade_no')->nullable();
+            $table->string('sk_latest_grade_no')->nullable();
             $table->date('sk_latest_grade_tmt')->nullable();
             $table->string('sk_latest_grade_file')->nullable();
             $table->string('file_assignation_evd')->nullable();

@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Client;
 
+use App\Enums\ClientCluster;
 use App\Filament\Resources\ClientResource;
 use App\Models\Client;
-use App\Models\Enums\ClientCluster;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
+use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -21,9 +23,10 @@ use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
-use Filament\Forms;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+use Throwable;
 
 
 /**
@@ -33,8 +36,6 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 {
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithForms, InteractsWithInfolists, InteractsWithFormActions;
     use CanUseDatabaseTransactions;
-
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.client-profile-page';
     public ?Client $record;
@@ -81,7 +82,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                                     ->collapsible()
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->schema(ClientResource::getClientBasicInformationForm())
+                                            ->schema(ClientResource::getClientBasicInformationForm(fn() => static::currentClient()))
                                             ->columnSpan(5),
                                     ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
 
@@ -101,6 +102,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     protected function fillFormWithData(): void
     {
         $data = $this->resolveRecord();
+        $data = $this->mutateDataBeforeFill($data);
         $this->form->fill($data);
     }
 
@@ -138,14 +140,31 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         ];
     }
 
+    /**
+     * @throws Throwable
+     */
     public function submit(): void
     {
         try {
+
+            $this->beginDatabaseTransaction();
+
             $data = $this->form->getState();
             $data = $this->mutateFormDataBeforeSave($data);
             $this->record = $this->handleSave($data);
+
+            $this->commitDatabaseTransaction();
+
         } catch (Halt $exception) {
+            $exception->shouldRollbackDatabaseTransaction() ?
+                $this->rollBackDatabaseTransaction() :
+                $this->commitDatabaseTransaction();
+
             return;
+        } catch (Throwable $exception) {
+            $this->rollBackDatabaseTransaction();
+
+            throw $exception;
         }
 
         $this->rememberData();
@@ -188,13 +207,29 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         $this->authorizeAccess();
 
+        if (is_null($this->record))
+            return $this->save($data);
+
+        return $this->update($data);
+    }
+
+    protected function save(array $data): Client
+    {
         $record = new Client($data);
         $record->save();
 
         $this->form->model($this->getRecord())->saveRelationships();
 
         return $record;
+    }
 
+    protected function update(array $data): Client
+    {
+        $this->record->update($data);
+
+        $this->form->model($this->record)->saveRelationships();
+
+        return $this->record;
     }
 
     public function getClientProfileSavedNotification(): ?Notification
@@ -220,10 +255,12 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     public function saveClientProfileAction(): Action
     {
         return Action::make('submit')
+            ->label('Submit')
             ->action(fn() => $this->submit())
             ->label(__('submit'))
             ->keyBindings(['mod+s']);
     }
+
 
     protected function authorizeAccess(): void
     {
@@ -251,11 +288,31 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     public static function getNavigationLabel(): string
     {
-        return __('Data Diri');
+        return __('labels.page.client_profile.nav');
     }
 
     public function getTitle(): string|Htmlable
     {
-        return __('Data Diri');
+        return __('labels.page.client_profile.title');
+    }
+
+    public static function canView(): bool
+    {
+        return Filament::auth()->user()->can(static::getPermissionName());
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('labels.nav.client_menu');
+    }
+
+    public static function getRoutePath(): string
+    {
+        return "/c/profile";
+    }
+
+    private static function currentClient(): ?Model
+    {
+        return auth()->user()->client;
     }
 }

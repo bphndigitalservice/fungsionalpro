@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Enums\ClientCluster;
-use App\Models\Enums\ClientStatus;
-use App\Models\Enums\CRoleAssignation;
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\CRoleAssignation;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -67,4 +67,11 @@ class Client extends Model
     {
         return $this->morphTo(__FUNCTION__, 'echelon_type', 'echelon_id');
     }
+
+    public function point(): HasOne
+    {
+        return $this->hasOne(ClientPoint::class);
+    }
+
+
 }

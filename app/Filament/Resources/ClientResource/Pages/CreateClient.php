@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources\ClientResource\Pages;
 
+use App\Enums\ClientCluster;
 use App\Filament\Resources\ClientResource;
-use App\Models\Enums\ClientCluster;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateClient extends CreateRecord

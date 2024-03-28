@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Models\Enums;
+namespace App\Enums;
 
 use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
-use function Laravel\Prompts\select;
 
 enum ClientStatus: string implements HasLabel, HasIcon, HasColor
 {

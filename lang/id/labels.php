@@ -3,6 +3,9 @@
 return [
     'nav' => [
         'client_management' => 'Manajemen Klien',
+        'client_menu' => 'My Data',
+        'client_profile' => 'Informasi Dasar',
+        'client_point' => 'Angka Kredit',
         'system' => 'Sistem',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
@@ -10,6 +13,21 @@ return [
         'references_province' => 'Provinsi',
         'references_regency' => 'Kota / Kabupaten',
         'references_department' => 'Kementerian & Lembaga',
+
+    ],
+    'page' => [
+        'client_profile' => [
+            'nav' => 'Informasi Dasar',
+            'title' => 'Informasi Dasar',
+        ],
+        'client_point_list' => [
+            'nav' => 'Riwayat',
+            'title' => 'Riwayat Angka Kredit',
+        ],
+        'client_point_create' => [
+            'nav' => 'Pengajuan',
+            'title' => 'Pengajuan',
+        ],
     ],
     'table' => [
         'client' => [
@@ -31,7 +49,7 @@ return [
         ]
     ],
     'form' => [
-        'user'=> [
+        'user' => [
             'heading' => [
                 'general' => 'Umum',
                 'general_description' => 'Name, email, and Password',
@@ -58,7 +76,13 @@ return [
                 'client_education' => 'Pendidikan Terakhir',
                 'client_education_description' => 'Pendidikan Terakhir',
                 'client_employee_information' => 'Data Kepegawaian',
-                'client_employee_information_description' => 'NIP, Jabatan, Jenjang'
+                'client_employee_information_description' => 'NIP, Jabatan, Jenjang',
+                'client_detail_cpns_pns' => 'CPNS & PNS',
+                'client_detail_cpns_pns_desc' => 'Data terkait CPNS & PNS',
+                'client_detail_role' => 'Jabatan',
+                'client_detail_role_desc' => 'Data terkait jabatan',
+                'client_detail_grade' => 'Pangkat',
+                'client_detail_grade_desc' => 'Data terkait kepangkatan'
             ],
             'fields' => [
                 'name' => 'Nama',
@@ -79,11 +103,19 @@ return [
                 'assignation_type' => 'Jenis Pengangkatan',
                 'agency' => 'Instansi',
                 'echelon' => 'Unit Kerja',
-                'grade' => 'Pangkat/Golongan'
-
+                'grade' => 'Pangkat/Golongan',
+                'tmt_cpns' => 'TMT CPNS',
+                'tmt_jf_latest' => 'TMT Jabatan Fungsional',
+                'latest_jf_no' => 'Nomor SK',
+                'file_sk_cpns' => 'File SK CPNS',
+                'file_sk_pns' => 'File SK PNS',
+                'file_sk_jf_latest' => 'File SK Jabatan Fungsional',
+                'tmt_grade_sk_latest' => 'TMT Pangkat Terakhir',
+                'grade_sk_latest_no' => 'Nomor SK Pangkat Terakhir',
+                'file_sk_grade_latest' => 'File SK Pangkat Terakhir',
             ]
         ],
-        'grade'=>[
+        'grade' => [
             'fields' => [
                 'grade_name' => 'Pangkat',
                 'grade_code' => 'Golongan/Ruang'

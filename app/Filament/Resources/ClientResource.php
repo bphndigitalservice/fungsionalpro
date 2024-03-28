@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\CRoleAssignation;
+use App\Enums\Gender;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Filament\Resources\ClientResource\RelationManagers;
 use App\Models\Client;
-use App\Models\Enums\ClientCluster;
-use App\Models\Enums\ClientStatus;
-use App\Models\Enums\CRoleAssignation;
-use App\Models\Enums\Gender;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
@@ -20,8 +20,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use PHPUnit\Metadata\Group;
 
 class ClientResource extends Resource
 {
@@ -60,7 +58,7 @@ class ClientResource extends Resource
                                     ->collapsible()
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->schema(static::getClientBasicInformationForm())
+                                            ->schema(static::getClientBasicInformationForm(fn(Model $record) => $record))
                                             ->columnSpan(5),
                                     ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
 
@@ -166,14 +164,14 @@ class ClientResource extends Resource
         return __('labels.nav.client_management');
     }
 
-    public static function getClientBasicInformationForm(): array
+    public static function getClientBasicInformationForm(?callable $callback): array
     {
         return [
             Forms\Components\Group::make()
                 ->schema([
                     Forms\Components\TextInput::make('nip')
                         ->label(__('labels.form.client.fields.nip'))
-                        ->unique(Client::class)
+                        ->unique(table: Client::class, ignorable: $callback)
                         ->required()
                         ->maxLength(18),
                     Forms\Components\Select::make('reg_grade_id')
@@ -286,7 +284,9 @@ class ClientResource extends Resource
                         ->acceptedFileTypes(config('fungsional-pro.accepted_media_type'))
                         ->directory('photos')
                         ->image()
+                        ->visibility('private')
                         ->downloadable()
+                        ->avatar()
                         ->required()
                 ])
                 ->relationship('identity')
@@ -321,7 +321,7 @@ class ClientResource extends Resource
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->directory('education_certificate')
-                                ->getUploadedFileUsing(fn())
+                                ->visibility('private')
                                 ->downloadable()
                         ])->columns(2)
                 ])
@@ -334,46 +334,56 @@ class ClientResource extends Resource
         return [
             Forms\Components\Group::make()
                 ->schema([
-                    Forms\Components\Section::make('CPNS & PNS')
-                        ->description('Data terkait CPNS & PNS')
+                    Forms\Components\Section::make(__('labels.form.client.heading.client_detail_cpns_pns'))
+                        ->description(__('labels.form.client.heading.client_detail_cpns_pns_desc'))
                         ->schema([
                             Forms\Components\DatePicker::make('sk_cpns_tmt')
-                                ->label('TMT CPNS'),
+                                ->label(__('labels.form.client.fields.tmt_cpns')),
                             Forms\Components\FileUpload::make('sk_cpns_file')
+                                ->label(__('labels.form.client.fields.file_sk_cpns'))
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
+                                ->visibility(static::storageVisibility())
+                                ->downloadable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size')),
                             Forms\Components\FileUpload::make('sk_pns_file')
+                                ->label(__('labels.form.client.fields.file_sk_pns'))
+                                ->visibility(static::storageVisibility())
+                                ->downloadable()
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                         ]),
-                    Forms\Components\Section::make('Jabatan')
-                        ->description('Data terkait jabatan')
+                    Forms\Components\Section::make(__('labels.form.client.heading.client_detail_role'))
+                        ->description(__('labels.form.client.heading.client_detail_role_desc'))
                         ->schema([
                             Forms\Components\Group::make()
                                 ->schema([
                                     Forms\Components\DatePicker::make('sk_latest_jf_tmt')
-                                        ->label('TMT Jabatan Fungsional'),
+                                        ->label(__('labels.form.client.fields.tmt_jf_latest')),
                                     Forms\Components\TextInput::make('sk_latest_jf_no')
-                                        ->label('Nomor SK'),
+                                        ->label(__('labels.form.client.fields.latest_jf_no')),
                                 ])->columns(2),
                             Forms\Components\FileUpload::make('sk_latest_jf_file')
+                                ->label(__('labels.form.client.fields.file_sk_jf_latest'))
+                                ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size')),
                         ]),
-                    Forms\Components\Section::make('Pangkat')
-                        ->description('Data terkait pangkat')
+                    Forms\Components\Section::make(__('labels.form.client.heading.client_detail_grade'))
+                        ->description(__('labels.form.client.heading.client_detail_grade_desc'))
                         ->schema([
                             Forms\Components\Group::make()
                                 ->schema([
                                     Forms\Components\DatePicker::make('sk_latest_grade_tmt')
-                                        ->label('TMT Pangkat'),
+                                        ->label(__('labels.form.client.fields.tmt_grade_sk_latest')),
                                     Forms\Components\TextInput::make('sk_latest_grade_no')
-                                        ->label('Nomor SK'),
+                                        ->label(__('labels.form.client.fields.grade_sk_latest_no')),
                                 ])->columns(2),
                             Forms\Components\FileUpload::make('sk_latest_grade_file')
+                                ->label(__('labels.form.client.fields.file_sk_grade_latest'))
+                                ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size')),
@@ -394,5 +404,10 @@ class ClientResource extends Resource
             'Nama' => $record->identity->name,
             'NIP' => $record->nip
         ];
+    }
+
+    private static function storageVisibility(): string
+    {
+        return config('fungsional-pro.s3.visibility');
     }
 }
