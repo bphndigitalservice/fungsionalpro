@@ -14,5 +14,4 @@ class ClientPointSubmissionFile extends Model
     {
         return $this->belongsTo(ClientPointSubmission::class, 'requisite_spec_id', 'id');
     }
-
 }

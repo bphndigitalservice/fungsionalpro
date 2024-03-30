@@ -15,7 +15,6 @@ class EditClient extends EditRecord
 {
     protected static string $resource = ClientResource::class;
 
-
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['agency_type'] = match ($data['type']) {

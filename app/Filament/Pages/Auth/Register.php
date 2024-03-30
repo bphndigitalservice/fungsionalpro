@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Register extends BaseRegister
 {
-
     public function register(): ?RegistrationResponse
     {
         try {
@@ -41,7 +40,7 @@ class Register extends BaseRegister
 
             $user = $this->getUserModel()::create($data);
 
-            $user->assignRole(['client','panel_user']);
+            $user->assignRole(['client', 'panel_user']);
 
             return $user;
         });
@@ -60,7 +59,7 @@ class Register extends BaseRegister
     public function sendEmailVerificationNotification(Model $user): void
     {
 
-        if (!$user instanceof MustVerifyEmail) {
+        if (! $user instanceof MustVerifyEmail) {
             return;
         }
 
@@ -68,7 +67,7 @@ class Register extends BaseRegister
             return;
         }
 
-        if (!method_exists($user, 'notify')) {
+        if (! method_exists($user, 'notify')) {
             $userClass = $user::class;
 
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
@@ -79,5 +78,4 @@ class Register extends BaseRegister
 
         $user->notify($notification);
     }
-
 }

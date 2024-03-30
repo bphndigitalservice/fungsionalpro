@@ -45,8 +45,8 @@ return [
         ],
         'crole' => [
             'name' => 'Nama Jabatan Fungsional',
-            'active' => 'Aktif'
-        ]
+            'active' => 'Aktif',
+        ],
     ],
     'form' => [
         'user' => [
@@ -56,15 +56,15 @@ return [
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',
-                'verification_descritpion' => 'Verifikasi Email'
+                'verification_descritpion' => 'Verifikasi Email',
             ],
             'fields' => [
                 'name' => 'Nama',
                 'email' => 'Email',
                 'Password' => 'Kata Sandi',
                 'role' => 'Peran',
-                'verification' => 'Verifikasi Email'
-            ]
+                'verification' => 'Verifikasi Email',
+            ],
         ],
         'client' => [
             'tab_info' => 'Identitas ASN',
@@ -82,7 +82,7 @@ return [
                 'client_detail_role' => 'Jabatan',
                 'client_detail_role_desc' => 'Data terkait jabatan',
                 'client_detail_grade' => 'Pangkat',
-                'client_detail_grade_desc' => 'Data terkait kepangkatan'
+                'client_detail_grade_desc' => 'Data terkait kepangkatan',
             ],
             'fields' => [
                 'name' => 'Nama',
@@ -113,19 +113,19 @@ return [
                 'tmt_grade_sk_latest' => 'TMT Pangkat Terakhir',
                 'grade_sk_latest_no' => 'Nomor SK Pangkat Terakhir',
                 'file_sk_grade_latest' => 'File SK Pangkat Terakhir',
-            ]
+            ],
         ],
         'grade' => [
             'fields' => [
                 'grade_name' => 'Pangkat',
-                'grade_code' => 'Golongan/Ruang'
-            ]
+                'grade_code' => 'Golongan/Ruang',
+            ],
         ],
         'crole' => [
             'fields' => [
                 'role_name' => 'Jabatan',
-                'active' => 'Aktif'
-            ]
-        ]
+                'active' => 'Aktif',
+            ],
+        ],
     ],
 ];

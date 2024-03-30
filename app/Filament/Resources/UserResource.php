@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -38,9 +35,9 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('password')
                             ->label(__('labels.form.user.fields.password'))
                             ->password()
-                            ->required(fn(string $context): bool => $context == 'create')
-                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                            ->dehydrated(fn($state) => filled($state))
+                            ->required(fn (string $context): bool => $context == 'create')
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
                             ->minLength(8)
                             ->autocomplete(false),
                     ]),
@@ -52,14 +49,14 @@ class UserResource extends Resource
                             ->label(__('labels.form.user.fields.role'))
                             ->multiple()
                             ->relationship('roles', 'name')
-                            ->preload(true)
+                            ->preload(true),
                     ]),
                 Forms\Components\Section::make(__('labels.form.user.heading.verification'))
                     ->description(__('labels.form.user.heading.verification_description'))
                     ->collapsible()
                     ->schema([
                         Forms\Components\DateTimePicker::make('email_verified_at')->label(__('labels.form.user.fields.verification')),
-                    ])
+                    ]),
             ]);
     }
 

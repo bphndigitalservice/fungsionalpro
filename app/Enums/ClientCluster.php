@@ -6,13 +6,11 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-
-enum ClientCluster: string implements HasLabel, HasColor
+enum ClientCluster: string implements HasColor, HasLabel
 {
-
-    case Central = "central";
-    case LocalProvince = "local_province";
-    case LocalRegency = "local_regency";
+    case Central = 'central';
+    case LocalProvince = 'local_province';
+    case LocalRegency = 'local_regency';
 
     public function getColor(): string|array|null
     {

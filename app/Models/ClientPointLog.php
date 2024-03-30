@@ -19,5 +19,4 @@ class ClientPointLog extends Model
     {
         return $this->belongsTo(ClientPointSubmissionBag::class);
     }
-
 }

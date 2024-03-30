@@ -3,8 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Client;
-use App\Models\ClientEducation;
-use Illuminate\Support\Facades\DB;
 
 class ClientObserver
 {

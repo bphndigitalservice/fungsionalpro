@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -14,9 +15,16 @@ return new class extends Migration {
             $table->ulid('id')->unique();
             $table->foreignUlid('client_id');
             $table->foreignUlid('submission_bag_id');
-            $table->string('point_determination_number', 128);
             $table->string('submission_type', 128);
-            $table->float('self_appraised_point')->default(0);
+            $table->string('pak_number', 128);
+            $table->float('point')->default(0);
+            $table->string('pak_file');
+            $table->string('x_skp2ak_number', 128)->nullable();
+            $table->float('x_skp2ak_point')->nullable();
+            $table->string('x_skp2ak_file', 128)->nullable();
+            $table->string('x_accumulated_number', 128)->nullable();
+            $table->float('x_accumulated_point')->nullable();
+            $table->string('x_accumulated_file', 128)->nullable();
             $table->string('status', '50');
             $table->boolean('is_approved')->default(false);
             $table->string('verifier_note')->nullable();

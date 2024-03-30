@@ -1,31 +1,30 @@
 <?php
 
-namespace App\Filament\Pages\Client;
+namespace App\Filament\Pages\Client\Point;
 
 use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
-use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
-use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Filament\Widgets\Concerns\InteractsWithPageTable;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class ClientClientPointList extends Page implements HasInfolists, HasTable
+class ClientPointList extends Page implements HasInfolists, HasTable
 {
-    use HasPageShield, InteractsWithInfolists;
     use CanUseDatabaseTransactions;
+    use HasPageShield, InteractsWithInfolists;
     use HasTabs;
     use InteractsWithTable {
         makeTable as makeBaseTable;
@@ -37,7 +36,11 @@ class ClientClientPointList extends Page implements HasInfolists, HasTable
     {
         return $table->query($this->getTableQuery())
             ->columns([
-
+                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('bag.label'),
+                TextColumn::make('submission_type')->badge(),
+                TextColumn::make('status'),
+                TextColumn::make('is_approved'),
             ]);
     }
 
@@ -49,6 +52,11 @@ class ClientClientPointList extends Page implements HasInfolists, HasTable
     protected function getTableQuery(): Builder|Relation|null
     {
         return ClientPointSubmission::query()->with(['client', 'bag'])->where('client_id', auth()->user()->client->id);
+    }
+
+    public function setCachedTableRecords(Paginator|Collection|CursorPaginator|null $cachedTableRecords): void
+    {
+        $this->cachedTableRecords = $cachedTableRecords;
     }
 
     public static function getNavigationGroup(): ?string
@@ -68,7 +76,6 @@ class ClientClientPointList extends Page implements HasInfolists, HasTable
 
     public static function getRoutePath(): string
     {
-        return "/c/points";
+        return '/c/points';
     }
-
 }

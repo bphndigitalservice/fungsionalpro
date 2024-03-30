@@ -20,5 +20,4 @@ class ClientPoint extends Model
     {
         return static::query()->where('client_id', $id)->first()->point ?? 0;
     }
-
 }

@@ -6,14 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class RegProvince extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
-
 
     public function regencies(): HasMany
     {
@@ -22,12 +20,11 @@ class RegProvince extends Model
 
     public function agency(): MorphOne
     {
-        return $this->morphOne(Client::class, "agency");
+        return $this->morphOne(Client::class, 'agency');
     }
 
     public function echelon1s(): HasMany
     {
         return $this->hasMany(RegProvinceEchelon1::class);
     }
-
 }

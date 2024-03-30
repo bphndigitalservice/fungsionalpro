@@ -2,20 +2,15 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Admin\Pages\Auth\EditProfile;
-use App\Filament\Navigations\Navigation;
 use App\Filament\Pages\Dashboard;
-use App\Filament\Widgets\PointOverview;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -42,20 +37,20 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label(__('labels.nav.client_menu'))
+                    ->icon('clarity-employee-line'),
+                NavigationGroup::make()
                     ->label(__('labels.nav.client_management'))
                     ->icon('heroicon-o-users'),
+                NavigationGroup::make()
+                    ->label(__('labels.nav.client_point'))
+                    ->icon('iconpark-credit'),
                 NavigationGroup::make()
                     ->label(__('labels.nav.reference'))
                     ->icon('heroicon-o-arrow-up-right'),
                 NavigationGroup::make()
                     ->label(__('labels.nav.system'))
                     ->icon('heroicon-o-cog'),
-                NavigationGroup::make()
-                    ->label(__('labels.nav.client_menu'))
-                    ->icon('clarity-employee-line'),
-                NavigationGroup::make()
-                    ->label(__('labels.nav.client_point'))
-                    ->icon('iconpark-credit'),
 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -79,7 +74,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ])
             ->defaultThemeMode(ThemeMode::Dark)
             ->databaseTransactions()

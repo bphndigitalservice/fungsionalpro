@@ -26,26 +26,26 @@ return [
         ],
         'crole' => [
             'name' => 'Nama Jabatan Fungsional',
-            'active' => 'Aktif'
-        ]
+            'active' => 'Aktif',
+        ],
     ],
     'form' => [
-        'user'=> [
+        'user' => [
             'heading' => [
                 'general' => 'Umum',
                 'general_description' => 'Name, email, and Password',
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',
-                'verification_descritpion' => 'Verifikasi Email'
+                'verification_descritpion' => 'Verifikasi Email',
             ],
             'fields' => [
                 'name' => 'Nama',
                 'email' => 'Email',
                 'Password' => 'Kata Sandi',
                 'role' => 'Peran',
-                'verification' => 'Verifikasi Email'
-            ]
+                'verification' => 'Verifikasi Email',
+            ],
         ],
         'client' => [
             'tab_info' => 'Identitas ASN',
@@ -56,7 +56,7 @@ return [
                 'client_education' => 'Pendidikan Terakhir',
                 'client_education_description' => 'Pendidikan Terakhir',
                 'client_employee_information' => 'Data Kepegawaian',
-                'client_employee_information_description' => 'NIP, Jabatan, Jenjang'
+                'client_employee_information_description' => 'NIP, Jabatan, Jenjang',
             ],
             'fields' => [
                 'name' => 'Nama',
@@ -78,13 +78,13 @@ return [
                 'agency' => 'Instansi',
                 'echelon' => 'Unit Kerja',
 
-            ]
+            ],
         ],
         'crole' => [
             'fields' => [
                 'role_name' => 'Jabatan',
-                'active' => 'Aktif'
-            ]
-        ]
+                'active' => 'Aktif',
+            ],
+        ],
     ],
 ];

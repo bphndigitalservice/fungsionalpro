@@ -3,22 +3,18 @@
 namespace App\Listeners;
 
 use App\Concerns\Point\PointRule;
-use App\Models\Client;
 use App\Models\ClientPoint;
 use Filament\Events\Auth\Registered;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class HandleRegisteredClient
 {
-
     protected Authenticatable $user;
 
     protected array $defaultRoles = [
-        'client', 'panel_user'
+        'client', 'panel_user',
     ];
 
     /**
@@ -47,6 +43,7 @@ class HandleRegisteredClient
             });
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
+
             return;
         }
 
@@ -64,7 +61,4 @@ class HandleRegisteredClient
             'point' => PointRule::getDefaultPoint(),
         ]);
     }
-
-
 }
-

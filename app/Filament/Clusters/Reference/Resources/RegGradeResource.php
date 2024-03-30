@@ -4,17 +4,12 @@ namespace App\Filament\Clusters\Reference\Resources;
 
 use App\Filament\Clusters\Reference;
 use App\Filament\Clusters\Reference\Resources\RegGradeResource\Pages;
-use App\Filament\Clusters\Reference\Resources\RegGradeResource\RelationManagers;
 use App\Models\RegGrade;
-use App\Models\RegProvince;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use PHPUnit\Metadata\Group;
 
 class RegGradeResource extends Resource
 {
@@ -40,8 +35,8 @@ class RegGradeResource extends Resource
                                     ->label(__('labels.form.grade.fields.grade_code'))
                                     ->required()
                                     ->maxLength(255),
-                            ])->columns(2)
-                    ])->columnSpan(5)
+                            ])->columns(2),
+                    ])->columnSpan(5),
             ]);
     }
 

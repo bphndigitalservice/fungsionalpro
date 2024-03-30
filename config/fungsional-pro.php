@@ -7,14 +7,13 @@ return [
     'accepted_media_type' => ['image/jpeg', 'image/png'],
     'accepted_document_type' => ['application/pdf'],
 
-
     //cache section
     'cache' => [
-        'point_remember' => 60 * 60 // one hour
+        'point_remember' => 60 * 60, // one hour
     ],
 
     //S3 Config
     's3' => [
-        'visibility' => 'private'
-    ]
+        'visibility' => 'private',
+    ],
 ];

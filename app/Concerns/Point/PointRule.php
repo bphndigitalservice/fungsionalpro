@@ -8,5 +8,4 @@ class PointRule
     {
         return 0.0;
     }
-
 }

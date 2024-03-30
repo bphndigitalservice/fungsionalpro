@@ -30,8 +30,6 @@ class CreateClient extends CreateRecord
 
         $data['echelon_x_text'] = $data['type'] == ClientCluster::Central->value ? null : $data['type'];
 
-
         return parent::mutateFormDataBeforeCreate($data);
     }
-
 }

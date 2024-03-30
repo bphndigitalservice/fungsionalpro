@@ -3,8 +3,6 @@
 namespace App\Filament\Clusters\Reference\Resources;
 
 use App\Filament\Clusters\Reference;
-use App\Filament\Resources\RegProvinceResource\Pages;
-use App\Filament\Resources\RegProvinceResource\RelationManagers;
 use App\Models\RegProvince;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,9 +13,10 @@ use Filament\Tables\Table;
 class RegProvinceResource extends Resource
 {
     protected static ?string $model = RegProvince::class;
-    protected static ?string $cluster = Reference::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $cluster = Reference::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -57,7 +56,7 @@ class RegProvinceResource extends Resource
     {
         return [
             Reference\Resources\RegProvinceResource\RelationManagers\RegenciesRelationManager::class,
-            Reference\Resources\RegProvinceResource\RelationManagers\Echelon1sRelationManager::class
+            Reference\Resources\RegProvinceResource\RelationManagers\Echelon1sRelationManager::class,
         ];
     }
 

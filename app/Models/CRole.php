@@ -10,8 +10,8 @@ class CRole extends Model
 {
     use HasFactory;
 
-    public function levels(): HasMany{
+    public function levels(): HasMany
+    {
         return $this->hasMany(CRoleLevel::class);
     }
-
 }

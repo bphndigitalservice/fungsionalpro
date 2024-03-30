@@ -10,8 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CRoleResource extends Resource
 {
@@ -96,5 +94,4 @@ class CRoleResource extends Resource
     {
         return __('labels.nav.crole');
     }
-
 }

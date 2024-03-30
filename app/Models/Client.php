@@ -22,7 +22,6 @@ class Client extends Model
         'assignation_type' => CRoleAssignation::class,
     ];
 
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -72,6 +71,4 @@ class Client extends Model
     {
         return $this->hasOne(ClientPoint::class);
     }
-
-
 }

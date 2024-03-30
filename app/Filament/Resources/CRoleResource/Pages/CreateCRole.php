@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\CRoleResource\Pages;
 
 use App\Filament\Resources\CRoleResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateCRole extends CreateRecord

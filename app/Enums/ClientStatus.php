@@ -7,12 +7,11 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum ClientStatus: string implements HasLabel, HasIcon, HasColor
+enum ClientStatus: string implements HasColor, HasIcon, HasLabel
 {
-
-    case Active = "active";
-    case NonActive = "non_active";
-    case TemporarilyNonActive = "temporarily_nonactive";
+    case Active = 'active';
+    case NonActive = 'non_active';
+    case TemporarilyNonActive = 'temporarily_nonactive';
 
     public function getLabel(): ?string
     {
@@ -29,7 +28,7 @@ enum ClientStatus: string implements HasLabel, HasIcon, HasColor
             self::Active => 'heroicon-o-check-circle',
             self::NonActive => 'heroicon-o-x-circle',
             self::TemporarilyNonActive => 'heroicon-o-clock'
-    };
+        };
     }
 
     public function getColor(): string|array|null

@@ -6,7 +6,6 @@ use App\Filament\Widgets\PointOverview;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Facades\FilamentIcon;
-use Filament\Widgets\AccountWidget;
 use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends Page
@@ -47,13 +46,12 @@ class Dashboard extends Page
     {
         if (auth()->user()->hasRole(['client'])) {
             return [
-                PointOverview::class
+                PointOverview::class,
             ];
         }
 
         return [];
     }
-
 
     public function getVisibleWidgets(): array
     {
@@ -69,5 +67,4 @@ class Dashboard extends Page
     {
         return static::$title ?? __('filament-panels::pages/dashboard.title');
     }
-
 }

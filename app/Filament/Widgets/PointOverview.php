@@ -14,14 +14,14 @@ class PointOverview extends BaseWidget
     {
         return [
             Stat::make(__('Angka Kredit'), $this->getPoint())
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->descriptionIcon('heroicon-m-arrow-trending-up'),
         ];
     }
 
     protected function getPoint(): float
     {
         $client = $this->getClient();
-        if (!is_null($client)) {
+        if (! is_null($client)) {
             $key = sprintf('point_%s', $client->id);
 
             return Cache::remember($key, config('fungsional-pro.cache.point_remember'), function () use ($client) {

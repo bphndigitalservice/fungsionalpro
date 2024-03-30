@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class RegRegency extends Model
 {
@@ -17,17 +16,16 @@ class RegRegency extends Model
 
     public function province(): BelongsTo
     {
-        return $this->belongsTo(RegProvince::class,'province_id','id');
+        return $this->belongsTo(RegProvince::class, 'province_id', 'id');
     }
 
     public function agency(): MorphOne
     {
-        return $this->morphOne(Client::class, "agency");
+        return $this->morphOne(Client::class, 'agency');
     }
 
     public function echelon1s(): HasMany
     {
         return $this->hasMany(RegRegencyEchelon1::class);
     }
-
 }

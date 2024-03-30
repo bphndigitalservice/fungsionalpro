@@ -28,20 +28,21 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
-
 /**
  * @property Form $form
  */
 class ClientProfilePage extends Page implements HasForms, HasInfolists
 {
-    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithForms, InteractsWithInfolists, InteractsWithFormActions;
     use CanUseDatabaseTransactions;
+    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-profile-page';
-    public ?Client $record;
-    public ?array $data = [];
-    public string $previousUrl;
 
+    public ?Client $record;
+
+    public ?array $data = [];
+
+    public string $previousUrl;
 
     public function mount(): void
     {
@@ -66,7 +67,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                                         Forms\Components\Group::make()
                                             ->schema(ClientResource::getClientIdentityForm())
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                                 Forms\Components\Section::make()
                                     ->heading(__('labels.form.client.heading.client_education'))
                                     ->description(__('labels.form.client.heading.client_education_description'))
@@ -75,21 +76,21 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                                         Forms\Components\Group::make()
                                             ->schema(ClientResource::getClientEducationForm())
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                                 Forms\Components\Section::make()
                                     ->heading(__('labels.form.client.heading.client_employee_information'))
                                     ->description(__('labels.form.client.heading.client_employee_information_description'))
                                     ->collapsible()
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->schema(ClientResource::getClientBasicInformationForm(fn() => static::currentClient()))
+                                            ->schema(ClientResource::getClientBasicInformationForm(fn () => static::currentClient()))
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
 
                             ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
                             ->schema(ClientResource::getDetailedClientForm()),
-                    ])->columnSpan(5)
+                    ])->columnSpan(5),
             ]);
 
     }
@@ -106,7 +107,6 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         $this->form->fill($data);
     }
 
-
     protected function resolveRecord(): array
     {
         if (is_null($this->record)) {
@@ -117,10 +117,9 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
             ...$this->record->attributesToArray(),
             'identity' => $this->record->identity->attributesToArray() ?? [],
             'education' => $this->record->education->attributesToArray() ?? [],
-            'detail' => $this->record->detail->attributesToArray() ?? []
+            'detail' => $this->record->detail->attributesToArray() ?? [],
         ];
     }
-
 
     protected function getForms(): array
     {
@@ -129,14 +128,14 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                 ->operation('submit')
                 ->model(Client::class)
                 ->statePath($this->getFormStatePath())
-            )
+            ),
         ];
     }
 
     public function getFormActions(): array
     {
         return [
-            $this->saveClientProfileAction()
+            $this->saveClientProfileAction(),
         ];
     }
 
@@ -171,7 +170,6 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         $this->getClientProfileSavedNotification()?->send();
     }
 
-
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = auth('web')->user()->id;
@@ -190,7 +188,6 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
         $data['echelon_x_text'] = $data['type'] == ClientCluster::Central->value ? null : $data['type'];
 
-
         return $data;
     }
 
@@ -207,8 +204,9 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         $this->authorizeAccess();
 
-        if (is_null($this->record))
+        if (is_null($this->record)) {
             return $this->save($data);
+        }
 
         return $this->update($data);
     }
@@ -256,28 +254,29 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label('Submit')
-            ->action(fn() => $this->submit())
-            ->label(__('submit'))
+            ->action(fn () => $this->submit())
             ->keyBindings(['mod+s']);
     }
-
 
     protected function authorizeAccess(): void
     {
         abort_unless(auth('web')->user()->can(['create_client', 'update_client']), 403);
     }
 
-
-    protected function getClientProfileSavedNotificationTitle(): ?string
+    protected function getClientProfileSavedNotificationTitle(): string
     {
-        return "Profil telah disimpan";
+        return $this->getClientProfileSavedNotificationMessage() ?? 'Profil telah disimpan';
+    }
+
+    protected function getClientProfileSavedNotificationMessage(): ?string
+    {
+        return null;
     }
 
     public function getFormStatePath(): ?string
     {
         return 'data';
     }
-
 
     public function getBreadcrumbs(): array
     {
@@ -308,7 +307,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     public static function getRoutePath(): string
     {
-        return "/c/profile";
+        return '/c/profile';
     }
 
     private static function currentClient(): ?Model

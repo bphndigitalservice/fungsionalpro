@@ -7,8 +7,6 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RegenciesRelationManager extends RelationManager
 {
@@ -20,10 +18,10 @@ class RegenciesRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->required()
-                                ->maxLength(255),]
-                    )
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255), ]
+                    ),
             ]);
     }
 
@@ -50,6 +48,4 @@ class RegenciesRelationManager extends RelationManager
                 ]),
             ]);
     }
-
-
 }

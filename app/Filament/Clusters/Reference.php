@@ -3,11 +3,9 @@
 namespace App\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
-use Illuminate\Contracts\Support\Htmlable;
 
 class Reference extends Cluster
 {
-
     public static function getNavigationLabel(): string
     {
         return __('labels.nav.references');

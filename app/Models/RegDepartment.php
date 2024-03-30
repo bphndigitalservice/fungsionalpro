@@ -18,9 +18,8 @@ class RegDepartment extends Model
         return $this->hasMany(RegDepartmentEchelon1::class, 'department_id', 'id');
     }
 
-
     public function agency(): MorphOne
     {
-        return $this->morphOne(Client::class, "agency");
+        return $this->morphOne(Client::class, 'agency');
     }
 }

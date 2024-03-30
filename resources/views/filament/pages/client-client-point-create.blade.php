@@ -1,16 +1,13 @@
 <x-filament-panels::page>
-
-
-
     <x-filament-panels::form
-        :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()"
-        wire:submit="submit"
+            :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()"
+            wire:submit="submit"
     >
         {{ $this->form }}
 
         <x-filament-panels::form.actions
-            :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
+                :actions="$this->getCachedFormActions()"
+                :full-width="$this->hasFullWidthFormActions()"
         />
     </x-filament-panels::form>
 
