@@ -319,12 +319,18 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public static function getFinalPAKUploadField(): FileUpload|Component
     {
         return FileUpload::make('pak_file')
+            ->downloadable()
+            ->directory(config('fungsional-pro.s3.directory.pak_files'))
+            ->visibility(config('fungsional-pro.s3.visibility'))
             ->required();
     }
 
     public static function getSKP2AkFileUploadField(): FileUpload|Component
     {
         return FileUpload::make('x_skp2ak_file')
+            ->downloadable()
+            ->directory(config('fungsional-pro.s3.directory.pak_files'))
+            ->visibility(config('fungsional-pro.s3.visibility'))
             ->hidden(fn (Get $get) => ! static::isSKP($get))
             ->required(fn (Get $get) => static::isSKP($get));
     }
@@ -332,6 +338,9 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public static function getAccumulatedAKFileUploadField(): FileUpload|Component
     {
         return FileUpload::make('x_accumulated_file')
+            ->downloadable()
+            ->directory(config('fungsional-pro.s3.directory.pak_files'))
+            ->visibility(config('fungsional-pro.s3.visibility'))
             ->hidden(fn (Get $get) => ! static::isSKP($get))
             ->required(fn (Get $get) => static::isSKP($get));
     }

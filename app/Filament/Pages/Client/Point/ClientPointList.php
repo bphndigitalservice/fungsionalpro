@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
@@ -36,11 +37,13 @@ class ClientPointList extends Page implements HasInfolists, HasTable
     {
         return $table->query($this->getTableQuery())
             ->columns([
-                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('bag.label'),
+                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true)->searchable(),
+                TextColumn::make('bag.label')->searchable(),
                 TextColumn::make('submission_type')->badge(),
-                TextColumn::make('status'),
+                TextColumn::make('status')->searchable(),
                 TextColumn::make('is_approved'),
+            ])->actions([
+                ViewPointSubmission::make(),
             ]);
     }
 

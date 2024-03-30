@@ -15,5 +15,8 @@ return [
     //S3 Config
     's3' => [
         'visibility' => 'private',
+        'directory' => [
+            'pak_files' => 'pak-files',
+        ],
     ],
 ];

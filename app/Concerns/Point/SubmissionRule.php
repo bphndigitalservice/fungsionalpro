@@ -25,6 +25,11 @@ class SubmissionRule
             ->where('submission_bag_id', $bagId)
             ->where('client_id', $client)
             ->where('submission_type', $pointSubmissionType)
-            ->count() > 0;
+            ->count() > static::getMaximumSubmission();
+    }
+
+    protected static function getMaximumSubmission(): int
+    {
+        return 1;
     }
 }
