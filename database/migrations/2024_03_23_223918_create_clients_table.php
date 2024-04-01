@@ -33,13 +33,13 @@ return new class extends Migration
             $table->foreign('user_id')
                 ->on('users')
                 ->references('id')
-                ->onDelete('set null')
+                ->onDelete('cascade')
                 ->onUpdate('cascade');
 
             $table->foreign('c_role_id')
                 ->on('c_roles')
                 ->references('id')
-                ->onDelete('set null')
+                ->onDelete('cascade')
                 ->onUpdate('cascade');
         });
     }

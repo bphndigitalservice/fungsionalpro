@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Subscribers;
+
+use App\Concerns\Point\PointRule;
+use App\Models\ClientPoint;
+use Filament\Events\Auth\Registered;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class UserEventSubscriber
+{
+
+    protected Authenticatable $user;
+
+    protected array $defaultRoles = [
+        'client', 'panel_user',
+    ];
+
+    public function handleRegisteredUser(Registered $event): void
+    {
+        try {
+            $this->user = $event->getUser();
+            $this->setDefaultRole();
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+
+            return;
+        }
+    }
+
+    public function subscribe(Dispatcher $events): array
+    {
+        return [
+            Registered::class => 'handleRegisteredUser'
+        ];
+    }
+
+
+    protected function setDefaultRole(): void
+    {
+        $this->user->assignRole($this->defaultRoles);
+    }
+
+}

@@ -17,6 +17,11 @@ class VerifierAccess extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(CRole::class,'c_role_id','id');
+    }
+
     public function accessible(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'entity_type', 'entity_id');

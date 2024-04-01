@@ -204,7 +204,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         $this->authorizeAccess();
 
-        if (is_null($this->record)) {
+        if (is_null($this->getRecord())) {
             return $this->save($data);
         }
 

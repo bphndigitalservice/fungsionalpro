@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
+use App\Events\ClientProfileCompleted;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -70,5 +71,14 @@ class Client extends Model
     public function point(): HasOne
     {
         return $this->hasOne(ClientPoint::class);
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::created(function (Client $model) {
+            event(new ClientProfileCompleted($model));
+        });
     }
 }

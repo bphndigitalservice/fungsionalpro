@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Subscribers\ClientEventSubscriber;
+use App\Subscribers\UserEventSubscriber;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,5 +24,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::unguard();
+
+        Event::subscribe(UserEventSubscriber::class);
+        Event::subscribe(ClientEventSubscriber::class);
     }
 }

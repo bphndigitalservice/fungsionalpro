@@ -4,6 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\VerifierAccessResource\Pages;
 use App\Filament\Resources\VerifierAccessResource\RelationManagers;
+use App\Models\RegDepartment;
+use App\Models\RegProvince;
+use App\Models\RegRegency;
 use App\Models\User;
 use App\Models\VerifierAccess;
 use Filament\Forms;
@@ -24,17 +27,32 @@ class VerifierAccessResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->searchable()
-                    ->relationship('user', 'name', modifyQueryUsing: fn() => User::role('verifier'))
-                    ->required()
-                ,
-                Forms\Components\TextInput::make('entity_type')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('entity_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\Select::make('c_role_id')
+                                    ->searchable()
+                                    ->relationship('role', 'role_name')
+                                    ->required(),
+                                Forms\Components\Select::make('user_id')
+                                    ->searchable()
+                                    ->relationship('user', 'name', modifyQueryUsing: fn() => User::role('verifier'))
+                                    ->required(),
+                            ])->columns(2),
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\MorphToSelect::make('accessible')
+                                    ->types([
+                                        Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
+                                            ->titleAttribute('name'),
+                                        Forms\Components\MorphToSelect\Type::make(RegProvince::class)
+                                            ->titleAttribute('name'),
+                                        Forms\Components\MorphToSelect\Type::make(RegRegency::class)
+                                            ->titleAttribute('name'),
+                                    ]),
+                            ])->columns(2)
+                    ])
             ]);
     }
 
@@ -92,7 +110,7 @@ class VerifierAccessResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('labels.nav.client_management');
+        return __('labels.nav.system');
     }
 
 }

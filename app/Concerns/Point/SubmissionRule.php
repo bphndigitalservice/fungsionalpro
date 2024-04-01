@@ -6,14 +6,13 @@ use App\Models\ClientPointSubmission;
 use App\Models\ClientPointSubmissionBag;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SubmissionRule
 {
     public static function hasSubmissionActive(): bool
     {
-        $submissionBags = Cache::remember('active_submission_bags', 60 * 60, function () {
-            return ClientPointSubmissionBag::where('is_enabled', true)->get();
-        });
+        $submissionBags = ClientPointSubmissionBag::where('is_enabled', true)->get();
         $activeSubmissionBag = $submissionBags->filter(fn (ClientPointSubmissionBag $value) => Carbon::now()->betweenIncluded(Carbon::make($value->date_start), Carbon::make($value->date_end)));
 
         return $activeSubmissionBag->count() > 0;

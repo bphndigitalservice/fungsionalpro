@@ -62,7 +62,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public function form(Form $form): Form
     {
         return $form
-            ->disabled(! SubmissionRule::hasSubmissionActive())
+            ->disabled(!SubmissionRule::hasSubmissionActive())
             ->schema([
                 Select::make('submission_bag_id')
                     ->label(__('Periode'))
