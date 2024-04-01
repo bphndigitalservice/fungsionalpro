@@ -22,4 +22,9 @@ class RegDepartment extends Model
     {
         return $this->morphOne(Client::class, 'agency');
     }
+
+    public function access(): MorphOne
+    {
+        return $this->morphOne(VerifierAccess::class, 'access');
+    }
 }

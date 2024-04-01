@@ -27,4 +27,9 @@ class RegProvince extends Model
     {
         return $this->hasMany(RegProvinceEchelon1::class);
     }
+
+    public function access(): MorphOne
+    {
+        return $this->morphOne(VerifierAccess::class, 'access');
+    }
 }

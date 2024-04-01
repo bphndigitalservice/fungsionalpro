@@ -28,4 +28,9 @@ class RegRegency extends Model
     {
         return $this->hasMany(RegRegencyEchelon1::class);
     }
+
+    public function access(): MorphOne
+    {
+        return $this->morphOne(VerifierAccess::class, 'access');
+    }
 }
