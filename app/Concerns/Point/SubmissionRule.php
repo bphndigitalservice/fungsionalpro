@@ -5,8 +5,6 @@ namespace App\Concerns\Point;
 use App\Models\ClientPointSubmission;
 use App\Models\ClientPointSubmissionBag;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class SubmissionRule
 {

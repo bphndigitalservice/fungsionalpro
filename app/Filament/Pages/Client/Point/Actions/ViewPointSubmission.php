@@ -12,19 +12,23 @@ class ViewPointSubmission extends ViewAction
     {
         parent::setUp();
 
-        $this->form([
+        $this->form(static::getFormSubmissionView());
+    }
+
+    public static function getFormSubmissionView(bool $disabled = false): array
+    {
+        return [
             Select::make('submission_bag_id')
                 ->label(__('Periode'))
                 ->required()
-                ->relationship('bag', 'label'),
-            ClientPointCreate::getSubmissionTypeField(),
-            ClientPointCreate::getSKP2AKConversionForm(),
-            ClientPointCreate::getSKPAccumulation(),
-            ClientPointCreate::getFinalAKForm(),
-            ClientPointCreate::getSKP2AkFileUploadField(),
-            ClientPointCreate::getAccumulatedAKFileUploadField(),
-            ClientPointCreate::getFinalPAKUploadField(),
-        ]);
-
+                ->relationship('bag', 'label')->disabled($disabled),
+            ClientPointCreate::getSubmissionTypeField()->disabled($disabled),
+            ClientPointCreate::getSKP2AKConversionForm()->disabled($disabled),
+            ClientPointCreate::getSKPAccumulation()->disabled($disabled),
+            ClientPointCreate::getFinalAKForm()->disabled($disabled),
+            ClientPointCreate::getSKP2AkFileUploadField()->disabled($disabled),
+            ClientPointCreate::getAccumulatedAKFileUploadField()->disabled($disabled),
+            ClientPointCreate::getFinalPAKUploadField()->disabled($disabled),
+        ];
     }
 }

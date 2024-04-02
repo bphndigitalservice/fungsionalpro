@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Concerns\Verifier\InteractWithClientData;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -14,6 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     use HasFactory, HasPanelShield, HasRoles, Notifiable;
+    use InteractWithClientData;
 
     /**
      * The attributes that are mass assignable.
@@ -52,10 +53,5 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function isActiveClient(): bool
     {
         return $this->hasRole('client') && ! is_null($this->client);
-    }
-
-    public function client(): HasOne
-    {
-        return $this->hasOne(Client::class);
     }
 }

@@ -43,6 +43,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label(__('labels.nav.client_management'))
                     ->icon('heroicon-o-users'),
                 NavigationGroup::make()
+                    ->label(__('Verifikasi'))
+                    ->icon('fluentui-checkbox-arrow-right-20'),
+                NavigationGroup::make()
                     ->label(__('labels.nav.client_point'))
                     ->icon('iconpark-credit'),
                 NavigationGroup::make()

@@ -2,17 +2,13 @@
 
 namespace App\Subscribers;
 
-use App\Concerns\Point\PointRule;
-use App\Models\ClientPoint;
 use Filament\Events\Auth\Registered;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UserEventSubscriber
 {
-
     protected Authenticatable $user;
 
     protected array $defaultRoles = [
@@ -34,14 +30,12 @@ class UserEventSubscriber
     public function subscribe(Dispatcher $events): array
     {
         return [
-            Registered::class => 'handleRegisteredUser'
+            Registered::class => 'handleRegisteredUser',
         ];
     }
-
 
     protected function setDefaultRole(): void
     {
         $this->user->assignRole($this->defaultRoles);
     }
-
 }

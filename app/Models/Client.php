@@ -73,6 +73,17 @@ class Client extends Model
         return $this->hasOne(ClientPoint::class);
     }
 
+    public static function current(): ?Client
+    {
+        $user = auth()->user();
+        if (is_null($user)) {
+            return null;
+        }
+
+        return Client::where('user_id', $user->id)->first();
+
+    }
+
     protected static function boot(): void
     {
         parent::boot();

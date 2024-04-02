@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\VerifierAccessResource\Pages;
-use App\Filament\Resources\VerifierAccessResource\RelationManagers;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
@@ -14,10 +13,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Cache;
 
 class VerifierAccessResource extends Resource
 {
@@ -37,7 +32,7 @@ class VerifierAccessResource extends Resource
                                     ->required(),
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn() => User::role('verifier'))
+                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role('verifier'))
                                     ->required(),
                             ])->columns(2),
                         Forms\Components\Group::make()
@@ -51,8 +46,8 @@ class VerifierAccessResource extends Resource
                                         Forms\Components\MorphToSelect\Type::make(RegRegency::class)
                                             ->titleAttribute('name'),
                                     ]),
-                            ])->columns(2)
-                    ])
+                            ])->columns(2),
+                    ]),
             ]);
     }
 
@@ -112,5 +107,4 @@ class VerifierAccessResource extends Resource
     {
         return __('labels.nav.system');
     }
-
 }

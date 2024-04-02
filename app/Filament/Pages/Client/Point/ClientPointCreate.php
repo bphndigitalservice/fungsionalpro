@@ -6,6 +6,7 @@ use App\Concerns\Point\SubmissionRule;
 use App\Enums\PointSubmissionStatus;
 use App\Enums\PointSubmissionType;
 use App\Exceptions\ExceedMaxPointSubmission;
+use App\Models\Client;
 use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -62,7 +63,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public function form(Form $form): Form
     {
         return $form
-            ->disabled(!SubmissionRule::hasSubmissionActive())
+            ->disabled(! SubmissionRule::hasSubmissionActive())
             ->schema([
                 Select::make('submission_bag_id')
                     ->label(__('Periode'))
@@ -139,7 +140,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     protected function injectCurrentUser(array $data): array
     {
-        $data['client_id'] = auth()->user()->client->id;
+        $data['client_id'] = Client::current()->id;
 
         return $data;
     }
@@ -247,19 +248,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         ];
     }
 
-    /*public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                \Filament\Infolists\Components\Section::make(__('Info'))
-                    ->schema([
-                        TextEntry::make('Batas Akhir')
-                            ->badge()
-                            ->state('Besok'),
-                    ]),
-            ]);
-    }*/
-
     public static function getSKP2AKConversionForm(): Field|Component
     {
         return
@@ -360,7 +348,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     public static function canView(): bool
     {
-        return Filament::auth()->user()->can(static::getPermissionName()) || auth()->user()->isActiveClient();
+        return Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current());
     }
 
     public static function getNavigationGroup(): ?string

@@ -28,6 +28,9 @@ return [
             'nav' => 'Pengajuan',
             'title' => 'Pengajuan',
         ],
+        'v_client_point_submission' => [
+            'title' => 'Daftar Pengajuan AK',
+        ],
     ],
     'table' => [
         'client' => [
@@ -43,6 +46,7 @@ return [
             'status' => 'Status',
             'assignation_type' => 'Pengangkatan',
         ],
+
         'crole' => [
             'name' => 'Nama Jabatan Fungsional',
             'active' => 'Aktif',

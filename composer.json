@@ -8,6 +8,7 @@
         "php": "^8.2",
         "bezhansalleh/filament-shield": "^3.2",
         "codeat3/blade-clarity-icons": "^1.9",
+        "codeat3/blade-fluentui-system-icons": "^1.33",
         "codeat3/blade-iconpark": "^1.6",
         "codeat3/blade-phosphor-icons": "^2.1",
         "filament/filament": "^3.2",

@@ -11,7 +11,6 @@ class VerifierAccess extends Model
 {
     use HasFactory;
 
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -19,12 +18,11 @@ class VerifierAccess extends Model
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(CRole::class,'c_role_id','id');
+        return $this->belongsTo(CRole::class, 'c_role_id', 'id');
     }
 
     public function accessible(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'entity_type', 'entity_id');
     }
-
 }
