@@ -20,7 +20,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class VerificationWorkspace extends Page implements HasInfolists, HasTable
+class PointSubmissionVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
     use HasPageShield, InteractsWithInfolists;
     use HasTabs;
@@ -69,7 +69,7 @@ class VerificationWorkspace extends Page implements HasInfolists, HasTable
 
     public static function getNavigationLabel(): string
     {
-        return __('Workspace');
+        return __("labels.page.v_client_point_verification.title");
     }
 
     public function getTitle(): string|Htmlable

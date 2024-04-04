@@ -54,45 +54,50 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     public function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\Tabs::make()
-                    ->schema([
-                        Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_info'))
-                            ->schema([
-                                Forms\Components\Section::make()
-                                    ->heading(__('labels.form.client.heading.client_identity'))
-                                    ->description(__('labels.form.client.heading.client_identity_description'))
-                                    ->collapsible()
-                                    ->schema([
-                                        Forms\Components\Group::make()
-                                            ->schema(ClientResource::getClientIdentityForm())
-                                            ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
-                                Forms\Components\Section::make()
-                                    ->heading(__('labels.form.client.heading.client_education'))
-                                    ->description(__('labels.form.client.heading.client_education_description'))
-                                    ->collapsible()
-                                    ->schema([
-                                        Forms\Components\Group::make()
-                                            ->schema(ClientResource::getClientEducationForm())
-                                            ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
-                                Forms\Components\Section::make()
-                                    ->heading(__('labels.form.client.heading.client_employee_information'))
-                                    ->description(__('labels.form.client.heading.client_employee_information_description'))
-                                    ->collapsible()
-                                    ->schema([
-                                        Forms\Components\Group::make()
-                                            ->schema(ClientResource::getClientBasicInformationForm(fn () => static::currentClient()))
-                                            ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
+            ->schema(static::getClientIdentityForm());
 
-                            ]),
-                        Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
-                            ->schema(ClientResource::getDetailedClientForm()),
-                    ])->columnSpan(5),
-            ]);
+    }
 
+    public static function getClientIdentityForm(): array
+    {
+        return [
+            Forms\Components\Tabs::make()
+                ->schema([
+                    Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_info'))
+                        ->schema([
+                            Forms\Components\Section::make()
+                                ->heading(__('labels.form.client.heading.client_identity'))
+                                ->description(__('labels.form.client.heading.client_identity_description'))
+                                ->collapsible()
+                                ->schema([
+                                    Forms\Components\Group::make()
+                                        ->schema(ClientResource::getClientIdentityForm())
+                                        ->columnSpan(5),
+                                ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                            Forms\Components\Section::make()
+                                ->heading(__('labels.form.client.heading.client_education'))
+                                ->description(__('labels.form.client.heading.client_education_description'))
+                                ->collapsible()
+                                ->schema([
+                                    Forms\Components\Group::make()
+                                        ->schema(ClientResource::getClientEducationForm())
+                                        ->columnSpan(5),
+                                ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                            Forms\Components\Section::make()
+                                ->heading(__('labels.form.client.heading.client_employee_information'))
+                                ->description(__('labels.form.client.heading.client_employee_information_description'))
+                                ->collapsible()
+                                ->schema([
+                                    Forms\Components\Group::make()
+                                        ->schema(ClientResource::getClientBasicInformationForm(fn() => $this->getRecord()))
+                                        ->columnSpan(5),
+                                ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+
+                        ]),
+                    Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
+                        ->schema(ClientResource::getDetailedClientForm()),
+                ])->columnSpan(5)
+        ];
     }
 
     protected function fillForm(): void
@@ -254,7 +259,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label('Submit')
-            ->action(fn () => $this->submit())
+            ->action(fn() => $this->submit())
             ->keyBindings(['mod+s']);
     }
 

@@ -25,11 +25,17 @@ return [
             'title' => 'Riwayat Angka Kredit',
         ],
         'client_point_create' => [
-            'nav' => 'Pengajuan',
-            'title' => 'Pengajuan',
+            'nav' => 'Pelaporan AK',
+            'title' => 'Pelaporan AK',
         ],
         'v_client_point_submission' => [
-            'title' => 'Daftar Pengajuan AK',
+            'title' => 'Daftar Pelaporan AK',
+        ],
+        'v_client_identity_verification' => [
+            'title' => 'Verifikasi Indentitas JF',
+        ],
+        'v_client_point_verification' => [
+            'title' => 'Verifikasi Pelaporan AK',
         ],
     ],
     'table' => [
@@ -45,6 +51,8 @@ return [
             'echelon_text' => 'Unit Kerja - Typed',
             'status' => 'Status',
             'assignation_type' => 'Pengangkatan',
+            'is_verified' => 'Verified',
+            'verified_at' => 'Verified AT',
         ],
 
         'crole' => [

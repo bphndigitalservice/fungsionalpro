@@ -2,44 +2,41 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use App\Filament\Pages\Client\ClientProfilePage;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
-use Closure;
+use App\Filament\Resources\ClientResource;
 use Filament\Actions\StaticAction;
 use Filament\Forms\Components\Textarea;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class VerifyPointSubmissionAction extends Action
+class ViewClientIdentityAction extends Action
 {
-    // use CanUseDatabaseTransactions;
 
     protected ?Closure $mutateRecordDataUsing = null;
 
     public static function getDefaultName(): ?string
     {
-        return 'verify_submission';
+        return 'verify_identity';
     }
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 
-        $this->label(__('Verifikasi'));
-        $this->icon('heroicon-o-check');
-
-        $this->modalHeading(__('Verifikasi Pengajuan AK'));
-
-        $this->modalSubmitAction(false);
-        $this->modalCancelAction(fn(StaticAction $action) => $action->label(__('close')));
+        $this->label(__('Lihat'));
+        $this->icon('heroicon-o-eye');
+        $this->color("gray");
 
         $this->disabledForm();
+        $this->modalHeading(__('Verifikasi Identitas JF'));
 
-        $this->form([
-            ...ViewPointSubmission::getFormSubmissionView(true),
-            Textarea::make('verifier_note'),
-        ]);
+        $this->modalSubmitAction(false);
+
+        $this->modalCancelAction(fn(StaticAction $action) => $action->label(__('close')));
+
+        $this->form(ClientProfilePage::getClientIdentityForm());
 
         $this->fillForm(function (Model $record, Table $table): array {
             if ($translatableContentDriver = $table->makeTranslatableContentDriver()) {
@@ -55,12 +52,7 @@ class VerifyPointSubmissionAction extends Action
             return $data;
         });
 
-    }
-
-    public function mutateRecordDataUsing(?Closure $callback): static
-    {
-        $this->mutateRecordDataUsing = $callback;
-
-        return $this;
+        $this->action(static function (): void {
+        });
     }
 }

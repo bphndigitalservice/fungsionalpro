@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
+use App\Enums\Verified;
 use App\Events\ClientProfileCompleted;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ class Client extends Model
         'type' => ClientCluster::class,
         'status' => ClientStatus::class,
         'assignation_type' => CRoleAssignation::class,
+        //'is_verified' => Verified::Verified
     ];
 
     public function user(): BelongsTo
@@ -71,6 +73,21 @@ class Client extends Model
     public function point(): HasOne
     {
         return $this->hasOne(ClientPoint::class);
+    }
+
+    public function verified(): void
+    {
+        $this->update([
+            'is_verified' => true,
+            'verified_at' => now()
+        ]);
+    }
+
+    public function reject(): void
+    {
+        $this->update([
+            'is_verified' => false,
+        ]);
     }
 
     public static function current(): ?Client

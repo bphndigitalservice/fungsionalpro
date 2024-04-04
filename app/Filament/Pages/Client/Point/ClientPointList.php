@@ -31,6 +31,11 @@ class ClientPointList extends Page implements HasInfolists, HasTable
 
     protected static string $view = 'filament.pages.client-client-point-list';
 
+
+    public function mount(): void {
+        static::canView();
+    }
+
     public function table(Table $table): Table
     {
         return $table->query($this->getTableQuery())

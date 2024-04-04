@@ -38,16 +38,16 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label(__('labels.nav.client_menu'))
-                    ->icon('clarity-employee-line'),
+                    ->icon('heroicon-o-users'),
                 NavigationGroup::make()
                     ->label(__('labels.nav.client_management'))
                     ->icon('heroicon-o-users'),
                 NavigationGroup::make()
                     ->label(__('Verifikasi'))
-                    ->icon('fluentui-checkbox-arrow-right-20'),
+                    ->icon('heroicon-o-check'),
                 NavigationGroup::make()
                     ->label(__('labels.nav.client_point'))
-                    ->icon('iconpark-credit'),
+                    ->icon('heroicon-o-star'),
                 NavigationGroup::make()
                     ->label(__('labels.nav.reference'))
                     ->icon('heroicon-o-arrow-up-right'),

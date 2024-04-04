@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\RegGrade;
+use App\Models\VerifierAccess;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class RegGradePolicy
+class VerifierAccessPolicy
 {
     use HandlesAuthorization;
 
@@ -18,19 +18,19 @@ class RegGradePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_reg::grade');
+        return $user->can('view_any_verifier::access');
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\RegGrade  $regGrade
+     * @param  \App\Models\VerifierAccess  $verifierAccess
      * @return bool
      */
-    public function view(User $user, RegGrade $regGrade): bool
+    public function view(User $user, VerifierAccess $verifierAccess): bool
     {
-        return $user->can('view_reg::grade');
+        return $user->can('view_verifier::access');
     }
 
     /**
@@ -41,31 +41,31 @@ class RegGradePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_reg::grade');
+        return $user->can('create_verifier::access');
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\RegGrade  $regGrade
+     * @param  \App\Models\VerifierAccess  $verifierAccess
      * @return bool
      */
-    public function update(User $user, RegGrade $regGrade): bool
+    public function update(User $user, VerifierAccess $verifierAccess): bool
     {
-        return $user->can('update_reg::grade');
+        return $user->can('update_verifier::access');
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\RegGrade  $regGrade
+     * @param  \App\Models\VerifierAccess  $verifierAccess
      * @return bool
      */
-    public function delete(User $user, RegGrade $regGrade): bool
+    public function delete(User $user, VerifierAccess $verifierAccess): bool
     {
-        return $user->can('delete_reg::grade');
+        return $user->can('delete_verifier::access');
     }
 
     /**
@@ -76,19 +76,19 @@ class RegGradePolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_reg::grade');
+        return $user->can('delete_any_verifier::access');
     }
 
     /**
      * Determine whether the user can permanently delete.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\RegGrade  $regGrade
+     * @param  \App\Models\VerifierAccess  $verifierAccess
      * @return bool
      */
-    public function forceDelete(User $user, RegGrade $regGrade): bool
+    public function forceDelete(User $user, VerifierAccess $verifierAccess): bool
     {
-        return $user->can('force_delete_reg::grade');
+        return $user->can('force_delete_verifier::access');
     }
 
     /**
@@ -99,19 +99,19 @@ class RegGradePolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_reg::grade');
+        return $user->can('force_delete_any_verifier::access');
     }
 
     /**
      * Determine whether the user can restore.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\RegGrade  $regGrade
+     * @param  \App\Models\VerifierAccess  $verifierAccess
      * @return bool
      */
-    public function restore(User $user, RegGrade $regGrade): bool
+    public function restore(User $user, VerifierAccess $verifierAccess): bool
     {
-        return $user->can('restore_reg::grade');
+        return $user->can('restore_verifier::access');
     }
 
     /**
@@ -122,19 +122,19 @@ class RegGradePolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_reg::grade');
+        return $user->can('restore_any_verifier::access');
     }
 
     /**
      * Determine whether the user can replicate.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\RegGrade  $regGrade
+     * @param  \App\Models\VerifierAccess  $verifierAccess
      * @return bool
      */
-    public function replicate(User $user, RegGrade $regGrade): bool
+    public function replicate(User $user, VerifierAccess $verifierAccess): bool
     {
-        return $user->can('replicate_reg::grade');
+        return $user->can('replicate_verifier::access');
     }
 
     /**
@@ -145,7 +145,7 @@ class RegGradePolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_reg::grade');
+        return $user->can('reorder_verifier::access');
     }
 
 }
