@@ -2,14 +2,15 @@
 
 namespace App\Enums;
 
+use Filament\Support\Colors\Color;
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum Verified: int implements HasLabel, HasIcon
+enum Verified: int implements HasColor, HasIcon, HasLabel
 {
     case Verified = 1;
     case Unverified = 0;
-
 
     public function getLabel(): ?string
     {
@@ -24,6 +25,14 @@ enum Verified: int implements HasLabel, HasIcon
         return match ($this) {
             self::Verified => 'heroicon-o-check-badge',
             self::Unverified => 'heroicon-o-x-circle',
+        };
+    }
+
+    public function getColor(): string|array|null
+    {
+        return match ($this) {
+            self::Verified => Color::Green,
+            self::Unverified => Color::Gray
         };
     }
 }

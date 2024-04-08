@@ -18,6 +18,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class ClientPointList extends Page implements HasInfolists, HasTable
@@ -31,8 +32,8 @@ class ClientPointList extends Page implements HasInfolists, HasTable
 
     protected static string $view = 'filament.pages.client-client-point-list';
 
-
-    public function mount(): void {
+    public function mount(): void
+    {
         static::canView();
     }
 
@@ -44,7 +45,8 @@ class ClientPointList extends Page implements HasInfolists, HasTable
                 TextColumn::make('bag.label')->searchable(),
                 TextColumn::make('submission_type')->badge(),
                 TextColumn::make('status')->searchable(),
-                TextColumn::make('is_approved'),
+                TextColumn::make('is_approved')
+                    ->description(fn (Model $record) => $record->verifier_note),
             ])->actions([
                 ViewPointSubmission::make(),
             ]);

@@ -2,18 +2,21 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use App\Enums\Acceptance;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use Closure;
+use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Actions\StaticAction;
 use Filament\Forms\Components\Textarea;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Get;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
 class VerifyPointSubmissionAction extends Action
 {
-    // use CanUseDatabaseTransactions;
+    use CanCustomizeProcess;
 
     protected ?Closure $mutateRecordDataUsing = null;
 
@@ -26,19 +29,21 @@ class VerifyPointSubmissionAction extends Action
     {
         parent::setUp();
 
-        $this->label(__('Verifikasi'));
+        $this->label(__('labels.table.verification.point.actions.accept'));
         $this->icon('heroicon-o-check');
 
-        $this->modalHeading(__('Verifikasi Pengajuan AK'));
+        $this->modalHeading(__('labels.table.verification.point.modal_heading'));
 
-        $this->modalSubmitAction(false);
-        $this->modalCancelAction(fn(StaticAction $action) => $action->label(__('close')));
-
-        $this->disabledForm();
+        $this->modalSubmitAction(fn (StaticAction $action) => $action->label(__('Accept')));
+        $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
 
         $this->form([
             ...ViewPointSubmission::getFormSubmissionView(true),
-            Textarea::make('verifier_note'),
+            ToggleButtons::make('is_verified')
+                ->live()
+                ->required()
+                ->options(Acceptance::class)->inline(),
+            Textarea::make('verifier_note')->required(fn (Get $get) => $get('is_verified') == Acceptance::Reject->value),
         ]);
 
         $this->fillForm(function (Model $record, Table $table): array {
@@ -53,6 +58,12 @@ class VerifyPointSubmissionAction extends Action
             }
 
             return $data;
+        });
+
+        $this->action(function (): void {
+            $this->process(function (array $data, Model $record, Table $table) {
+                $record->verify($data['is_verified'], $data['verifier_note']);
+            });
         });
 
     }

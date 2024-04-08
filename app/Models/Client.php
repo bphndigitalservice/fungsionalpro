@@ -7,6 +7,7 @@ use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
 use App\Enums\Verified;
 use App\Events\ClientProfileCompleted;
+use App\Events\ClientProfileUpdated;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +23,7 @@ class Client extends Model
         'type' => ClientCluster::class,
         'status' => ClientStatus::class,
         'assignation_type' => CRoleAssignation::class,
-        //'is_verified' => Verified::Verified
+        'is_verified' => Verified::class,
     ];
 
     public function user(): BelongsTo
@@ -79,7 +80,7 @@ class Client extends Model
     {
         $this->update([
             'is_verified' => true,
-            'verified_at' => now()
+            'verified_at' => now(),
         ]);
     }
 
@@ -101,6 +102,11 @@ class Client extends Model
 
     }
 
+    public function note(): HasOne
+    {
+        return $this->hasOne(VClientNote::class, 'client_id', 'id');
+    }
+
     protected static function boot(): void
     {
         parent::boot();
@@ -108,5 +114,6 @@ class Client extends Model
         static::created(function (Client $model) {
             event(new ClientProfileCompleted($model));
         });
+
     }
 }

@@ -12,6 +12,7 @@ class CreateClientPointSubmissionBag extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = auth()->user()->id;
+        $data['updated_by'] = $data['created_by'];
 
         return $data;
     }

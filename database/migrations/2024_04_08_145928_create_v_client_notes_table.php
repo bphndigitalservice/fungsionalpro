@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('client_points', function (Blueprint $table) {
-            $table->ulid('id')->unique();
+        Schema::create('v_client_notes', function (Blueprint $table) {
+            $table->id();
             $table->foreignUlid('client_id');
-            $table->float('point');
+            $table->string('client_notes');
+            $table->string('verifier_notes');
             $table->timestamps();
 
             $table->foreign('client_id')
@@ -23,7 +24,6 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
         });
-
     }
 
     /**
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('client_points');
+        Schema::dropIfExists('v_client_notes');
     }
 };

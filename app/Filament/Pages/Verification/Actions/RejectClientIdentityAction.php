@@ -2,13 +2,14 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use App\Events\ClientProfileRejected;
+use App\Events\ClientProfileUpdated;
 use Filament\Actions\Concerns\CanCustomizeProcess;
+use Filament\Forms\Components\Textarea;
 use Filament\Support\Colors\Color;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Arr;
 
 class RejectClientIdentityAction extends Action
 {
@@ -16,21 +17,26 @@ class RejectClientIdentityAction extends Action
 
     public static function getDefaultName(): ?string
     {
-        return "reject_identity";
+        return 'reject_identity';
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->label(__("Reject"));
-        $this->icon("heroicon-o-x-circle");
+        $this->label(__('labels.table.verification.identity.actions.reject'));
+        $this->icon('heroicon-o-x-circle');
         $this->color(Color::Red);
 
         $this->requiresConfirmation();
 
+        $this->form([
+            Textarea::make('verifier_notes')->required(),
+        ]);
+
         $this->action(function (): void {
             $this->process(function (array $data, Model $record, Table $table) {
                 $record->reject();
+                event(new ClientProfileRejected($record, $data['verifier_notes']));
             });
 
             $this->success();

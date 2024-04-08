@@ -1,4 +1,5 @@
 <x-filament-panels::page>
+    {{ $this->infolist  }}
     <x-filament-panels::form
         :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()"
         wire:submit="submit"

@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages\Client;
 
+use App\Concerns\Client\CanUseProfileNote;
 use App\Enums\ClientCluster;
+use App\Events\ClientProfileUpdated;
 use App\Filament\Resources\ClientResource;
 use App\Models\Client;
 use App\Models\RegDepartment;
@@ -16,8 +18,14 @@ use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -33,12 +41,13 @@ use Throwable;
  */
 class ClientProfilePage extends Page implements HasForms, HasInfolists
 {
+    use CanUseProfileNote;
     use CanUseDatabaseTransactions;
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-profile-page';
 
-    public ?Client $record;
+    public static ?Client $record;
 
     public ?array $data = [];
 
@@ -51,11 +60,25 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         $this->previousUrl = url()->previous();
     }
 
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            Group::make()
+                ->schema([
+                    Grid::make()
+                        ->schema([
+                            TextEntry::make(__('Status Verifikasi'))->state(fn() => $this->getVerificationNote()),
+                            TextEntry::make('Keterangan')
+                                ->state(fn() => $this->getProfileNote()),
+                        ])->columns(2)
+                ])->columnSpan(2)
+        ]);
+    }
+
     public function form(Form $form): Form
     {
         return $form
             ->schema(static::getClientIdentityForm());
-
     }
 
     public static function getClientIdentityForm(): array
@@ -89,14 +112,14 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                                 ->collapsible()
                                 ->schema([
                                     Forms\Components\Group::make()
-                                        ->schema(ClientResource::getClientBasicInformationForm(fn() => $this->getRecord()))
+                                        ->schema(ClientResource::getClientBasicInformationForm(fn() => static::getRecord()))
                                         ->columnSpan(5),
                                 ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
 
                         ]),
                     Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
                         ->schema(ClientResource::getDetailedClientForm()),
-                ])->columnSpan(5)
+                ])->columnSpan(5),
         ];
     }
 
@@ -114,15 +137,15 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     protected function resolveRecord(): array
     {
-        if (is_null($this->record)) {
+        if (is_null(static::$record)) {
             return [];
         }
 
         return [
-            ...$this->record->attributesToArray(),
-            'identity' => $this->record->identity->attributesToArray() ?? [],
-            'education' => $this->record->education->attributesToArray() ?? [],
-            'detail' => $this->record->detail->attributesToArray() ?? [],
+            ...static::$record->attributesToArray(),
+            'identity' => static::$record->identity->attributesToArray() ?? [],
+            'education' => static::$record->education->attributesToArray() ?? [],
+            'detail' => static::$record->detail->attributesToArray() ?? [],
         ];
     }
 
@@ -155,7 +178,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
             $data = $this->form->getState();
             $data = $this->mutateFormDataBeforeSave($data);
-            $this->record = $this->handleSave($data);
+            static::$record = $this->handleSave($data);
 
             $this->commitDatabaseTransaction();
 
@@ -198,7 +221,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     protected function mutateDataBeforeFill(array $data): array
     {
-        if (is_null($this->record)) {
+        if (is_null(static::$record)) {
             $data['name'] = auth('web')->user()->name;
         }
 
@@ -228,11 +251,13 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     protected function update(array $data): Client
     {
-        $this->record->update($data);
+        static::$record->update($data);
 
-        $this->form->model($this->record)->saveRelationships();
+        $this->form->model(static::$record)->saveRelationships();
 
-        return $this->record;
+        event(new ClientProfileUpdated(static::$record));
+
+        return static::$record;
     }
 
     public function getClientProfileSavedNotification(): ?Notification
@@ -247,12 +272,12 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
             ->title($title);
     }
 
-    protected function getRecord(): ?Client
+    public static function getRecord(): ?Client
     {
         $record = Client::with(['education', 'identity', 'detail'])->where('user_id', auth('web')->user()->id)->first();
-        $this->record = $record;
+        self::$record = $record;
 
-        return $this->record;
+        return static::$record;
     }
 
     public function saveClientProfileAction(): Action

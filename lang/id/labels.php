@@ -6,6 +6,7 @@ return [
         'client_menu' => 'My Data',
         'client_profile' => 'Informasi Dasar',
         'client_point' => 'Angka Kredit',
+        'client_point_submission_bag' => 'Periode Pelaporan AK',
         'system' => 'Sistem',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
@@ -17,8 +18,8 @@ return [
     ],
     'page' => [
         'client_profile' => [
-            'nav' => 'Informasi Dasar',
-            'title' => 'Informasi Dasar',
+            'nav' => 'Identitas',
+            'title' => 'Identitas',
         ],
         'client_point_list' => [
             'nav' => 'Riwayat',
@@ -52,9 +53,23 @@ return [
             'status' => 'Status',
             'assignation_type' => 'Pengangkatan',
             'is_verified' => 'Verified',
-            'verified_at' => 'Verified AT',
+            'verified_at' => 'Verified At',
         ],
-
+        'verification' => [
+            'identity' => [
+                'actions' => [
+                    'accept' => 'Terima',
+                    'reject' => 'Tolak',
+                ],
+            ],
+            'point' => [
+                'modal_heading' => 'Verifikasi Pelaporan AK',
+                'actions' => [
+                    'accept' => 'Periksa',
+                    'reject' => 'Tolak',
+                ],
+            ],
+        ],
         'crole' => [
             'name' => 'Nama Jabatan Fungsional',
             'active' => 'Aktif',

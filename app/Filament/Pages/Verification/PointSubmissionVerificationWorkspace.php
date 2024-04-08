@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Verification;
 
+use App\Concerns\Components\HasCustomPageTab;
 use App\Filament\Pages\Verification\Actions\VerifyPointSubmissionAction;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
@@ -11,6 +12,7 @@ use Filament\Facades\Filament;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -18,15 +20,13 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class PointSubmissionVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
     use HasPageShield, InteractsWithInfolists;
-    use HasTabs;
-    use InteractsWithTable {
-        makeTable as makeBaseTable;
-    }
+    use HasCustomPageTab;
 
     protected static string $view = 'filament.pages.verifier-workspace';
 
@@ -34,7 +34,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     public function table(Table $table): Table
     {
-        return $table->query($this->getTableQuery())
+        return $table
             ->columns([
                 TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('client.identity.name'),
@@ -45,13 +45,13 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('verified_at'),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make(),
+                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !is_null($record->verified_at)),
             ]);
     }
 
     public static function canView(): bool
     {
-        return Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current());
+        return Filament::auth()->user()->can(static::getPermissionName()) || !is_null(Client::current());
     }
 
     protected function getTableQuery(): Builder|Relation|null
@@ -69,7 +69,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     public static function getNavigationLabel(): string
     {
-        return __("labels.page.v_client_point_verification.title");
+        return __('labels.page.v_client_point_verification.title');
     }
 
     public function getTitle(): string|Htmlable
@@ -82,5 +82,21 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         $this->verifier = auth()->user();
 
         return $this->verifier;
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make(__('All')),
+            'new' => Tab::make(__('New'))
+                ->badge($this->getTableQuery()->whereNull('client_point_submissions.verified_at')->count())
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
+        ];
+    }
+
+    public function getDefaultActiveTab(): string|int|null
+    {
+        return 'new';
     }
 }

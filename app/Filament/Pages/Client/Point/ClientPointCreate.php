@@ -98,6 +98,10 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     public function getFormActions(): array
     {
+        if (! SubmissionRule::hasSubmissionActive()) {
+            return [];
+        }
+
         return [
             $this->submitPointAction(),
             $this->getSubmitAnotherPointFormAction(),

@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\Acceptance;
 use App\Enums\PointSubmissionStatus;
 use App\Enums\PointSubmissionType;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +20,7 @@ class ClientPointSubmission extends Model
     protected $casts = [
         'submission_type' => PointSubmissionType::class,
         'status' => PointSubmissionStatus::class,
+        'is_approved' => Acceptance::class,
     ];
 
     public function files(): HasMany
@@ -38,15 +38,48 @@ class ClientPointSubmission extends Model
         return $this->belongsTo(ClientPointSubmissionBag::class, 'submission_bag_id', 'id');
     }
 
-    protected function verifiedAt(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => is_null($value) ? 'Belum Diverifikasi' : Carbon::make($value)->toDayDateTimeString(),
-        );
-    }
-
     protected function unprocessedLabel(): string
     {
         return 'Menunggu Verifikasi';
+    }
+
+    private function prepareVerificationData(bool $isApproved): array
+    {
+        return [
+            'is_approved' => $isApproved,
+            'verifier_note' => null,
+            'verified_at' => now(),
+            'status' => PointSubmissionStatus::Verified->value,
+        ];
+    }
+
+    public function verify(bool $accept, string $note): void
+    {
+        if ($accept) {
+            $this->accept($note);
+
+            return;
+        }
+
+        $this->reject($note);
+    }
+
+    public function accept(?string $note): void
+    {
+        $data = $this->prepareVerificationData(true);
+
+        if (! is_null($note)) {
+            $data['verifier_note'] = $note;
+        }
+
+        $this->update($data);
+    }
+
+    public function reject(string $note): void
+    {
+        $data = $this->prepareVerificationData(false);
+        $data['verifier_notes'] = $note;
+
+        $this->update($data);
     }
 }
