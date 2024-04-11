@@ -12,17 +12,17 @@ class ClientProfileUpdated
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     protected Client $client;
+
     protected ?string $verifierNotes;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Client $client, ?string $verifierNotes=null)
+    public function __construct(Client $client, ?string $verifierNotes = null)
     {
         $this->client = $client;
         $this->verifierNotes = $verifierNotes;
     }
-
 
     /**
      * Get the channels the event should broadcast on.

@@ -17,8 +17,7 @@ trait HasCustomPageTab
     protected function makeTable(): Table
     {
         return $this->makeBaseTable()
-            ->query(fn(): Builder => $this->getTableQuery())
+            ->query(fn (): Builder => $this->getTableQuery())
             ->modifyQueryUsing($this->modifyQueryWithActiveTab(...));
     }
-
 }

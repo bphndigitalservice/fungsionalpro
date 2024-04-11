@@ -15,9 +15,7 @@ use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
 use Filament\Resources\Components\Tab;
-use Filament\Resources\Concerns\HasTabs;
 use Filament\Tables;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,10 +25,9 @@ use Illuminate\Database\Query\JoinClause;
 
 class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
-    use HasPageShield, HasCustomPageTab, InteractsWithInfolists;
+    use HasCustomPageTab, HasPageShield, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-identity-verification-workspace';
-
 
     public function mount(): void
     {
@@ -97,8 +94,8 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                 ])
                 ->actions([
                     ViewClientIdentityAction::make(),
-                    AcceptClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
-                    RejectClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
+                    AcceptClientIdentityAction::make()->hidden(fn (Model $record) => $record->is_verified),
+                    RejectClientIdentityAction::make()->hidden(fn (Model $record) => $record->is_verified),
                 ]);
     }
 
@@ -149,8 +146,8 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('is_verified')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('is_verified')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('is_verified')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('is_verified')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('is_verified')),
         ];
     }
 
@@ -158,5 +155,4 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
     {
         return 'new';
     }
-
 }

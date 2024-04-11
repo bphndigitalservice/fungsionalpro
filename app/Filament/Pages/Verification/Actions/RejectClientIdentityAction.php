@@ -3,7 +3,6 @@
 namespace App\Filament\Pages\Verification\Actions;
 
 use App\Events\ClientProfileRejected;
-use App\Events\ClientProfileUpdated;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Forms\Components\Textarea;
 use Filament\Support\Colors\Color;

@@ -79,6 +79,7 @@ class ClientPointSubmission extends Model
     {
         $data = $this->prepareVerificationData(false);
         $data['verifier_notes'] = $note;
+        $data['status'] = PointSubmissionStatus::ShouldRevise;
 
         $this->update($data);
     }

@@ -7,6 +7,8 @@ use App\Events\ClientProfileAccepted;
 use App\Events\ClientProfileCompleted;
 use App\Events\ClientProfileRejected;
 use App\Events\ClientProfileUpdated;
+use App\Jobs\ProcessAcceptedProfile;
+use App\Jobs\ProcessRejectedProfile;
 use App\Models\ClientPoint;
 use App\Models\VClientNote;
 use Illuminate\Events\Dispatcher;
@@ -38,8 +40,11 @@ class ClientEventSubscriber
             'client_id' => $client->id,
         ], [
             'client_notes' => 'system::update-profile',
-            'verifier_notes' => 'ACK OK'
+            'verifier_notes' => 'ACK OK',
         ]);
+
+        ProcessAcceptedProfile::dispatch($client)->onQueue('emails');
+
     }
 
     public function handleRejectedClientProfile(ClientProfileRejected $event): void
@@ -56,16 +61,19 @@ class ClientEventSubscriber
                 'client_id' => $client->id,
             ], [
                 'client_notes' => 'system::update-profile',
-                'verifier_notes' => $event->getVerifierNotes()
+                'verifier_notes' => $event->getVerifierNotes(),
             ]);
 
             DB::commit();
 
+            ProcessRejectedProfile::dispatch($client->user->email,
+                $client->crole->role_name,
+                $event->getVerifierNotes());
+
         } catch (\Exception $exception) {
-            Log::error($exception->getMessage(), [$event->getClient(), $event->getVerifierNotes()]);
+            Log::error($exception->getMessage(), [$client, $event->getVerifierNotes()]);
             DB::rollBack();
         }
-
 
     }
 
@@ -78,13 +86,14 @@ class ClientEventSubscriber
             // reset verification
             $client->update([
                 'is_verified' => null,
+                'verified_at' => null,
             ]);
 
             VClientNote::updateOrCreate([
                 'client_id' => $client->id,
             ], [
                 'client_notes' => 'system::update-profile',
-                'verifier_notes' => null
+                'verifier_notes' => null,
             ]);
 
             DB::commit();
@@ -94,7 +103,6 @@ class ClientEventSubscriber
             DB::rollBack();
         }
 
-
     }
 
     public function subscribe(Dispatcher $dispatcher): array
@@ -103,7 +111,7 @@ class ClientEventSubscriber
             ClientProfileCompleted::class => 'handleCompletedClientProfile',
             ClientProfileRejected::class => 'handleRejectedClientProfile',
             ClientProfileAccepted::class => 'handleAcceptedClientProfile',
-            ClientProfileUpdated::class => 'handleUpdatedClientProfile'
+            ClientProfileUpdated::class => 'handleUpdatedClientProfile',
         ];
     }
 }

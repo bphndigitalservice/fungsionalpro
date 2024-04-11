@@ -79,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
             ])->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ])
-            ->defaultThemeMode(ThemeMode::Dark)
+            ->defaultThemeMode(ThemeMode::Light)
             ->databaseTransactions()
             ->unsavedChangesAlerts();
     }

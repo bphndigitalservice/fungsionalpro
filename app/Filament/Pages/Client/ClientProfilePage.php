@@ -20,8 +20,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
@@ -41,8 +39,8 @@ use Throwable;
  */
 class ClientProfilePage extends Page implements HasForms, HasInfolists
 {
-    use CanUseProfileNote;
     use CanUseDatabaseTransactions;
+    use CanUseProfileNote;
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-profile-page';
@@ -67,11 +65,11 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                 ->schema([
                     Grid::make()
                         ->schema([
-                            TextEntry::make(__('Status Verifikasi'))->state(fn() => $this->getVerificationNote()),
+                            TextEntry::make(__('Status Verifikasi'))->state(fn () => $this->getVerificationNote()),
                             TextEntry::make('Keterangan')
-                                ->state(fn() => $this->getProfileNote()),
-                        ])->columns(2)
-                ])->columnSpan(2)
+                                ->state(fn () => $this->getProfileNote()),
+                        ])->columns(2),
+                ])->columnSpan(2),
         ]);
     }
 
@@ -96,7 +94,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                                     Forms\Components\Group::make()
                                         ->schema(ClientResource::getClientIdentityForm())
                                         ->columnSpan(5),
-                                ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                             Forms\Components\Section::make()
                                 ->heading(__('labels.form.client.heading.client_education'))
                                 ->description(__('labels.form.client.heading.client_education_description'))
@@ -105,16 +103,16 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
                                     Forms\Components\Group::make()
                                         ->schema(ClientResource::getClientEducationForm())
                                         ->columnSpan(5),
-                                ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                             Forms\Components\Section::make()
                                 ->heading(__('labels.form.client.heading.client_employee_information'))
                                 ->description(__('labels.form.client.heading.client_employee_information_description'))
                                 ->collapsible()
                                 ->schema([
                                     Forms\Components\Group::make()
-                                        ->schema(ClientResource::getClientBasicInformationForm(fn() => static::getRecord()))
+                                        ->schema(ClientResource::getClientBasicInformationForm(fn () => static::getRecord()))
                                         ->columnSpan(5),
-                                ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
 
                         ]),
                     Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
@@ -284,7 +282,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label('Submit')
-            ->action(fn() => $this->submit())
+            ->action(fn () => $this->submit())
             ->keyBindings(['mod+s']);
     }
 

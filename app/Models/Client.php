@@ -7,7 +7,6 @@ use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
 use App\Enums\Verified;
 use App\Events\ClientProfileCompleted;
-use App\Events\ClientProfileUpdated;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -29,6 +29,10 @@ return [
             'nav' => 'Pelaporan AK',
             'title' => 'Pelaporan AK',
         ],
+        'client_point_edit' => [
+            'nav' => 'Perbaikan Pelaporan AK',
+            'title' => 'Perbaikan Pelaporan AK',
+        ],
         'v_client_point_submission' => [
             'title' => 'Daftar Pelaporan AK',
         ],

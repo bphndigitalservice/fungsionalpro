@@ -13,9 +13,7 @@ use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
 use Filament\Resources\Components\Tab;
-use Filament\Resources\Concerns\HasTabs;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -25,8 +23,8 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 class PointSubmissionVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
-    use HasPageShield, InteractsWithInfolists;
     use HasCustomPageTab;
+    use HasPageShield, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.verifier-workspace';
 
@@ -45,13 +43,13 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('verified_at'),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !is_null($record->verified_at)),
+                VerifyPointSubmissionAction::make()->hidden(fn (Model $record) => ! auth()->user()->isSuperAdmin() && is_null($record->verified_at) && is_null($record->revised_at)),
             ]);
     }
 
     public static function canView(): bool
     {
-        return Filament::auth()->user()->can(static::getPermissionName()) || !is_null(Client::current());
+        return Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current());
     }
 
     protected function getTableQuery(): Builder|Relation|null
@@ -90,8 +88,8 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('client_point_submissions.verified_at')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
         ];
     }
 

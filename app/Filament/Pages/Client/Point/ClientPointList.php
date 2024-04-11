@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use App\Enums\PointSubmissionStatus;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
@@ -12,6 +13,7 @@ use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -49,6 +51,9 @@ class ClientPointList extends Page implements HasInfolists, HasTable
                     ->description(fn (Model $record) => $record->verifier_note),
             ])->actions([
                 ViewPointSubmission::make(),
+                Action::make('Update')
+                    ->hidden(fn (Model $record) => $record->status != PointSubmissionStatus::ShouldRevise)
+                    ->url(fn (Model $record) => ClientPointEdit::getUrl(['pointSubmission' => $record->id])),
             ]);
     }
 

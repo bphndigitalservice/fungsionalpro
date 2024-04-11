@@ -62,7 +62,9 @@ class VerifyPointSubmissionAction extends Action
 
         $this->action(function (): void {
             $this->process(function (array $data, Model $record, Table $table) {
-                $record->verify($data['is_verified'], $data['verifier_note']);
+                if (auth()->user()->isSuperAdmin() || is_null($record->verified_at) || is_null($record->revised_at)) {
+                    $record->verify($data['is_verified'], $data['verifier_note']);
+                }
             });
         });
 

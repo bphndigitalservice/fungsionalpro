@@ -29,10 +29,12 @@ class VerifierAccessResource extends Resource
                                 Forms\Components\Select::make('c_role_id')
                                     ->searchable()
                                     ->relationship('role', 'role_name')
+                                    ->preload()
                                     ->required(),
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
                                     ->relationship('user', 'name', modifyQueryUsing: fn () => User::role('verifier'))
+                                    ->preload()
                                     ->required(),
                             ])->columns(2),
                         Forms\Components\Group::make()
@@ -55,14 +57,15 @@ class VerifierAccessResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
+                Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('entity_type')
+                Tables\Columns\TextColumn::make('role.role_name')
+                    ->badge()
+                    ->label(__('Ruang Jabatan')),
+                Tables\Columns\TextColumn::make('accessible.name')
+                    ->label(__('Ruang Regional'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('entity_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -105,7 +105,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return [
             $this->submitPointAction(),
             $this->getSubmitAnotherPointFormAction(),
-            $this->getCancelFormAction(),
+            $this->cancelFormAction(),
         ];
     }
 
@@ -117,7 +117,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->keyBindings(['mod+s']);
     }
 
-    protected function getCancelFormAction(): Action
+    protected function cancelFormAction(): Action
     {
         return Action::make('cancel')
             ->label(__('cancel'))
@@ -161,7 +161,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         try {
             $this->beginDatabaseTransaction();
 
-            // do your things
             $data = $this->form->getState();
             $data = $this->mutateDataBeforeSubmit($data);
             $this->record = $this->handleRecordCreation($data);
@@ -226,7 +225,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     protected function getSubmittedNotificationTitle(): string
     {
-        return $this->getSubmittedNotificationMessage() ?? __('Pengajuan Angka Kredit Terkirim');
+        return $this->getSubmittedNotificationMessage() ?? __('Pelaporan Angka Kredit Terkirim');
     }
 
     protected function getSubmittedNotificationMessage(): ?string
@@ -248,7 +247,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         return [
             '#' => 'Angka Kredit',
-            self::getRoutePath() => 'Pengajuan',
+            self::getRoutePath() => 'Pelaporan',
         ];
     }
 
