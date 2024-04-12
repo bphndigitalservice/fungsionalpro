@@ -49,7 +49,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     public static function canView(): bool
     {
-        return Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current());
+        return Filament::auth()->user()->can(static::getPermissionName());
     }
 
     protected function getTableQuery(): Builder|Relation|null

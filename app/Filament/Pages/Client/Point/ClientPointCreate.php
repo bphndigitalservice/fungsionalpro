@@ -2,10 +2,12 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use App\Concerns\Components\EnsureClientHasCompleteProfile;
 use App\Concerns\Point\SubmissionRule;
 use App\Enums\PointSubmissionStatus;
 use App\Enums\PointSubmissionType;
 use App\Exceptions\ExceedMaxPointSubmission;
+use App\Filament\Pages\Client\ClientProfilePage;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -22,8 +24,11 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Infolists\Components\Actions;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -44,6 +49,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
+    use EnsureClientHasCompleteProfile;
 
     protected static string $view = 'filament.pages.client-client-point-create';
 
@@ -63,7 +69,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public function form(Form $form): Form
     {
         return $form
-            ->disabled(! SubmissionRule::hasSubmissionActive())
+            ->disabled(!SubmissionRule::hasSubmissionActive())
             ->schema([
                 Select::make('submission_bag_id')
                     ->label(__('Periode'))
@@ -98,7 +104,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     public function getFormActions(): array
     {
-        if (! SubmissionRule::hasSubmissionActive()) {
+        if (!SubmissionRule::hasSubmissionActive()) {
             return [];
         }
 
@@ -113,7 +119,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label(__('Submit'))
-            ->action(fn () => $this->submit())
+            ->action(fn() => $this->submit())
             ->keyBindings(['mod+s']);
     }
 
@@ -121,7 +127,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         return Action::make('cancel')
             ->label(__('cancel'))
-            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = '.Js::from($this->previousUrl).')')
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl) . ')')
             ->color('gray');
     }
 
@@ -259,12 +265,12 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                 ->schema([
                     TextInput::make('x_skp2pak_number')
                         ->label(__('Nomor Konversi Predikat Kinerja'))
-                        ->required(fn (Get $get) => static::isSKP($get)),
+                        ->required(fn(Get $get) => static::isSKP($get)),
                     TextInput::make('x_skp2pak_point')
                         ->label(__('Nilai Angka Kredit Hasil Konversi'))
                         ->numeric()
-                        ->required(fn (Get $get) => static::isSKP($get)),
-                ])->hidden(fn (Get $get) => ! static::isSKP($get));
+                        ->required(fn(Get $get) => static::isSKP($get)),
+                ])->hidden(fn(Get $get) => !static::isSKP($get));
     }
 
     public static function getSKPAccumulation(): Field|Component
@@ -274,12 +280,12 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->schema([
                 TextInput::make('x_accumulated_number')
                     ->label(__('Nomor Akumulasi Angka Kredit'))
-                    ->required(fn (Get $get) => static::isSKP($get)),
+                    ->required(fn(Get $get) => static::isSKP($get)),
                 TextInput::make('x_accumulated_point')
                     ->label(__('Jumlah Angka Kredit Yang Diperoleh '))
                     ->numeric()
-                    ->required(fn (Get $get) => static::isSKP($get)),
-            ])->hidden(fn (Get $get) => ! static::isSKP($get));
+                    ->required(fn(Get $get) => static::isSKP($get)),
+            ])->hidden(fn(Get $get) => !static::isSKP($get));
     }
 
     public static function getFinalAKForm(): Field|Component
@@ -322,8 +328,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->downloadable()
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
-            ->hidden(fn (Get $get) => ! static::isSKP($get))
-            ->required(fn (Get $get) => static::isSKP($get));
+            ->hidden(fn(Get $get) => !static::isSKP($get))
+            ->required(fn(Get $get) => static::isSKP($get));
     }
 
     public static function getAccumulatedAKFileUploadField(): FileUpload|Component
@@ -332,8 +338,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->downloadable()
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
-            ->hidden(fn (Get $get) => ! static::isSKP($get))
-            ->required(fn (Get $get) => static::isSKP($get));
+            ->hidden(fn(Get $get) => !static::isSKP($get))
+            ->required(fn(Get $get) => static::isSKP($get));
     }
 
     protected function getErrorNotification(string $title, string $message): Notification
@@ -349,9 +355,22 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return $get('submission_type') == PointSubmissionType::SKP->value;
     }
 
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            TextEntry::make('Perhatian')
+                ->state('Data anda belum lengkap.'),
+            Actions::make([
+                Actions\Action::make('complete_profile')
+                    ->url(fn(): string => ClientProfilePage::getUrl())
+            ])->fullWidth(),
+        ]);
+    }
+
     public static function canView(): bool
     {
-        return Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current());
+        return Filament::auth()->user()->can(static::getPermissionName());
     }
 
     public static function getNavigationGroup(): ?string
