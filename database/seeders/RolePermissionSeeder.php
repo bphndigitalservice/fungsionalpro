@@ -12,9 +12,9 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $superAdmin = Role::findByName("super_admin");
+        $superAdmin = Role::findByName('super_admin');
 
-        foreach ($superAdmin->permissions() as $permission){
+        foreach ($superAdmin->permissions() as $permission) {
             $superAdmin->revokePermissionTo($permission);
         }
 

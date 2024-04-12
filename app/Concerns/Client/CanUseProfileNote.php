@@ -10,7 +10,7 @@ trait CanUseProfileNote
 {
     public function getProfileNote(): ?string
     {
-        if (is_null($this->getClientId())){
+        if (is_null($this->getClientId())) {
             return null;
         }
 
@@ -28,8 +28,9 @@ trait CanUseProfileNote
 
     public function getClientId(): ?string
     {
-        if (auth()->user()->isActiveClient())
+        if (auth()->user()->isActiveClient()) {
             return Client::where('user_id', auth()->user()->id)->first()->id;
+        }
 
         return null;
     }
