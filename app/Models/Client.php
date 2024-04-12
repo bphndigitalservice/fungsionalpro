@@ -97,7 +97,7 @@ class Client extends Model
             return null;
         }
 
-        return Client::where('user_id', $user->id)->first();
+        return Client::where('user_id', $user->id)->first() ?? null;
 
     }
 

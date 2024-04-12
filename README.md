@@ -1,5 +1,9 @@
 # FungsionalPro
 
+## Documentation
+
+Read full documentation [https://docs.fungsionalpro.bphn.go.id](here)
+
 ## Todo
 
 - [x] Registration

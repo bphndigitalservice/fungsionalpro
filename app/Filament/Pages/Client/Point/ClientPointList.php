@@ -36,7 +36,7 @@ class ClientPointList extends Page implements HasInfolists, HasTable
 
     public function mount(): void
     {
-        static::canView();
+        //static::canView();
     }
 
     public function table(Table $table): Table
@@ -57,9 +57,9 @@ class ClientPointList extends Page implements HasInfolists, HasTable
             ]);
     }
 
-    public static function canView(): bool
+    public static function canView(): void
     {
-        return Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current());
+        abort_unless(Filament::auth()->user()->can(static::getPermissionName()) || ! is_null(Client::current()), 403);
     }
 
     protected function getTableQuery(): Builder|Relation|null

@@ -12,8 +12,14 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::findByName('super_admin')
-            ->givePermissionTo($this->superAdminPermissions());
+        $superAdmin = Role::findByName("super_admin");
+
+        foreach ($superAdmin->permissions() as $permission){
+            $superAdmin->revokePermissionTo($permission);
+        }
+
+        $superAdmin->givePermissionTo($this->superAdminPermissions());
+
         Role::findByName('client')
             ->givePermissionTo($this->clientPermissions());
         Role::findByName('verifier')
@@ -295,7 +301,7 @@ class RolePermissionSeeder extends Seeder
             'page_ClientProfilePage',
             'page_ClientPointCreate',
             'page_ClientPointList',
-            'page_VerificationWorkspace',
+            //'page_VerificationWorkspace',
             'page_Reference',
             'widget_PointOverview',
             'page_PointSubmissionVerificationWorkspace',

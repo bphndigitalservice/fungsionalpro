@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\RegProvince;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class Deploy extends Command
 {
@@ -33,18 +35,28 @@ class Deploy extends Command
         $this->migrateRegionReference();
 
         // 2. Migrate the rest of remaining tables and its seeds
-        $this->call('migrate', [
-            '--seed',
+        $this->call('migrate');
+        $this->call("shield:install",[
+            '--fresh'
         ]);
+        $this->call('db:seed');
 
     }
 
     public function migrateRegionReference(): void
     {
-        $sqlCollection = scandir(database_path('sql'));
-        foreach ($sqlCollection as $sql) {
-            $this->info("Migrating {$sql}");
-            DB::unprepared(file_get_contents($sql));
+        if ($this->isRegionDatabaseDoesntExists()) {
+            $sqlPath = database_path('sql');
+            foreach (glob($sqlPath . DIRECTORY_SEPARATOR . "*.sql") as $sql) {
+                $this->info("Migrating {$sql}");
+                DB::unprepared(file_get_contents($sql));
+            }
         }
     }
+
+    public function isRegionDatabaseDoesntExists(): bool
+    {
+        return DB::table("reg_provinces")->doesntExist() && DB::table("reg_regencies")->doesntExist() && DB::table("reg_districts")->doesntExist();
+    }
+
 }

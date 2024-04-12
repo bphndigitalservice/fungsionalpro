@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\RegGrade;
 use App\Models\User;
+use App\Models\RegGrade;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RegGradePolicy
