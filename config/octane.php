@@ -11,6 +11,7 @@ use Laravel\Octane\Events\TickTerminated;
 use Laravel\Octane\Events\WorkerErrorOccurred;
 use Laravel\Octane\Events\WorkerStarting;
 use Laravel\Octane\Events\WorkerStopping;
+use Laravel\Octane\Listeners\CloseMonologHandlers;
 use Laravel\Octane\Listeners\CollectGarbage;
 use Laravel\Octane\Listeners\DisconnectFromDatabases;
 use Laravel\Octane\Listeners\EnsureUploadedFilesAreValid;
@@ -114,7 +115,7 @@ return [
         ],
 
         WorkerStopping::class => [
-            //
+            CloseMonologHandlers::class,
         ],
     ],
 
@@ -186,7 +187,7 @@ return [
         'app',
         'bootstrap',
         'config',
-        'database',
+        'database/**/*.php',
         'public/**/*.php',
         'resources/**/*.php',
         'routes',
@@ -219,12 +220,5 @@ return [
     */
 
     'max_execution_time' => 30,
-
-    'swoole' => [
-        'options' => [
-            'log_file' => storage_path('logs/swoole_http.log'),
-            'package_max_length' => 10 * 1024 * 1024,
-        ],
-    ],
 
 ];
