@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Verification;
 
 use App\Concerns\Components\HasCustomPageTab;
+use App\Enums\PointSubmissionStatus;
 use App\Filament\Pages\Verification\Actions\VerifyPointSubmissionAction;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
@@ -45,7 +46,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true)
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !static::canVerifying()),
+                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
             ]);
     }
 

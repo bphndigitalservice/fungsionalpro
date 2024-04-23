@@ -21,10 +21,10 @@ class PointOverview extends BaseWidget
     protected function getPoint(): float
     {
         $client = $this->getClient();
-        if (! is_null($client)) {
+        if (!is_null($client)) {
             $key = sprintf('point_%s', $client->id);
 
-            return Cache::remember($key, config('fungsional-pro.cache.point_remember'), function () use ($client) {
+            return Cache::remember($key, 60, function () use ($client) {
                 return ClientPoint::getPoint($client->id);
             });
         }
