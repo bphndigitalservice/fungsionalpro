@@ -171,6 +171,7 @@ class ClientResource extends Resource
                         ->label(__('labels.form.client.fields.nip'))
                         ->unique(table: Client::class, ignorable: $callback)
                         ->required()
+                        ->placeholder('199301012017121001')
                         ->maxLength(18),
                     Forms\Components\Select::make('reg_grade_id')
                         ->label(__('labels.form.client.fields.grade'))
@@ -312,6 +313,7 @@ class ClientResource extends Resource
                             Forms\Components\TextInput::make('gpa')
                                 ->label(__('labels.form.client.fields.gpa'))
                                 ->numeric()
+                                ->maxValue(4)
                                 ->required(),
                             Forms\Components\FileUpload::make('certificate')
                                 ->label(__('labels.form.client.fields.certificate'))

@@ -43,7 +43,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('verified_at'),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn (Model $record) => ! auth()->user()->isSuperAdmin() && is_null($record->verified_at) && is_null($record->revised_at)),
+                VerifyPointSubmissionAction::make()->hidden(fn (Model $record) => (! auth()->user()->isSuperAdmin() || ! auth()->user()->hasRole(['verifier'])) && is_null($record->verified_at) && is_null($record->revised_at)),
             ]);
     }
 

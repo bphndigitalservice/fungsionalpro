@@ -144,6 +144,9 @@ return [
                 'tmt_grade_sk_latest' => 'TMT Pangkat Terakhir',
                 'grade_sk_latest_no' => 'Nomor SK Pangkat Terakhir',
                 'file_sk_grade_latest' => 'File SK Pangkat Terakhir',
+                'x_skp2ak_file' => 'Lembar Konversi Predikat Kinerja Ke Angka Kredit',
+                'x_accumulated_file' => 'Lembar Akumulasi AK',
+                'pak_file' => 'Lembar Penetapan Angka Kredit'
             ],
         ],
         'grade' => [

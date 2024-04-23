@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('v_client_notes', function (Blueprint $table) {
             $table->id();
             $table->foreignUlid('client_id');
-            $table->string('client_notes');
-            $table->string('verifier_notes');
+            $table->string('client_notes')->nullable();
+            $table->string('verifier_notes')->nullable();
             $table->timestamps();
 
             $table->foreign('client_id')

@@ -29,6 +29,7 @@ class ClientEventSubscriber
         VClientNote::create([
             'client_id' => $client->id,
             'client_notes' => 'system::init',
+
         ]);
     }
 
