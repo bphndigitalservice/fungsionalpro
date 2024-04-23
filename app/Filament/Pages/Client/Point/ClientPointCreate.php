@@ -187,7 +187,11 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
             Log::error($exception->getMessage());
 
-            $this->getErrorNotification('error', "Opps")->send();
+            if ($exception instanceof ExceedMaxPointSubmission){
+                $this->getErrorNotification('error', $exception->getMessage())->send();
+            }else{
+                $this->getErrorNotification('error', "Something went wrong 😢")->send();
+            }
 
             return;
         }
