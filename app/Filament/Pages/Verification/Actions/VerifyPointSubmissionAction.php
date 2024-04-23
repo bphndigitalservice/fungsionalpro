@@ -34,7 +34,7 @@ class VerifyPointSubmissionAction extends Action
 
         $this->modalHeading(__('labels.table.verification.point.modal_heading'));
 
-        $this->modalSubmitAction(fn (StaticAction $action) => $action->label(__('Accept')));
+        $this->modalSubmitAction(fn (StaticAction $action) => $action->label(__('Save')));
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
 
         $this->form([

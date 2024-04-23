@@ -53,7 +53,7 @@ class ClientPointSubmission extends Model
         ];
     }
 
-    public function verify(bool $accept, string $note): void
+    public function verify(bool $accept, ?string $note): void
     {
         if ($accept) {
             $this->accept($note);
