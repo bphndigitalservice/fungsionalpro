@@ -320,6 +320,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->downloadable()
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
+            ->maxSize(config('fungsional-pro.max_upload_file_size'))
+            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->required();
     }
 
@@ -328,6 +330,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return FileUpload::make('x_skp2ak_file')
             ->label(__('labels.form.client.fields.x_skp2ak_file'))
             ->downloadable()
+            ->maxSize(config('fungsional-pro.max_upload_file_size'))
+            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
             ->hidden(fn(Get $get) => !static::isSKP($get))
@@ -339,6 +343,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return FileUpload::make('x_accumulated_file')
             ->label(__('labels.form.client.fields.x_accumulated_file'))
             ->downloadable()
+            ->maxSize(config('fungsional-pro.max_upload_file_size'))
+            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
             ->hidden(fn(Get $get) => !static::isSKP($get))
