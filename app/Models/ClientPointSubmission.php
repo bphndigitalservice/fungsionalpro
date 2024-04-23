@@ -78,7 +78,7 @@ class ClientPointSubmission extends Model
     public function reject(string $note): void
     {
         $data = $this->prepareVerificationData(false);
-        $data['verifier_notes'] = $note;
+        $data['verifier_note'] = $note;
         $data['status'] = PointSubmissionStatus::ShouldRevise;
 
         $this->update($data);
