@@ -187,7 +187,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
             Log::error($exception->getMessage(), $data);
 
-            $this->getErrorNotification('error', $exception->getMessage())->send();
+            $this->getErrorNotification('error', "Opps")->send();
 
             return;
         }
@@ -263,10 +263,10 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             Fieldset::make()
                 ->label('Konversi Kinerja (SKP) ke Angka Kredit')
                 ->schema([
-                    TextInput::make('x_skp2pak_number')
+                    TextInput::make('x_skp2ak_number')
                         ->label(__('Nomor Konversi Predikat Kinerja'))
                         ->required(fn(Get $get) => static::isSKP($get)),
-                    TextInput::make('x_skp2pak_point')
+                    TextInput::make('x_skp2ak_point')
                         ->label(__('Nilai Angka Kredit Hasil Konversi'))
                         ->numeric()
                         ->required(fn(Get $get) => static::isSKP($get)),

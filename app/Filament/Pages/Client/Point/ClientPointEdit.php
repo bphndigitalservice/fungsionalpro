@@ -56,7 +56,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
 
     public function resolveRecord(string $id): ClientPointSubmission
     {
-        $record = ClientPointSubmission::find($id)->first();
+        $record = ClientPointSubmission::where('id', $id)->first();
         if (is_null($record)) {
             throw new ModelNotFoundException();
         }
@@ -114,7 +114,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label(__('Submit'))
-            ->action(fn () => $this->update())
+            ->action(fn() => $this->update())
             ->keyBindings(['mod+s']);
     }
 
@@ -122,7 +122,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     {
         return Action::make('cancel')
             ->label(__('Cancel'))
-            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = '.Js::from($this->previousUrl).')')
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl) . ')')
             ->color('gray');
     }
 
