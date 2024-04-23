@@ -9,7 +9,7 @@ return [
 
     //cache section
     'cache' => [
-        'point_remember' => 60 * 60, // one hour
+        'point_remember' => 60 * 3, // three minutes
     ],
 
     //S3 Config
