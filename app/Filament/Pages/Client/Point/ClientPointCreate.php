@@ -185,7 +185,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         } catch (\Throwable $exception) {
             $this->rollBackDatabaseTransaction();
 
-            Log::error($exception->getMessage(), $data);
+            Log::error($exception->getMessage());
 
             $this->getErrorNotification('error', "Opps")->send();
 
