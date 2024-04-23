@@ -110,7 +110,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
         return [
             $this->submitPointAction(),
-            $this->getSubmitAnotherPointFormAction(),
+            // $this->getSubmitAnotherPointFormAction(),
             $this->cancelFormAction(),
         ];
     }
@@ -131,14 +131,14 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->color('gray');
     }
 
-    protected function getSubmitAnotherPointFormAction(): Action
-    {
-        return Action::make('createAnother')
-            ->label(__('Submit & Submit lainnya'))
-            ->action('createAnother')
-            ->keyBindings(['mod+shift+s'])
-            ->color('gray');
-    }
+    // protected function getSubmitAnotherPointFormAction(): Action
+    // {
+    //     return Action::make('createAnother')
+    //         ->label(__('Submit & Submit lainnya'))
+    //         ->action('createAnother')
+    //         ->keyBindings(['mod+shift+s'])
+    //         ->color('gray');
+    // }
 
     protected function mutateDataBeforeSubmit(array $data): array
     {
