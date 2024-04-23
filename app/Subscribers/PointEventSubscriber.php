@@ -2,6 +2,7 @@
 
 namespace App\Subscribers;
 
+use App\Enums\PointSubmissionStatus;
 use App\Events\ClientProfileCompleted;
 use App\Events\PointSubmissionAccepted;
 use App\Models\ClientPoint;
@@ -12,14 +13,16 @@ class PointEventSubscriber
 
     public function handlePointAccepted(PointSubmissionAccepted $event): void
     {
-        $clientId = $event->getPointSubmission()->client->id;
-        $currentPoint = ClientPoint::getPoint($clientId);
+        if (!$event->getPointSubmission()->status == PointSubmissionStatus::Verified) {
+            $clientId = $event->getPointSubmission()->client->id;
+            $currentPoint = ClientPoint::getPoint($clientId);
 
-        ClientPoint::updateOrCreate([
-            'client_id' => $clientId,
-        ], [
-            'point' => $currentPoint + $event->getPointSubmission()->point
-        ]);
+            ClientPoint::updateOrCreate([
+                'client_id' => $clientId,
+            ], [
+                'point' => $currentPoint + $event->getPointSubmission()->point
+            ]);
+        }
     }
 
 
