@@ -68,7 +68,7 @@ class ClientPointSubmission extends Model
     {
         $data = $this->prepareVerificationData(true);
 
-        if (! is_null($note)) {
+        if (!is_null($note)) {
             $data['verifier_note'] = $note;
         }
 
@@ -79,6 +79,7 @@ class ClientPointSubmission extends Model
     {
         $data = $this->prepareVerificationData(false);
         $data['verifier_note'] = $note;
+        unset($data['verified_at']);
         $data['status'] = PointSubmissionStatus::ShouldRevise;
 
         $this->update($data);
