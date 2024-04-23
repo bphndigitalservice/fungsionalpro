@@ -50,6 +50,7 @@ return [
             'name' => 'Nama',
             'role' => 'Jabatan',
             'grade' => 'Jenjang',
+            'point' => 'Angka Kredit',
             'cluster' => 'Kluster',
             'agency' => 'agency',
             'echelon' => 'Unit Kerja',

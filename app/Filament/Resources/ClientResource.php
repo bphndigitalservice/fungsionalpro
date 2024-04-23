@@ -95,6 +95,10 @@ class ClientResource extends Resource
                     ->label(__('labels.table.client.grade'))
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('point.point')
+                    ->label(__('labels.table.client.point'))
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label(__('labels.table.client.cluster'))
                     ->searchable(),

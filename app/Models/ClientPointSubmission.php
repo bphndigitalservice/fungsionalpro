@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Acceptance;
 use App\Enums\PointSubmissionStatus;
 use App\Enums\PointSubmissionType;
+use App\Events\PointSubmissionAccepted;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -73,6 +74,8 @@ class ClientPointSubmission extends Model
         }
 
         $this->update($data);
+
+        event(new PointSubmissionAccepted($this));
     }
 
     public function reject(string $note): void

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Policies\RolePolicy;
 use App\Subscribers\ClientEventSubscriber;
+use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
@@ -32,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
 
         Event::subscribe(UserEventSubscriber::class);
         Event::subscribe(ClientEventSubscriber::class);
+        Event::subscribe(PointEventSubscriber::class);
     }
 }
