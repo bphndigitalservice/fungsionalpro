@@ -6,8 +6,9 @@ return [
         'client_menu' => 'My Data',
         'client_profile' => 'Informasi Dasar',
         'client_point' => 'Angka Kredit',
-        'client_point_submission_bag' => 'Periode Pelaporan AK',
+        'client_point_submission_bag' => 'Rule-set',
         'system' => 'Sistem',
+        'regional_access' => 'Regional Role Access',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
         'references_grade' => 'Pangkat/Golongan',
@@ -147,7 +148,7 @@ return [
                 'file_sk_grade_latest' => 'File SK Pangkat Terakhir',
                 'x_skp2ak_file' => 'Lembar Konversi Predikat Kinerja Ke Angka Kredit',
                 'x_accumulated_file' => 'Lembar Akumulasi AK',
-                'pak_file' => 'Lembar Penetapan Angka Kredit'
+                'pak_file' => 'Lembar Penetapan Angka Kredit',
             ],
         ],
         'grade' => [

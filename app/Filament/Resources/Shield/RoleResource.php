@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Shield;
 
+use App\Filament\Resources\Shield\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
-use App\Filament\Resources\Shield\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Forms;
 use Filament\Forms\Components\Component;
@@ -167,10 +167,10 @@ class RoleResource extends Resource implements HasShieldPermissions
         return __('filament-shield::filament-shield.nav.role.label');
     }
 
-/*    public static function getNavigationIcon(): string
-    {
-        return __('filament-shield::filament-shield.nav.role.icon');
-    }*/
+    /*    public static function getNavigationIcon(): string
+        {
+            return __('filament-shield::filament-shield.nav.role.icon');
+        }*/
 
     public static function getNavigationSort(): ?int
     {
@@ -211,7 +211,7 @@ class RoleResource extends Resource implements HasShieldPermissions
                 );
 
                 return Forms\Components\Section::make($sectionLabel)
-                    ->description(fn () => new HtmlString('<span style="word-break: break-word;">' . Utils::showModelPath($entity['fqcn']) . '</span>'))
+                    ->description(fn () => new HtmlString('<span style="word-break: break-word;">'.Utils::showModelPath($entity['fqcn']).'</span>'))
                     ->compact()
                     ->schema([
                         static::getCheckBoxListComponentForResource($entity),
@@ -233,7 +233,7 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         return collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))
             ->flatMap(function ($permission) use ($entity) {
-                $name = $permission . '_' . $entity['resource'];
+                $name = $permission.'_'.$entity['resource'];
                 $label = static::shield()->hasLocalizedPermissionLabels()
                     ? FilamentShield::getLocalizedResourcePermissionLabel($permission)
                     : $name;

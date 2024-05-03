@@ -3,13 +3,10 @@
 namespace App\Filament\Pages\Verification\Actions;
 
 use App\Enums\Acceptance;
-use App\Filament\Pages\Client\ClientProfilePage;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Actions\StaticAction;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
@@ -37,8 +34,8 @@ class VerifyPointSubmissionAction extends Action
 
         $this->modalHeading(__('labels.table.verification.point.modal_heading'));
 
-        $this->modalSubmitAction(fn(StaticAction $action) => $action->label(__('Save')));
-        $this->modalCancelAction(fn(StaticAction $action) => $action->label(__('Close')));
+        $this->modalSubmitAction(fn (StaticAction $action) => $action->label(__('Save')));
+        $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
 
         $this->form([
             ...ViewPointSubmission::getFormSubmissionView(true),
@@ -46,7 +43,7 @@ class VerifyPointSubmissionAction extends Action
                 ->live()
                 ->required()
                 ->options(Acceptance::class)->inline(),
-            Textarea::make('verifier_note')->required(fn(Get $get) => $get('is_verified') == Acceptance::Reject->value),
+            Textarea::make('verifier_note')->required(fn (Get $get) => $get('is_verified') == Acceptance::Reject->value),
         ]);
 
         $this->fillForm(function (Model $record, Table $table): array {

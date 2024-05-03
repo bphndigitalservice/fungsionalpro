@@ -74,6 +74,9 @@ class ClientResource extends Resource
             ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -131,8 +134,35 @@ class ClientResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                Tables\Filters\Filter::make('agency_id')
+                    ->hidden(! static::canFilterRegional())
+                    ->form([
+                        Forms\Components\MorphToSelect::make('agenciable')
+                            ->label(__('Instansi'))
+                            ->types([
+                                Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
+                                    ->titleAttribute('name'),
+                                Forms\Components\MorphToSelect\Type::make(RegProvince::class)
+                                    ->titleAttribute('name'),
+                                Forms\Components\MorphToSelect\Type::make(RegRegency::class)
+                                    ->titleAttribute('name'),
+                            ]),
+                    ])->query(function (Builder $query, array $data): Builder {
+
+                        if (blank($data['agency_type']) || blank($data['agency_id'])) {
+                            return $query;
+                        }
+
+                        return $query
+                            ->where('agency_type', '=', $data['agency_type'])
+                            ->where('agency_id', '=', $data['agency_id']);
+                    }),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(ClientStatus::class),
+                Tables\Filters\SelectFilter::make('assignation_type')
+                    ->options(CRoleAssignation::class),
+
+            ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
@@ -149,6 +179,11 @@ class ClientResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function canFilterRegional(): bool
+    {
+        return auth()->user()->hasRole(['super_admin', 'admin-pusat']);
     }
 
     public static function getPages(): array
@@ -206,10 +241,9 @@ class ClientResource extends Resource
                         })
                         ->live()
                         ->required(),
-                    Forms\Components\ToggleButtons::make('status')
+                    Forms\Components\Select::make('status')
                         ->label(__('labels.form.client.fields.status'))
                         ->options(ClientStatus::class)
-                        ->inline()
                         ->required(),
                 ])->columns(2),
             Forms\Components\Select::make('assignation_type')

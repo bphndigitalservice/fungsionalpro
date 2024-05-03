@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Client;
 
 use App\Concerns\Client\CanUseProfileNote;
 use App\Enums\ClientCluster;
+use App\Enums\Verified;
 use App\Events\ClientProfileUpdated;
 use App\Filament\Resources\ClientResource;
 use App\Models\Client;
@@ -76,6 +77,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     public function form(Form $form): Form
     {
         return $form
+            ->disabled($this->getVerificationNote() == Verified::Verified)
             ->schema(static::getClientIdentityForm());
     }
 

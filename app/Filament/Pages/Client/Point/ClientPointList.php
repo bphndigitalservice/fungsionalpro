@@ -3,7 +3,6 @@
 namespace App\Filament\Pages\Client\Point;
 
 use App\Enums\PointSubmissionStatus;
-use App\Enums\Verified;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
@@ -45,18 +44,18 @@ class ClientPointList extends Page implements HasInfolists, HasTable
         return $table->query($this->getTableQuery())
             ->columns([
                 TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true)->searchable(),
-                TextColumn::make('bag.label')->searchable(),
+                TextColumn::make('date_of_pak')->date(),
                 TextColumn::make('submission_type')->badge(),
                 TextColumn::make('status')->searchable(),
                 TextColumn::make('is_approved')
                     ->label('Rejected/Accepted')
-                    ->state(fn(Model $record) => $record->status == PointSubmissionStatus::Verified || $record->status == PointSubmissionStatus::ShouldRevise ? $record->is_approved : 'Sedang diverifikasi')
-                    ->description(fn(Model $record) => $record->status != PointSubmissionStatus::Verified ? $record->verifier_note : null),
+                    ->state(fn (Model $record) => $record->status == PointSubmissionStatus::Verified || $record->status == PointSubmissionStatus::ShouldRevise ? $record->is_approved : 'Sedang diverifikasi')
+                    ->description(fn (Model $record) => $record->status != PointSubmissionStatus::Verified ? $record->verifier_note : null),
             ])->actions([
                 ViewPointSubmission::make(),
                 Action::make('Update')
-                    ->hidden(fn(Model $record) => $record->status != PointSubmissionStatus::ShouldRevise)
-                    ->url(fn(Model $record) => ClientPointEdit::getUrl(['pointSubmission' => $record->id])),
+                    ->hidden(fn (Model $record) => $record->status != PointSubmissionStatus::ShouldRevise)
+                    ->url(fn (Model $record) => ClientPointEdit::getUrl(['pointSubmission' => $record->id])),
             ]);
     }
 
