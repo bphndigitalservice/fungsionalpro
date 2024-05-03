@@ -15,7 +15,7 @@ enum CRoleAssignation: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::CPNS => 'CPNS',
+            self::CPNS => 'CPNS/PPPK',
             self::Inpassing => 'Inpassing',
             self::PDJL => 'PDJL',
             self::Penyetaraan => 'Penyetaraan',
