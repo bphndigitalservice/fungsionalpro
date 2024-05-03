@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Acceptance;
+use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
 use App\Enums\PointSubmissionType;
 use App\Events\PointSubmissionAccepted;
@@ -19,7 +20,7 @@ class ClientPointSubmission extends Model
     protected $primaryKey = 'id';
 
     protected $casts = [
-        'submission_type' => PointSubmissionType::class,
+        'submission_type' => PointSubmissionPeriod::class,
         'status' => PointSubmissionStatus::class,
         'is_approved' => Acceptance::class,
     ];

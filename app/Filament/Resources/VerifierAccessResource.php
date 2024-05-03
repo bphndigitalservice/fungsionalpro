@@ -33,7 +33,7 @@ class VerifierAccessResource extends Resource
                                     ->required(),
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role('verifier'))
+                                    ->relationship('user', 'name', modifyQueryUsing: fn() => User::role(['verifier', 'admin-regional']))
                                     ->preload()
                                     ->required(),
                             ])->columns(2),
@@ -109,5 +109,10 @@ class VerifierAccessResource extends Resource
     public static function getNavigationGroup(): string
     {
         return __('labels.nav.system');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('labels.nav.regional_access');
     }
 }

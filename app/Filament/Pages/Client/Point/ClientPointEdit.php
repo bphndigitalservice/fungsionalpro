@@ -176,10 +176,6 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
 
     protected function handleRecordUpdate(ClientPointSubmission $pointSubmission, array $data): void
     {
-        if (SubmissionRule::isExceededMaxSubmission($data['submission_bag_id'], $data['submission_type'], $data['client_id'])) {
-            throw new ExceedMaxPointSubmission();
-        }
-
         $pointSubmission->update($data);
     }
 

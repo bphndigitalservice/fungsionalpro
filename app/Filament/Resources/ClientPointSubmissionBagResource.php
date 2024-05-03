@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PointSubmissionPeriod;
 use App\Filament\Resources\ClientPointSubmissionBagResource\Pages;
 use App\Models\ClientPointSubmissionBag;
 use Filament\Forms;
@@ -21,16 +22,13 @@ class ClientPointSubmissionBagResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('label')
+                            ->label(__('Name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Group::make()
-                            ->columns(2)
-                            ->schema([
-                                Forms\Components\DateTimePicker::make('date_start')
-                                    ->required(),
-                                Forms\Components\DateTimePicker::make('date_end')
-                                    ->required(),
-                            ]),
+                        Forms\Components\Select::make('rules')
+                            ->label(__('Rules'))
+                            ->options(PointSubmissionPeriod::class)
+                            ->multiple(),
                         Forms\Components\Toggle::make('is_enabled')
                             ->required(),
                     ])->columnSpan(5),
@@ -45,21 +43,11 @@ class ClientPointSubmissionBagResource extends Resource
                     ->label('ID')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('label')
+                    ->label(__('Name'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date_start')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('date_end')
-                    ->dateTime()
-                    ->sortable(),
                 Tables\Columns\IconColumn::make('is_enabled')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_by')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('updated_by')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('rules'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

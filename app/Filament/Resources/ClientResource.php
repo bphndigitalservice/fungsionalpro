@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\ClientCluster;
+use App\Enums\ClientClusterMorphFilter;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
 use App\Enums\Gender;
@@ -19,6 +20,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ClientResource extends Resource
 {
@@ -40,7 +42,7 @@ class ClientResource extends Resource
                                         Forms\Components\Group::make()
                                             ->schema(static::getClientIdentityForm())
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
                                 Forms\Components\Section::make()
                                     ->heading(__('labels.form.client.heading.client_education'))
                                     ->description(__('labels.form.client.heading.client_education_description'))
@@ -49,16 +51,16 @@ class ClientResource extends Resource
                                         Forms\Components\Group::make()
                                             ->schema(static::getClientEducationForm())
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
                                 Forms\Components\Section::make()
                                     ->heading(__('labels.form.client.heading.client_employee_information'))
                                     ->description(__('labels.form.client.heading.client_employee_information_description'))
                                     ->collapsible()
                                     ->schema([
                                         Forms\Components\Group::make()
-                                            ->schema(static::getClientBasicInformationForm(fn (Model $record) => $record))
+                                            ->schema(static::getClientBasicInformationForm(fn(Model $record) => $record))
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
 
                             ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
@@ -74,6 +76,9 @@ class ClientResource extends Resource
             ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -131,8 +136,35 @@ class ClientResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                Tables\Filters\Filter::make('agency_id')
+                    ->hidden(!static::canFilterRegional())
+                    ->form([
+                        Forms\Components\MorphToSelect::make('agenciable')
+                            ->label(__('Instansi'))
+                            ->types([
+                                Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
+                                    ->titleAttribute('name'),
+                                Forms\Components\MorphToSelect\Type::make(RegProvince::class)
+                                    ->titleAttribute('name'),
+                                Forms\Components\MorphToSelect\Type::make(RegRegency::class)
+                                    ->titleAttribute('name'),
+                            ])
+                    ])->query(function (Builder $query, array $data): Builder {
+
+                        if (blank($data['agency_type']) || blank($data['agency_id'])) {
+                            return $query;
+                        }
+
+                        return $query
+                            ->where('agency_type', '=', $data['agency_type'])
+                            ->where('agency_id', '=', $data['agency_id']);
+                    }),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(ClientStatus::class),
+                Tables\Filters\SelectFilter::make('assignation_type')
+                    ->options(CRoleAssignation::class)
+
+            ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
@@ -149,6 +181,11 @@ class ClientResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function canFilterRegional(): bool
+    {
+        return auth()->user()->hasRole(['super_admin', 'admin-pusat']);
     }
 
     public static function getPages(): array
@@ -191,7 +228,7 @@ class ClientResource extends Resource
                         ->required(),
                     Forms\Components\Select::make('c_role_level_id')
                         ->label(__('labels.form.client.fields.crole_grade'))
-                        ->relationship('croleLevel', 'level', fn (Builder $query, Forms\Get $get) => $query->where('c_role_id', $get('c_role_id') == '' ? 0 : $get('c_role_id')))
+                        ->relationship('croleLevel', 'level', fn(Builder $query, Forms\Get $get) => $query->where('c_role_id', $get('c_role_id') == '' ? 0 : $get('c_role_id')))
                         ->required(),
                 ])->columns(2),
             Forms\Components\Group::make()
@@ -206,10 +243,9 @@ class ClientResource extends Resource
                         })
                         ->live()
                         ->required(),
-                    Forms\Components\ToggleButtons::make('status')
+                    Forms\Components\Select::make('status')
                         ->label(__('labels.form.client.fields.status'))
                         ->options(ClientStatus::class)
-                        ->inline()
                         ->required(),
                 ])->columns(2),
             Forms\Components\Select::make('assignation_type')
@@ -222,32 +258,32 @@ class ClientResource extends Resource
                         ->label(__('labels.form.client.fields.agency'))
                         ->live()
                         ->searchable()
-                        ->required(fn (Forms\Get $get) => $get('type') == 'local_province')
-                        ->hidden(fn (Forms\Get $get): bool => $get('type') != 'local_province')
+                        ->required(fn(Forms\Get $get) => $get('type') == 'local_province')
+                        ->hidden(fn(Forms\Get $get): bool => $get('type') != 'local_province')
                         ->options(RegProvince::query()->pluck('name', 'id')),
                     Forms\Components\Select::make('agency_id')
                         ->label(__('labels.form.client.fields.agency'))
                         ->live()
                         ->searchable()
-                        ->required(fn (Forms\Get $get) => $get('type') == 'local_regency')
-                        ->hidden(fn (Forms\Get $get) => $get('type') != 'local_regency')
+                        ->required(fn(Forms\Get $get) => $get('type') == 'local_regency')
+                        ->hidden(fn(Forms\Get $get) => $get('type') != 'local_regency')
                         ->options(RegRegency::query()->pluck('name', 'id')),
                     Forms\Components\Select::make('agency_id')
                         ->label(__('labels.form.client.fields.agency'))
                         ->live()
                         ->searchable()
-                        ->required(fn (Forms\Get $get) => $get('type') == 'central')
-                        ->hidden(fn (Forms\Get $get) => $get('type') != 'central')
+                        ->required(fn(Forms\Get $get) => $get('type') == 'central')
+                        ->hidden(fn(Forms\Get $get) => $get('type') != 'central')
                         ->options(RegDepartment::query()->pluck('name', 'id')),
                     Forms\Components\TextInput::make('echelon_x_text')
                         ->label(__('labels.form.client.fields.echelon'))
-                        ->required(fn (Forms\Get $get) => $get('type') != 'central')
-                        ->hidden(fn (Forms\Get $get) => $get('type') == 'central'),
+                        ->required(fn(Forms\Get $get) => $get('type') != 'central')
+                        ->hidden(fn(Forms\Get $get) => $get('type') == 'central'),
                     Forms\Components\Select::make('echelon_id')
                         ->label(__('labels.form.client.fields.echelon'))
-                        ->options(fn (Forms\Get $get) => RegDepartmentEchelon1::query()->where('department_id', $get('agency_id'))->pluck('name', 'id'))
-                        ->required(fn (Forms\Get $get) => $get('type') == 'central')
-                        ->hidden(fn (Forms\Get $get) => $get('type') != 'central'),
+                        ->options(fn(Forms\Get $get) => RegDepartmentEchelon1::query()->where('department_id', $get('agency_id'))->pluck('name', 'id'))
+                        ->required(fn(Forms\Get $get) => $get('type') == 'central')
+                        ->hidden(fn(Forms\Get $get) => $get('type') != 'central'),
                 ])->columns(2),
         ];
     }

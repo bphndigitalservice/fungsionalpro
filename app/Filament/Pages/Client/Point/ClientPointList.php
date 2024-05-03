@@ -45,7 +45,7 @@ class ClientPointList extends Page implements HasInfolists, HasTable
         return $table->query($this->getTableQuery())
             ->columns([
                 TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true)->searchable(),
-                TextColumn::make('bag.label')->searchable(),
+                TextColumn::make('date_of_pak')->date(),
                 TextColumn::make('submission_type')->badge(),
                 TextColumn::make('status')->searchable(),
                 TextColumn::make('is_approved')
