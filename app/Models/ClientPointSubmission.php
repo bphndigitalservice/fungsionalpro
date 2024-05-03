@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Acceptance;
+use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
-use App\Enums\PointSubmissionType;
 use App\Events\PointSubmissionAccepted;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +19,7 @@ class ClientPointSubmission extends Model
     protected $primaryKey = 'id';
 
     protected $casts = [
-        'submission_type' => PointSubmissionType::class,
+        'submission_type' => PointSubmissionPeriod::class,
         'status' => PointSubmissionStatus::class,
         'is_approved' => Acceptance::class,
     ];
@@ -69,7 +69,7 @@ class ClientPointSubmission extends Model
     {
         $data = $this->prepareVerificationData(true);
 
-        if (!is_null($note)) {
+        if (! is_null($note)) {
             $data['verifier_note'] = $note;
         }
 

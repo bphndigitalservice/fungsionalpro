@@ -5,9 +5,9 @@ namespace App\Filament\Pages\Verification;
 use App\Concerns\Components\HasCustomPageTab;
 use App\Enums\PointSubmissionStatus;
 use App\Filament\Pages\Verification\Actions\VerifyPointSubmissionAction;
-use App\Models\Client;
 use App\Models\ClientPointSubmission;
 use App\Models\User;
+use App\Models\VerifierAccess;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
@@ -21,6 +21,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\JoinClause;
 
 class PointSubmissionVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
@@ -40,19 +41,18 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('client.nip')->label('NIP'),
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
-                TextColumn::make('bag.label')->label('Periode'),
                 TextColumn::make('submission_type')->toggleable(),
                 TextColumn::make('is_approved'),
-                TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true)
+                TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
+                VerifyPointSubmissionAction::make()->hidden(fn (Model $record) => ! static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
             ]);
     }
 
     public static function canVerifying(): bool
     {
-        return !auth()->user()->isSuperAdmin() || !auth()->user()->hasRole('verifier');
+        return ! auth()->user()->isSuperAdmin() || ! auth()->user()->hasRole('verifier');
     }
 
     public static function canView(): bool
@@ -62,10 +62,14 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     protected function getTableQuery(): Builder|Relation|null
     {
-        return ClientPointSubmission::with('client')->leftJoin('clients', 'client_id', '=', 'client_point_submissions.id')
-            ->where('clients.agency_type', '=', $this->getVerifier()->entity_type)
-            ->where('clients.agency_id', '=', $this->getVerifier()->entity_id)
-            ->select('client_point_submissions.*');
+        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
+
+        return ClientPointSubmission::leftJoin('clients', 'client_id', '=', 'client_point_submissions.client_id')
+            ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
+                $join->on('clients.c_role_id', '=', 'va.c_role_id');
+                $join->on('va.entity_type', '=', 'clients.agency_type');
+                $join->on('va.entity_id', '=', 'clients.agency_id');
+            })->select('client_point_submissions.*');
     }
 
     public static function getNavigationGroup(): ?string
@@ -83,21 +87,14 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return __('labels.page.v_client_point_submission.title');
     }
 
-    public function getVerifier(): User
-    {
-        $this->verifier = auth()->user();
-
-        return $this->verifier;
-    }
-
     public function getTabs(): array
     {
         return [
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('client_point_submissions.verified_at')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
         ];
     }
 

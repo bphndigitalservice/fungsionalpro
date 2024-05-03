@@ -3,9 +3,8 @@
 namespace App\Filament\Pages\Client\Point;
 
 use App\Concerns\Components\EnsureClientHasCompleteProfile;
-use App\Concerns\Point\SubmissionRule;
+use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
-use App\Enums\PointSubmissionType;
 use App\Exceptions\ExceedMaxPointSubmission;
 use App\Filament\Pages\Client\ClientProfilePage;
 use App\Models\Client;
@@ -14,16 +13,17 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
@@ -37,6 +37,7 @@ use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
 
@@ -48,8 +49,8 @@ use function Filament\Support\is_app_url;
 class ClientPointCreate extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
-    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
     use EnsureClientHasCompleteProfile;
+    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-client-point-create';
 
@@ -69,12 +70,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public function form(Form $form): Form
     {
         return $form
-            ->disabled(!SubmissionRule::hasSubmissionActive())
             ->schema([
-                Select::make('submission_bag_id')
-                    ->label(__('Periode'))
-                    ->required()
-                    ->relationship('bag', 'label'),
+                static::getYearField(),
                 static::getSubmissionTypeField(),
                 static::getSKP2AKConversionForm(),
                 static::getSKPAccumulation(),
@@ -104,9 +101,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     public function getFormActions(): array
     {
-        if (!SubmissionRule::hasSubmissionActive()) {
-            return [];
-        }
 
         return [
             $this->submitPointAction(),
@@ -119,7 +113,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label(__('Submit'))
-            ->action(fn() => $this->submit())
+            ->action(fn () => $this->submit())
             ->keyBindings(['mod+s']);
     }
 
@@ -127,7 +121,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         return Action::make('cancel')
             ->label(__('cancel'))
-            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl) . ')')
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = '.Js::from($this->previousUrl).')')
             ->color('gray');
     }
 
@@ -143,9 +137,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     protected function mutateDataBeforeSubmit(array $data): array
     {
         $data = $this->injectCurrentUser($data);
-        $data = $this->setInitialSubmissionStatus($data);
 
-        return $data;
+        return $this->setInitialSubmissionStatus($data);
     }
 
     protected function injectCurrentUser(array $data): array
@@ -187,10 +180,10 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
             Log::error($exception->getMessage());
 
-            if ($exception instanceof ExceedMaxPointSubmission){
+            if ($exception instanceof ExceedMaxPointSubmission) {
                 $this->getErrorNotification('error', $exception->getMessage())->send();
-            }else{
-                $this->getErrorNotification('error', "Something went wrong 😢")->send();
+            } else {
+                $this->getErrorNotification('error', 'Something went wrong 😢')->send();
             }
 
             return;
@@ -204,15 +197,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     }
 
-    /**
-     * @throws ExceedMaxPointSubmission
-     */
     public function handleRecordCreation($data): ClientPointSubmission
     {
-
-        if (SubmissionRule::isExceededMaxSubmission($data['submission_bag_id'], $data['submission_type'], $data['client_id'])) {
-            throw new ExceedMaxPointSubmission();
-        }
 
         $record = new ClientPointSubmission($data);
         $record->save();
@@ -269,12 +255,12 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                 ->schema([
                     TextInput::make('x_skp2ak_number')
                         ->label(__('Nomor Konversi Predikat Kinerja'))
-                        ->required(fn(Get $get) => static::isSKP($get)),
+                        ->required(fn (Get $get) => static::isStartFrom2023($get)),
                     TextInput::make('x_skp2ak_point')
                         ->label(__('Nilai Angka Kredit Hasil Konversi'))
                         ->numeric()
-                        ->required(fn(Get $get) => static::isSKP($get)),
-                ])->hidden(fn(Get $get) => !static::isSKP($get));
+                        ->required(fn (Get $get) => static::isStartFrom2023($get)),
+                ])->hidden(fn (Get $get) => ! static::isStartFrom2023($get));
     }
 
     public static function getSKPAccumulation(): Field|Component
@@ -284,12 +270,12 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->schema([
                 TextInput::make('x_accumulated_number')
                     ->label(__('Nomor Akumulasi Angka Kredit'))
-                    ->required(fn(Get $get) => static::isSKP($get)),
+                    ->required(fn (Get $get) => static::isStartFrom2023($get)),
                 TextInput::make('x_accumulated_point')
                     ->label(__('Jumlah Angka Kredit Yang Diperoleh '))
                     ->numeric()
-                    ->required(fn(Get $get) => static::isSKP($get)),
-            ])->hidden(fn(Get $get) => !static::isSKP($get));
+                    ->required(fn (Get $get) => static::isStartFrom2023($get)),
+            ])->hidden(fn (Get $get) => ! static::isStartFrom2023($get));
     }
 
     public static function getFinalAKForm(): Field|Component
@@ -307,13 +293,25 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ]);
     }
 
+    public static function getYearField(): Field|Component
+    {
+        return DatePicker::make('date_of_pak')
+            ->native(false)
+            ->live()
+            ->label(__('Tanggal Penetapan PAK'))
+            ->afterStateUpdated(function (Set $set, Get $get) {
+                if (static::isStartFrom2023($get)) {
+                    $set('submission_type', PointSubmissionPeriod::StartFrom2023);
+                } else {
+                    $set('submission_type', PointSubmissionPeriod::Before2023);
+                }
+            })
+            ->required();
+    }
+
     public static function getSubmissionTypeField(): Field|Component
     {
-        return ToggleButtons::make('submission_type')
-            ->label(__('Mekanisme Penilaian'))
-            ->options(PointSubmissionType::class)
-            ->inline()
-            ->live()
+        return Hidden::make('submission_type')
             ->required();
     }
 
@@ -338,8 +336,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
-            ->hidden(fn(Get $get) => !static::isSKP($get))
-            ->required(fn(Get $get) => static::isSKP($get));
+            ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
+            ->required(fn (Get $get) => static::isStartFrom2023($get));
     }
 
     public static function getAccumulatedAKFileUploadField(): FileUpload|Component
@@ -351,8 +349,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
-            ->hidden(fn(Get $get) => !static::isSKP($get))
-            ->required(fn(Get $get) => static::isSKP($get));
+            ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
+            ->required(fn (Get $get) => static::isStartFrom2023($get));
     }
 
     protected function getErrorNotification(string $title, string $message): Notification
@@ -363,11 +361,16 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->body($message);
     }
 
-    private static function isSKP(Get $get): bool
+    private static function isStartFrom2023(Get $get): bool
     {
-        return $get('submission_type') == PointSubmissionType::SKP->value;
-    }
+        $dateOfPak = Carbon::make($get('date_of_pak'));
 
+        if (is_null($dateOfPak)) {
+            return false;
+        }
+
+        return $dateOfPak->year >= 2023;
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -376,7 +379,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                 ->state('Data anda belum lengkap.'),
             Actions::make([
                 Actions\Action::make('complete_profile')
-                    ->url(fn(): string => ClientProfilePage::getUrl())
+                    ->url(fn (): string => ClientProfilePage::getUrl()),
             ])->fullWidth(),
         ]);
     }
