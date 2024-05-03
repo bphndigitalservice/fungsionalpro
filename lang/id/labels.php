@@ -116,6 +116,7 @@ return [
                 'client_detail_role_desc' => 'Data terkait jabatan',
                 'client_detail_grade' => 'Pangkat',
                 'client_detail_grade_desc' => 'Data terkait kepangkatan',
+                'client_employee_card_title' => 'Kartu Pegawai',
             ],
             'fields' => [
                 'name' => 'Nama',
@@ -149,6 +150,8 @@ return [
                 'x_skp2ak_file' => 'Lembar Konversi Predikat Kinerja Ke Angka Kredit',
                 'x_accumulated_file' => 'Lembar Akumulasi AK',
                 'pak_file' => 'Lembar Penetapan Angka Kredit',
+                'employee_card' => 'Nomor Kartu Pegawai',
+                'file_employee_card' => 'File Kartu Pegawai',
             ],
         ],
         'grade' => [

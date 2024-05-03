@@ -115,4 +115,9 @@ class Client extends Model
         });
 
     }
+
+    public function competence(): HasOne
+    {
+        return $this->hasOne(ClientCompetence::class);
+    }
 }

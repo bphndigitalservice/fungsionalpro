@@ -373,6 +373,18 @@ class ClientResource extends Resource
         return [
             Forms\Components\Group::make()
                 ->schema([
+                    Forms\Components\Section::make(__('labels.form.client.heading.client_employee_card_title'))
+                        ->schema([
+                            Forms\Components\TextInput::make('employee_card')
+                                ->label(__('labels.form.client.fields.employee_card')),
+                            Forms\Components\FileUpload::make('file_employee_card')
+                                ->label(__('labels.form.client.fields.file_employee_card'))
+                                ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->maxFiles(1)
+                                ->visibility(static::storageVisibility())
+                                ->downloadable()
+                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                        ]),
                     Forms\Components\Section::make(__('labels.form.client.heading.client_detail_cpns_pns'))
                         ->description(__('labels.form.client.heading.client_detail_cpns_pns_desc'))
                         ->schema([
