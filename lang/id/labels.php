@@ -148,7 +148,7 @@ return [
                 'file_sk_grade_latest' => 'File SK Pangkat Terakhir',
                 'x_skp2ak_file' => 'Lembar Konversi Predikat Kinerja Ke Angka Kredit',
                 'x_accumulated_file' => 'Lembar Akumulasi AK',
-                'pak_file' => 'Lembar Penetapan Angka Kredit'
+                'pak_file' => 'Lembar Penetapan Angka Kredit',
             ],
         ],
         'grade' => [

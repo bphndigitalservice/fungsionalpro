@@ -2,9 +2,7 @@
 
 namespace App\Filament\Pages\Client\Point;
 
-use App\Concerns\Point\SubmissionRule;
 use App\Enums\PointSubmissionStatus;
-use App\Exceptions\ExceedMaxPointSubmission;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -114,7 +112,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     {
         return Action::make('submit')
             ->label(__('Submit'))
-            ->action(fn() => $this->update())
+            ->action(fn () => $this->update())
             ->keyBindings(['mod+s']);
     }
 
@@ -122,7 +120,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     {
         return Action::make('cancel')
             ->label(__('Cancel'))
-            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl) . ')')
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = '.Js::from($this->previousUrl).')')
             ->color('gray');
     }
 

@@ -33,7 +33,7 @@ class VerifierAccessResource extends Resource
                                     ->required(),
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn() => User::role(['verifier', 'admin-regional']))
+                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role(['verifier', 'admin-regional']))
                                     ->preload()
                                     ->required(),
                             ])->columns(2),

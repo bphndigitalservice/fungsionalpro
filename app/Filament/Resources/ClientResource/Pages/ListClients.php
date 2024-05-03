@@ -4,18 +4,12 @@ namespace App\Filament\Resources\ClientResource\Pages;
 
 use App\Filament\Resources\ClientResource;
 use App\Models\Client;
-use App\Models\ClientPointSubmission;
-use App\Models\RegDepartment;
-use App\Models\RegProvince;
-use App\Models\RegRegency;
 use App\Models\User;
 use App\Models\VerifierAccess;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\Log;
 
 class ListClients extends ListRecords
 {
@@ -37,7 +31,6 @@ class ListClients extends ListRecords
             return parent::getTableQuery();
         }
 
-
         if ($principal->hasRole(['admin-regional', 'verifier'])) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
 
@@ -45,11 +38,10 @@ class ListClients extends ListRecords
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');
                 $join->on('va.entity_id', '=', 'clients.agency_id');
-            })->select("clients.*");
+            })->select('clients.*');
         }
 
         return null;
-
 
     }
 
