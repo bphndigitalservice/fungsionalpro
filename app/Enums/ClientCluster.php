@@ -24,7 +24,7 @@ enum ClientCluster: string implements HasColor, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Central => 'Pusat',
+            self::Central => 'Kementerian Lembaga',
             self::LocalProvince => 'Pemda - Provinsi',
             self::LocalRegency => 'Pemda - Kabupaten/Kota',
         };
