@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Dashboard;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -29,8 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('/')
-            ->login()
-            ->registration()
+            ->registration(Register::class)
             ->emailVerification()
             ->passwordReset()
             ->profile(isSimple: false)
@@ -95,7 +95,8 @@ class AdminPanelProvider extends PanelProvider
             ->databaseTransactions()
             ->unsavedChangesAlerts()
             ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'))
-            ->spa();
+            ->spa()
+            ->login();
 
     }
 }

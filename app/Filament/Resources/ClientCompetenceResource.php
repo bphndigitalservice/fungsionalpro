@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Concerns\Client\CanUseProfileNote;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
 use App\Filament\Resources\ClientCompetenceResource\RelationManagers;
 use App\Models\ClientCompetence;
@@ -22,6 +23,7 @@ use function Laravel\Prompts\text;
 
 class ClientCompetenceResource extends Resource
 {
+
     protected static ?string $model = ClientCompetence::class;
 
     protected static ?string $navigationLabel = 'Kompetensi';
@@ -43,7 +45,7 @@ class ClientCompetenceResource extends Resource
                     ->required(),
                 FileUpload::make('competence_file')
                     ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-                    ->maxFiles(1)   
+                    ->maxFiles(1)
                     ->downloadable()
                     ->required(),
             ]);
@@ -104,4 +106,11 @@ class ClientCompetenceResource extends Resource
     {
         return config('fungsional-pro.s3.visibility');
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Client::current() !== null;
+    }
+
+
 }

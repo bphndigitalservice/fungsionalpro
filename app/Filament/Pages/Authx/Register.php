@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages\Auth;
+namespace App\Filament\Pages\Authx;
 
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Exception;
@@ -12,9 +12,13 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Register extends BaseRegister
 {
+    /**
+     * @throws Exception
+     */
     public function register(): ?RegistrationResponse
     {
         try {
@@ -45,8 +49,9 @@ class Register extends BaseRegister
             return $user;
         });
 
-        event(new Registered($user));
+        //Log::debug($user);
 
+        event(new Registered($user));
         $this->sendEmailVerificationNotification($user);
 
         Filament::auth()->login($user);
@@ -58,7 +63,6 @@ class Register extends BaseRegister
 
     public function sendEmailVerificationNotification(Model $user): void
     {
-
         if (! $user instanceof MustVerifyEmail) {
             return;
         }
