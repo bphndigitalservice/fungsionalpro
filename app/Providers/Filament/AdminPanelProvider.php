@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Kenepa\Banner\BannerPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,7 +35,12 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile(isSimple: false)
             ->colors([
-                'primary' => Color::Fuchsia,
+                'danger' => Color::Rose,
+                'gray' => Color::Gray,
+                'info' => Color::Blue,
+                'primary' => Color::Indigo,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
             ->navigationGroups([
                 NavigationGroup::make()
@@ -57,6 +63,8 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-cog'),
 
             ])
+            ->sidebarCollapsibleOnDesktop()
+            ->breadcrumbs()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
@@ -79,10 +87,15 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                BannerPlugin::make()->persistsBannersInDatabase()
+                    ->navigationGroup(__("labels.nav.system"))
+                    ->bannerManagerAccessPermission('banner-manager')
             ])
             ->defaultThemeMode(ThemeMode::Light)
             ->databaseTransactions()
             ->unsavedChangesAlerts()
-            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn () => view('filament.components.footer'));
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'))
+            ->spa();
+
     }
 }
