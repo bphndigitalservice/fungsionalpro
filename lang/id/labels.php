@@ -123,7 +123,7 @@ return [
                 'academic_title' => 'Gelar Akademik',
                 'gender' => 'Jenis Kelamin',
                 'phone_number' => 'Nomor Telepon',
-                'address' => 'Alamat',
+                'address' => 'Alamat Kantor',
                 'photo' => 'Pas Foto',
                 'university_name' => 'Universitas',
                 'program_name' => 'Jurusan',
