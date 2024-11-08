@@ -6,6 +6,7 @@ use App\Filament\Resources\ClientCompetenceResource;
 use App\Models\Client;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CreateClientCompetence extends CreateRecord
 {
@@ -14,8 +15,14 @@ class CreateClientCompetence extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['client_id'] = Client::current()->id;
-    
+
         return $data;
     }
+
+    public function getTitle(): string|Htmlable
+    {
+        return "Input Diklat/Pelatihan";
+    }
+
 
 }

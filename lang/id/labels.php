@@ -2,7 +2,7 @@
 
 return [
     'nav' => [
-        'client_management' => 'Manajemen Klien',
+        'client_management' => 'Manajemen JF',
         'client_menu' => 'My Data',
         'client_profile' => 'Informasi Dasar',
         'client_point' => 'Angka Kredit',
@@ -139,6 +139,7 @@ return [
                 'echelon' => 'Unit Kerja',
                 'grade' => 'Pangkat/Golongan',
                 'tmt_cpns' => 'TMT CPNS',
+                'tmt_pns' => 'TMT PNS',
                 'tmt_jf_latest' => 'TMT Jabatan Fungsional',
                 'latest_jf_no' => 'Nomor SK',
                 'file_sk_cpns' => 'File SK CPNS',

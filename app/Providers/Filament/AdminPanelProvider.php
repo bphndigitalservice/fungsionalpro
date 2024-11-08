@@ -89,7 +89,7 @@ class AdminPanelProvider extends PanelProvider
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
                 BannerPlugin::make()->persistsBannersInDatabase()
                     ->navigationGroup(__("labels.nav.system"))
-                    ->bannerManagerAccessPermission('banner-manager')
+                    ->bannerManagerAccessPermission('banner-manager'),
             ])
             ->defaultThemeMode(ThemeMode::Light)
             ->databaseTransactions()

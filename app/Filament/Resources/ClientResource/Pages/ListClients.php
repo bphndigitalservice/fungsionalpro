@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VerifierAccess;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 
@@ -49,4 +50,6 @@ class ListClients extends ListRecords
     {
         return auth()->user();
     }
+
+
 }

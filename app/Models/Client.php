@@ -116,8 +116,8 @@ class Client extends Model
 
     }
 
-    public function competence(): HasOne
+    public function competences(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasOne(ClientCompetence::class);
+        return $this->hasMany(ClientCompetence::class);
     }
 }
