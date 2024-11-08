@@ -10,7 +10,7 @@
     "require": {
         "php": "^8.2",
         "bezhansalleh/filament-shield": "^3.2",
-        "filament/filament": "^3.2",
+        "filament/filament": "^v3.2.123",
         "kenepa/banner": "^0.0.9",
         "laravel/framework": "^11.0",
         "laravel/octane": "^2.3",
