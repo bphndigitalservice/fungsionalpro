@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Infolists\Components\MinioFileEntry;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -36,6 +37,7 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
                         TextEntry::make('institution')->label('Institusi'),
                         TextEntry::make('start_period')->label('Tanggal Mulai'),
                         TextEntry::make('end_period')->label('Tanggal Selesai'),
+                        MinioFileEntry::make('competence_file')->label('Sertifikat'),
                     ])->columns(2)
             ]);
     }

@@ -10,7 +10,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
+use Hugomyb\FilamentMediaAction\Infolists\Components\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class ClientEducationInfolist extends Component implements HasForms, HasInfolists
@@ -38,7 +40,6 @@ class ClientEducationInfolist extends Component implements HasForms, HasInfolist
                         TextEntry::make('university_name')->label('Sekolah/Universitas'),
                         TextEntry::make('gpa')->label('Nilai/IPK'),
                         MinioFileEntry::make('certificate')->label('Ijazah'),
-                        //TextEntry::make('certificate')->label('Ijazah'),
                     ])->columns(2)
             ]);
     }

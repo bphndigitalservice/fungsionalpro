@@ -10,7 +10,10 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ClientEducationResource extends Resource
 {
@@ -85,6 +88,9 @@ class ClientEducationResource extends Resource
                     ->options(EducationLevel::class),
             ])
             ->actions([
+                MediaAction::make()
+                    ->media(fn(Model $record) => Storage::temporaryUrl($record->certificate, now()->addMinutes(10)))
+                    ->label('Ijazah'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

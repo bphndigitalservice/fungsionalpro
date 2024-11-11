@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\AvatarProviders\FungsionalProAvatarProvider;
 use App\Filament\Pages\Authx\EmailVerificationPrompt;
 use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Dashboard;
@@ -95,6 +96,7 @@ class AdminPanelProvider extends PanelProvider
             ->defaultThemeMode(ThemeMode::Light)
             ->databaseTransactions()
             ->unsavedChangesAlerts()
+            ->defaultAvatarProvider(FungsionalProAvatarProvider::class)
             ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'));
 
     }

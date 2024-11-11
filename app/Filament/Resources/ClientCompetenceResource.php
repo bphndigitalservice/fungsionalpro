@@ -15,7 +15,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ClientCompetenceResource extends Resource
 {
@@ -117,11 +120,6 @@ class ClientCompetenceResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('completion_status')
                     ->label('Status')
-                    /*->enum([
-                        'PASSED' => 'Lulus',
-                        'FAILED' => 'Tidak Lulus',
-                        'SATISFACTORY' => 'Memuaskan',
-                    ])*/
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_period')
                     ->label('Awal Pelatihan')
@@ -135,12 +133,13 @@ class ClientCompetenceResource extends Resource
                     ->label('Lembaga Pelatihan')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('competence_file')
+
+                /*Tables\Columns\TextColumn::make('competence_file')
                     ->label('Sertifikat')
                     ->url(function ($record) {
                         return $record->competence_file_url;
                     })
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()*/
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
@@ -158,6 +157,9 @@ class ClientCompetenceResource extends Resource
                     ]),
             ])
             ->actions([
+                MediaAction::make()
+                    ->media(fn(Model $record) => Storage::temporaryUrl($record->competence_file, now()->addMinutes(10)))
+                    ->label('Sertifikat'),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
