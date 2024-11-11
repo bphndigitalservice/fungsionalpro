@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table("client_point_submissions",function (Blueprint $table){
-            $table->foreignId('role_id')->constrained('c_roles');
+            $table->foreignId('role_id')->nullable()->constrained('c_roles');
         });
 
         Schema::table("client_point_submission_files",function (Blueprint $table){
-            $table->foreignId('role_id')->constrained('c_roles');
+            $table->foreignId('role_id')->nullable()->constrained('c_roles');
         });
 
     }
