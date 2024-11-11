@@ -4,12 +4,16 @@ namespace App\Filament\Widgets;
 
 use App\Models\Client;
 use App\Models\ClientPoint;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Cache;
 
 class PointOverview extends BaseWidget
 {
+
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
         return [

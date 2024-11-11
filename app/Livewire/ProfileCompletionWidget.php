@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Client;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\IconEntry;
@@ -16,6 +17,7 @@ class ProfileCompletionWidget extends Widget implements HasForms, HasInfolists
 {
     use InteractsWithInfolists;
     use InteractsWithForms;
+    use HasWidgetShield;
 
     protected static string $view = 'livewire.profile-completion-widget';
     protected ?Client $client = null;
