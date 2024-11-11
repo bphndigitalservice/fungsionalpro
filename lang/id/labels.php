@@ -3,12 +3,12 @@
 return [
     'nav' => [
         'client_management' => 'Manajemen JF',
-        'client_menu' => 'My Data',
+        'client_menu' => 'Profil Saya',
         'client_profile' => 'Informasi Dasar',
         'client_point' => 'Angka Kredit',
         'client_point_submission_bag' => 'Rule-set',
         'system' => 'Sistem',
-        'regional_access' => 'Regional Role Access',
+        'regional_access' => 'Akses Verifikator',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
         'references_grade' => 'Pangkat/Golongan',
@@ -33,6 +33,9 @@ return [
         'client_point_edit' => [
             'nav' => 'Perbaikan Pelaporan AK',
             'title' => 'Perbaikan Pelaporan AK',
+        ],
+        'regional_access' => [
+            'title' => 'Akses Verifikator',
         ],
         'v_client_point_submission' => [
             'title' => 'Daftar Pelaporan AK',
@@ -104,11 +107,11 @@ return [
             'tab_file' => 'Rincian',
             'tab_user' => 'Pengguna Terkait',
             'heading' => [
-                'client_identity' => 'Data Pribadi',
+                'client_identity' => 'Informasi Dasar',
                 'client_identity_description' => 'Nama, Alamat, Gender',
                 'client_education' => 'Pendidikan Terakhir',
                 'client_education_description' => 'Pendidikan Terakhir',
-                'client_employee_information' => 'Data Kepegawaian',
+                'client_employee_information' => 'Informasi Kepegawaian',
                 'client_employee_information_description' => 'NIP, Jabatan, Jenjang',
                 'client_detail_cpns_pns' => 'CPNS & PNS',
                 'client_detail_cpns_pns_desc' => 'Data terkait CPNS & PNS',

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Authx\EmailVerificationPrompt;
 use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Dashboard;
 use Filament\Enums\ThemeMode;
@@ -30,8 +31,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('/')
+            ->login()
             ->registration(Register::class)
-            ->emailVerification()
+            ->emailVerification(EmailVerificationPrompt::class)
             ->passwordReset()
             ->profile(isSimple: false)
             ->colors([
@@ -63,7 +65,6 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-cog'),
 
             ])
-            ->sidebarCollapsibleOnDesktop()
             ->breadcrumbs()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -84,7 +85,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                Authenticate::class
             ])->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
                 BannerPlugin::make()->persistsBannersInDatabase()
@@ -94,9 +95,7 @@ class AdminPanelProvider extends PanelProvider
             ->defaultThemeMode(ThemeMode::Light)
             ->databaseTransactions()
             ->unsavedChangesAlerts()
-            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'))
-            ->spa()
-            ->login();
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'));
 
     }
 }

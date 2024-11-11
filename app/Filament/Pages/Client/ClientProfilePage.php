@@ -344,4 +344,9 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     {
         return auth()->user()->client;
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
 }

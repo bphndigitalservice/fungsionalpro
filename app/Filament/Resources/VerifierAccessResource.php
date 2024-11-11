@@ -18,6 +18,7 @@ class VerifierAccessResource extends Resource
 {
     protected static ?string $model = VerifierAccess::class;
 
+
     public static function form(Form $form): Form
     {
         return $form
@@ -115,4 +116,6 @@ class VerifierAccessResource extends Resource
     {
         return __('labels.nav.regional_access');
     }
+
+
 }

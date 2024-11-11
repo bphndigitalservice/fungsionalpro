@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Concerns\Client\CanUseProfileNote;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
 use App\Filament\Resources\ClientCompetenceResource\RelationManagers;
-use App\Models\ClientCompetence;
 use App\Models\Client;
+use App\Models\ClientCompetence;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -16,11 +15,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use GuzzleHttp\Psr7\UploadedFile;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
-use function Laravel\Prompts\text;
 
 class ClientCompetenceResource extends Resource
 {

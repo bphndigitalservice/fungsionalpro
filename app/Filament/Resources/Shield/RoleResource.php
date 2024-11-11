@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -267,6 +268,7 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function getPageOptions(): array
     {
+        Log::debug(FilamentShield::getPages());
         return collect(FilamentShield::getPages())
             ->flatMap(fn ($page) => [
                 $page['permission'] => static::shield()->hasLocalizedPermissionLabels()

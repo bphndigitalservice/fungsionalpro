@@ -2,7 +2,6 @@
     @if (method_exists($this, 'filtersForm'))
         {{ $this->filtersForm }}
     @endif
-
     <x-filament-widgets::widgets
         :columns="$this->getColumns()"
         :data="

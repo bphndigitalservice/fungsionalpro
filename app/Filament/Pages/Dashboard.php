@@ -3,12 +3,13 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\PointOverview;
+use App\Livewire\ProfileCompletionWidget;
 use Filament\Facades\Filament;
-use Filament\Pages\Page;
+use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Contracts\Support\Htmlable;
 
-class Dashboard extends Page
+class Dashboard extends BaseDashboard
 {
     protected static string $routePath = '/';
 
@@ -39,6 +40,7 @@ class Dashboard extends Page
     {
         return [
             ...$this->clientWidgets(),
+            //...Filament::getWidgets()
         ];
     }
 
@@ -46,6 +48,7 @@ class Dashboard extends Page
     {
         if (auth()->user()->hasRole(['client'])) {
             return [
+                ProfileCompletionWidget::class,
                 PointOverview::class,
             ];
         }
@@ -60,7 +63,7 @@ class Dashboard extends Page
 
     public function getColumns(): int|string|array
     {
-        return 2;
+        return 4;
     }
 
     public function getTitle(): string|Htmlable

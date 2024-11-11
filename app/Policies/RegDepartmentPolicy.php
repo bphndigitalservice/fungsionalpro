@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\RegDepartment;
 use App\Models\User;
+use App\Models\RegDepartment;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RegDepartmentPolicy

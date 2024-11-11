@@ -19,6 +19,8 @@ class ListClientCompetences extends ListRecords
         ];
     }
 
+
+
     protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
     {
         return parent::getTableQuery()->where('client_id', Client::current() ? Client::current()->id : 0);

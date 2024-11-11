@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
+use App\Enums\EducationLevel;
 use App\Enums\Gender;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Livewire\ViewClientCompetence;
@@ -14,9 +15,9 @@ use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Forms\Components\InfoList;
 use Filament\Forms\Components\InfoList\Item;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -219,7 +220,7 @@ class ClientResource extends Resource
                         ->label(__('labels.form.client.fields.nip'))
                         ->unique(table: Client::class, ignorable: $callback)
                         ->required()
-                        ->placeholder('199301012017121001')
+                        ->placeholder('19930101XXXXXXXXX')
                         ->maxLength(18),
                     Forms\Components\Select::make('reg_grade_id')
                         ->label(__('labels.form.client.fields.grade'))
@@ -231,7 +232,9 @@ class ClientResource extends Resource
                     Forms\Components\Select::make('c_role_id')
                         ->label(__('labels.form.client.fields.crole_name'))
                         ->live()
-                        ->relationship('crole', 'role_name')
+                        ->relationship('crole', 'role_name', function (Builder $query) {
+                            $query->where('active', '=', true);
+                        })
                         ->required(),
                     Forms\Components\Select::make('c_role_level_id')
                         ->label(__('labels.form.client.fields.crole_grade'))
@@ -325,7 +328,8 @@ class ClientResource extends Resource
                         ])->columns(2),
                     Forms\Components\Textarea::make('address')
                         ->label(__('labels.form.client.fields.address'))
-                        ->required(),
+                        ->required()
+                        ->maxLength(250),
                     Forms\Components\FileUpload::make('photo')
                         ->label(__('labels.form.client.fields.photo'))
                         ->maxSize(config('fungsional-pro.max_media_file_size'))
@@ -348,14 +352,26 @@ class ClientResource extends Resource
                 ->schema([
                     Forms\Components\Group::make()
                         ->schema([
+                            Forms\Components\Select::make('level')
+                                ->label(__('labels.form.client.fields.education_level'))
+                                ->options(EducationLevel::class)
+                                ->required(),
                             Forms\Components\TextInput::make('university_name')
                                 ->label(__('labels.form.client.fields.university_name'))
                                 ->required(),
+                        ])
+                        ->columns(2),
+                    Forms\Components\Group::make()
+                        ->schema([
                             Forms\Components\TextInput::make('program_name')
                                 ->label(__('labels.form.client.fields.program_name'))
                                 ->required(),
+                            Forms\Components\TextInput::make('academic_title')
+                                ->label(__('labels.form.client.fields.academic_title'))
+                                ->required(false)->hidden(true),
                         ])
                         ->columns(2),
+
                     Forms\Components\Group::make()
                         ->schema([
                             Forms\Components\TextInput::make('gpa')

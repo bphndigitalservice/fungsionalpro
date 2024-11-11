@@ -5,6 +5,7 @@ namespace App\Filament\Resources\VerifierAccessResource\Pages;
 use App\Filament\Resources\VerifierAccessResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ListVerifierAccesses extends ListRecords
 {
@@ -16,4 +17,11 @@ class ListVerifierAccesses extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('labels.page.regional_access.title');
+    }
+
+
 }

@@ -40,7 +40,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
-
 use function Filament\Support\is_app_url;
 
 /**

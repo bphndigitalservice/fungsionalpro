@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Client\ProfileMustComplete;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
@@ -11,12 +12,14 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Client extends Model
 {
     use HasFactory, HasUlids;
+    use ProfileMustComplete;
 
     protected $casts = [
         'type' => ClientCluster::class,
@@ -52,7 +55,12 @@ class Client extends Model
 
     public function education(): HasOne
     {
-        return $this->hasOne(ClientEducation::class);
+        return $this->hasOne(ClientEducation::class)->orderBy('id','desc');
+    }
+
+    public function educations(): HasMany
+    {
+        return $this->hasMany(ClientEducation::class)->orderBy('id','ASC');
     }
 
     public function identity(): HasOne

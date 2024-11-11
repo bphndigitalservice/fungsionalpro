@@ -24,7 +24,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
-
 use function Filament\Support\is_app_url;
 
 /**

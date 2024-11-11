@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -24,7 +23,7 @@ return new class extends Migration
             $table->string('echelon_type')->nullable();
             $table->unsignedBigInteger('echelon_id')->nullable();
             $table->string('echelon_x_text')->nullable();
-            $table->enum('status', ['active', 'non_active', 'temporarily_nonactive'])->default('active');
+            $table->enum('status', ['active', 'non_active_resign', 'non_active_ctln', 'non_active_study_leave', 'non_active_external_assignment', 'non_active_doesnt_meet_role_requirement'])->default('active');
             $table->string('assignation_type');
             $table->timestamps();
             $table->softDeletes();

@@ -2,15 +2,17 @@
 
 namespace App\Providers;
 
-use App\Policies\RolePolicy;
 use App\Subscribers\ClientEventSubscriber;
 use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
+use Filament\Facades\Filament;
+use Filament\Http\Responses\Auth\RegistrationResponse;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,7 +29,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        $this->app->bind(RegistrationResponse::class, \App\Filament\Pages\Authx\RegistrationResponse::class);
+
+        Authenticate::redirectUsing(fn(): string => Filament::getLoginUrl());
+        AuthenticateSession::redirectUsing(
+            fn(): string => Filament::getLoginUrl()
+        );
+        AuthenticationException::redirectUsing(
+            fn(): string => Filament::getLoginUrl()
+        );
+
+
         Model::unguard();
+
 
         /*Gate::policy(Role::class, RolePolicy::class);*/
 

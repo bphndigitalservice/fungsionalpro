@@ -42,4 +42,16 @@ class PointOverview extends BaseWidget
 
         return null;
     }
+
+    public function getColumnSpan(): int|string|array
+    {
+        return 1;
+    }
+
+    protected function getColumns(): int
+    {
+        return 1;
+    }
+
+
 }

@@ -4,7 +4,6 @@ namespace App\Filament\Resources\ClientCompetenceResource\Pages;
 
 use App\Filament\Resources\ClientCompetenceResource;
 use App\Models\Client;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
