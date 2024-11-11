@@ -12,7 +12,7 @@ use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 
-class ViewClientCompetence extends Component implements HasForms, HasInfolists
+class ClientCompetenceInfolist extends Component implements HasForms, HasInfolists
 {
     use InteractsWithInfolists;
     use InteractsWithForms;
@@ -36,7 +36,6 @@ class ViewClientCompetence extends Component implements HasForms, HasInfolists
                         TextEntry::make('institution')->label('Institusi'),
                         TextEntry::make('start_period')->label('Tanggal Mulai'),
                         TextEntry::make('end_period')->label('Tanggal Selesai'),
-                        
                     ])->columns(2)
             ]);
     }

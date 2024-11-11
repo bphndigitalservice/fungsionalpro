@@ -104,7 +104,7 @@ return [
         ],
         'client' => [
             'tab_info' => 'Identitas ASN',
-            'tab_file' => 'Rincian',
+            'tab_file' => 'Data Pendukung',
             'tab_user' => 'Pengguna Terkait',
             'heading' => [
                 'client_identity' => 'Informasi Dasar',

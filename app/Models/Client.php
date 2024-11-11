@@ -55,12 +55,27 @@ class Client extends Model
 
     public function education(): HasOne
     {
-        return $this->hasOne(ClientEducation::class)->orderBy('id','desc');
+        return $this->hasOne(ClientEducation::class)->orderBy('id', 'desc');
     }
 
     public function educations(): HasMany
     {
-        return $this->hasMany(ClientEducation::class)->orderBy('id','ASC');
+        return $this->hasMany(ClientEducation::class)->orderBy('id', 'ASC');
+    }
+
+    public function grades(): HasMany
+    {
+        return $this->hasMany(ClientGrade::class)->orderBy('id', 'DESC');
+    }
+
+    public function positions(): HasMany
+    {
+        return $this->hasMany(ClientPosition::class)->orderBy('id', 'DESC');
+    }
+
+    public function dossier(): HasMany
+    {
+        return $this->hasMany(ClientDossier::class)->orderBy('id', 'DESC');
     }
 
     public function identity(): HasOne

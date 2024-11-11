@@ -8,7 +8,8 @@ use App\Enums\CRoleAssignation;
 use App\Enums\EducationLevel;
 use App\Enums\Gender;
 use App\Filament\Resources\ClientResource\Pages;
-use App\Livewire\ViewClientCompetence;
+use App\Livewire\ClientEducationInfolist;
+use App\Livewire\ClientCompetenceInfolist;
 use App\Models\Client;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
@@ -69,9 +70,13 @@ class ClientResource extends Resource
                             ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
                             ->schema(static::getDetailedClientForm()),
-                        Forms\Components\Tabs\Tab::make('Diklat/Pelatihan')
+                        Forms\Components\Tabs\Tab::make('Riwayat Pendidikan')
                             ->schema([
-                                Forms\Components\Livewire::make(ViewClientCompetence::class)
+                                Forms\Components\Livewire::make(ClientEducationInfolist::class)
+                            ]),
+                        Forms\Components\Tabs\Tab::make('Riwayat Diklat/Pelatihan')
+                            ->schema([
+                                Forms\Components\Livewire::make(ClientCompetenceInfolist::class)
                             ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_user'))
                             ->schema([

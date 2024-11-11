@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concern\BelongsToClient;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,11 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ClientPoint extends Model
 {
     use HasFactory, HasUlids;
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
+    use BelongsToClient;
 
     public static function getPoint(string $id): float
     {

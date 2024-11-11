@@ -6,6 +6,7 @@ use App\Enums\Acceptance;
 use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
 use App\Events\PointSubmissionAccepted;
+use App\Models\Concern\BelongsToClient;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ClientPointSubmission extends Model
 {
     use HasFactory, HasUlids;
+    use BelongsToClient;
 
     protected $primaryKey = 'id';
 
@@ -27,11 +29,6 @@ class ClientPointSubmission extends Model
     public function files(): HasMany
     {
         return $this->hasMany(ClientPointSubmissionFile::class);
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 
     public function bag(): BelongsTo
