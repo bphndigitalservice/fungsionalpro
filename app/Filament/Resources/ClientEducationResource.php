@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\EducationLevel;
 use App\Filament\Resources\ClientEducationResource\Pages;
+use App\Models\Client;
 use App\Models\ClientEducation;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ClientEducationResource extends Resource
 {
+
     protected static ?string $model = ClientEducation::class;
 
     public static function form(Forms\Form $form): Forms\Form
@@ -115,4 +117,11 @@ class ClientEducationResource extends Resource
             'edit' => Pages\EditClientEducation::route('/{record}/edit'),
         ];
     }
+
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Client::current() !== null;
+    }
+
 }
