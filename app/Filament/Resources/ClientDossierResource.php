@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientDossierResource\Pages;
 use App\Filament\Resources\ClientDossierResource\RelationManagers;
+use App\Models\Client;
 use App\Models\ClientDossier;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -107,5 +108,15 @@ class ClientDossierResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('Informasi Pendukung');
+    }
+
+    public static function getRoutePath(): string
+    {
+        return '/c/dossier';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Client::current() !== null;
     }
 }

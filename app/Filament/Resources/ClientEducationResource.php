@@ -119,6 +119,11 @@ class ClientEducationResource extends Resource
     }
 
 
+    public static function getRoutePath(): string
+    {
+        return '/c/educations';
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         return Client::current() !== null;

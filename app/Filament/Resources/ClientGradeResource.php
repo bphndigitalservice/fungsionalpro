@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientGradeResource\Pages;
 use App\Filament\Resources\ClientGradeResource\RelationManagers;
+use App\Models\Client;
 use App\Models\ClientGrade;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -100,5 +101,16 @@ class ClientGradeResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('Riwayat Pangkat/Golongan');
+    }
+
+
+    public static function getRoutePath(): string
+    {
+        return '/c/grades';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Client::current() !== null;
     }
 }

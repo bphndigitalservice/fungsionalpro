@@ -196,6 +196,11 @@ class ClientCompetenceResource extends Resource
         return config('fungsional-pro.s3.visibility');
     }
 
+    public static function getRoutePath(): string
+    {
+        return '/c/courses';
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         return Client::current() !== null;
