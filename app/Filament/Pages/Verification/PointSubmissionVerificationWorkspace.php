@@ -36,7 +36,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         return $table
             ->columns([
-                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('client.identity.name')->label('Nama'),
                 TextColumn::make('client.nip')->label('NIP'),
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
@@ -46,13 +46,13 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn (Model $record) => ! static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
+                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
             ]);
     }
 
     public static function canVerifying(): bool
     {
-        return ! auth()->user()->isSuperAdmin() || ! auth()->user()->hasRole('verifier');
+        return !auth()->user()->isSuperAdmin() || !auth()->user()->hasRole('verifier');
     }
 
     public static function canView(): bool
@@ -62,7 +62,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     protected function getTableQuery(): Builder|Relation|null
     {
-        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
+        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id)->limit(1);
 
         return ClientPointSubmission::leftJoin('clients', 'client_id', '=', 'client_point_submissions.client_id')
             ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
@@ -87,14 +87,15 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return __('labels.page.v_client_point_submission.title');
     }
 
+
     public function getTabs(): array
     {
         return [
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('client_point_submissions.verified_at')->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
         ];
     }
 
