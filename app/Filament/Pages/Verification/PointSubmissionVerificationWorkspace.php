@@ -62,14 +62,16 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     protected function getTableQuery(): Builder|Relation|null
     {
-        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id)->limit(1);
+        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
 
-        return ClientPointSubmission::leftJoin('clients', 'clients.id', '=', 'client_point_submissions.client_id')
-            ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'va.c_role_id');
-                $join->on('va.entity_type', '=', 'clients.agency_type');
-                $join->on('va.entity_id', '=', 'clients.agency_id');
-            })->select('client_point_submissions.*');
+        return ClientPointSubmission::query()
+            ->whereHas('client', function (Builder $query) use ($verifierAccess) {
+                $query->whereHas('crole', function (Builder $roleQuery) use ($verifierAccess) {
+                    $roleQuery->whereIn('id', $verifierAccess->pluck('c_role_id'));
+                })
+                    ->whereIn('agency_type', $verifierAccess->pluck('entity_type'))
+                    ->whereIn('agency_id', $verifierAccess->pluck('entity_id'));
+            });
     }
 
     public static function getNavigationGroup(): ?string
@@ -103,4 +105,11 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         return 'new';
     }
+
+    /*public function getTableRecordKey(Model $record): string
+    {
+        return $record->getKey() ?? uniqid('client_point_submission_');
+    }*/
+
+
 }

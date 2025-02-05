@@ -128,7 +128,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
         $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id)->limit(1);
 
         return Client::with(['identity', 'education', 'detail'])
-            ->leftJoinSub($verifierAccess, 'va', function (JoinClause $join) {
+            ->rightJoinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');
                 $join->on('va.entity_id', '=', 'clients.agency_id');
