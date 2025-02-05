@@ -26,6 +26,11 @@ class ClientPointSubmission extends Model
         'is_approved' => Acceptance::class,
     ];
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id', 'id');
+    }
+
     public function files(): HasMany
     {
         return $this->hasMany(ClientPointSubmissionFile::class);

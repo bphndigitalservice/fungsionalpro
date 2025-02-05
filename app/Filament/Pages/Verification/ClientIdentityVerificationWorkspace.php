@@ -40,7 +40,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
             $table
                 ->columns([
                     Tables\Columns\TextColumn::make('id')
-                        ->toggleable(isToggledHiddenByDefault: false)
+                        ->toggleable(isToggledHiddenByDefault: true)
                         ->label(__('labels.table.client.id')),
                     Tables\Columns\TextColumn::make('nip')
                         ->label(__('labels.table.client.nip'))

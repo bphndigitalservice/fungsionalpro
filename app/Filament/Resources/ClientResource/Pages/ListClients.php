@@ -32,7 +32,7 @@ class ListClients extends ListRecords
         }
 
         if ($principal->hasRole(['admin-regional', 'verifier'])) {
-            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
+            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');

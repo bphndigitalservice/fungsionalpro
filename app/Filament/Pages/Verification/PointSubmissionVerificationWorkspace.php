@@ -36,12 +36,12 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         return $table
             ->columns([
-                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('client.identity.name')->label('Nama'),
                 TextColumn::make('client.nip')->label('NIP'),
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
-                TextColumn::make('submission_type')->toggleable(),
+                TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('is_approved'),
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -64,7 +64,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id)->limit(1);
 
-        return ClientPointSubmission::leftJoin('clients', 'client_id', '=', 'client_point_submissions.client_id')
+        return ClientPointSubmission::leftJoin('clients', 'clients.id', '=', 'client_point_submissions.client_id')
             ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');
