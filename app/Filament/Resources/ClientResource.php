@@ -226,7 +226,9 @@ class ClientResource extends Resource
                         ->unique(table: Client::class, ignorable: $callback)
                         ->required()
                         ->placeholder('19930101XXXXXXXXX')
-                        ->maxLength(18),
+                        ->minLength(18)
+                        ->maxLength(18)
+                        ->rules('regex:/^\d+$/'),
                     Forms\Components\Select::make('reg_grade_id')
                         ->label(__('labels.form.client.fields.grade'))
                         ->relationship('grade', 'grade_code')

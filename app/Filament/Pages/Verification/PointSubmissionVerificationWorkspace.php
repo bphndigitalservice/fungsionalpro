@@ -41,18 +41,18 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('client.nip')->label('NIP'),
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
-                TextColumn::make('submission_type')->toggleable(),
+                TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('is_approved'),
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn (Model $record) => ! static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
+                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
             ]);
     }
 
     public static function canVerifying(): bool
     {
-        return ! auth()->user()->isSuperAdmin() || ! auth()->user()->hasRole('verifier');
+        return !auth()->user()->isSuperAdmin() || !auth()->user()->hasRole('verifier');
     }
 
     public static function canView(): bool
@@ -64,12 +64,14 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
 
-        return ClientPointSubmission::leftJoin('clients', 'client_id', '=', 'client_point_submissions.client_id')
-            ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'va.c_role_id');
-                $join->on('va.entity_type', '=', 'clients.agency_type');
-                $join->on('va.entity_id', '=', 'clients.agency_id');
-            })->select('client_point_submissions.*');
+        return ClientPointSubmission::query()
+            ->whereHas('client', function (Builder $query) use ($verifierAccess) {
+                $query->whereHas('crole', function (Builder $roleQuery) use ($verifierAccess) {
+                    $roleQuery->whereIn('id', $verifierAccess->pluck('c_role_id'));
+                })
+                    ->whereIn('agency_type', $verifierAccess->pluck('entity_type'))
+                    ->whereIn('agency_id', $verifierAccess->pluck('entity_id'));
+            });
     }
 
     public static function getNavigationGroup(): ?string
@@ -87,14 +89,15 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return __('labels.page.v_client_point_submission.title');
     }
 
+
     public function getTabs(): array
     {
         return [
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('client_point_submissions.verified_at')->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
         ];
     }
 
@@ -102,4 +105,11 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         return 'new';
     }
+
+    /*public function getTableRecordKey(Model $record): string
+    {
+        return $record->getKey() ?? uniqid('client_point_submission_');
+    }*/
+
+
 }

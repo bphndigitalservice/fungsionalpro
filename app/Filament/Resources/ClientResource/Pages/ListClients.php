@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ClientResource\Pages;
 
 use App\Filament\Resources\ClientResource;
+use App\Filament\Resources\CRoleResource\Concern\CanAccessClientData;
 use App\Models\Client;
 use App\Models\User;
 use App\Models\VerifierAccess;
@@ -13,6 +14,7 @@ use Illuminate\Database\Query\JoinClause;
 
 class ListClients extends ListRecords
 {
+
     protected static string $resource = ClientResource::class;
 
     protected function getHeaderActions(): array
@@ -31,8 +33,8 @@ class ListClients extends ListRecords
             return parent::getTableQuery();
         }
 
-        if ($principal->hasRole(['admin-regional', 'verifier'])) {
-            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
+        if ($principal->hasRole(['admin-regional', 'verifier', 'admin-pusat'])) {
+            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');

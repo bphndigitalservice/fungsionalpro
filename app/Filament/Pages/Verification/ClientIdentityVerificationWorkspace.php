@@ -94,8 +94,8 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                 ])
                 ->actions([
                     ViewClientIdentityAction::make(),
-                    AcceptClientIdentityAction::make()->hidden(fn (Model $record) => $record->is_verified),
-                    RejectClientIdentityAction::make()->hidden(fn (Model $record) => $record->is_verified),
+                    AcceptClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
+                    RejectClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
                 ]);
     }
 
@@ -125,10 +125,10 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
     protected function getTableQuery(): Builder|Relation|null
     {
 
-        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
+        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id)->limit(1);
 
         return Client::with(['identity', 'education', 'detail'])
-            ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
+            ->rightJoinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');
                 $join->on('va.entity_id', '=', 'clients.agency_id');
@@ -146,8 +146,8 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('is_verified')->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('is_verified')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('is_verified')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('is_verified')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('is_verified')),
         ];
     }
 

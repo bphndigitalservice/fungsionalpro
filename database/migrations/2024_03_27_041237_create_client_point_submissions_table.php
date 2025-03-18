@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('client_point_submissions', function (Blueprint $table) {
             $table->ulid('id')->unique();
             $table->foreignUlid('client_id');
-            $table->foreignUlid('submission_bag_id');
             $table->string('submission_type', 128);
             $table->string('pak_number', 128);
             $table->float('point')->default(0);
