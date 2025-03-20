@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Concerns\Verifier\InteractWithClientData;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Tapp\FilamentInvite\Notifications\SetPassword;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
@@ -69,6 +71,23 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
         return true;
+    }
+
+    public function getResetPasswordUrl(string $token, array $parameters = []): string
+    {
+        return URL::signedRoute(
+            'filament.admin.auth.password-reset.reset',
+            [
+                'email' => $this->email,
+                'token' => $token,
+                ...$parameters,
+            ],
+        );
+    }
+
+    public function sendPasswordSetNotification($token): void
+    {
+        Notification::send($this, new SetPassword($token));
     }
 
 

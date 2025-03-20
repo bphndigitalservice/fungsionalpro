@@ -76,9 +76,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     public function form(Form $form): Form
     {
-        return $form
-            ->disabled($this->getVerificationNote() == Verified::Verified)
-            ->schema(static::getClientIdentityForm());
+        return $form->schema(static::getClientIdentityForm());
     }
 
     public static function getClientIdentityForm(): array

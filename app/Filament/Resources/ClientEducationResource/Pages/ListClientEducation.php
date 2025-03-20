@@ -11,6 +11,14 @@ class ListClientEducation extends ListRecords
 {
     protected static string $resource = ClientEducationResource::class;
 
+    /**
+     * @return string|\Illuminate\Contracts\Support\Htmlable
+     */
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('labels.page.client_education_list.title');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

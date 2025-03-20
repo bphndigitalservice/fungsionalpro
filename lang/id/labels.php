@@ -26,6 +26,13 @@ return [
             'nav' => 'Riwayat',
             'title' => 'Riwayat Angka Kredit',
         ],
+        'client_education_list' => [
+            'nav' => 'Riwayat Pendidikan',
+            'title' => 'Riwayat Pendidikan',
+        ],
+        'client_education_create' => [
+            'title' => 'Buat Riwayat Pendidikan',
+        ],
         'client_point_create' => [
             'nav' => 'Pelaporan AK',
             'title' => 'Pelaporan AK',
@@ -97,7 +104,7 @@ return [
             'fields' => [
                 'name' => 'Nama',
                 'email' => 'Email',
-                'Password' => 'Kata Sandi',
+                'password' => 'Kata Sandi',
                 'role' => 'Peran',
                 'verification' => 'Verifikasi Email',
             ],
@@ -109,8 +116,8 @@ return [
             'heading' => [
                 'client_identity' => 'Informasi Dasar',
                 'client_identity_description' => 'Nama, Alamat, Gender',
-                'client_education' => 'Pendidikan Terakhir',
-                'client_education_description' => 'Pendidikan Terakhir',
+                'client_education' => 'Pendidikan',
+                'client_education_description' => 'Pendidikan',
                 'client_employee_information' => 'Informasi Kepegawaian',
                 'client_employee_information_description' => 'NIP, Jabatan, Jenjang',
                 'client_detail_cpns_pns' => 'CPNS & PNS',
@@ -128,7 +135,7 @@ return [
                 'phone_number' => 'Nomor Telepon',
                 'address' => 'Alamat Kantor',
                 'photo' => 'Pas Foto',
-                'university_name' => 'Universitas',
+                'university_name' => 'Sekolah/Universitas',
                 'program_name' => 'Jurusan',
                 'gpa' => 'IPK',
                 'certificate' => 'Ijazah/Transkrip',

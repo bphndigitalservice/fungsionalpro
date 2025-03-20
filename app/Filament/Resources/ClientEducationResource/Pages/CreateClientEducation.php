@@ -11,6 +11,14 @@ class CreateClientEducation extends CreateRecord
 {
     protected static string $resource = ClientEducationResource::class;
 
+    /**
+     * @return string|\Illuminate\Contracts\Support\Htmlable
+     */
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('labels.page.client_education_create.title');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['client_id'] = Client::current()->id;

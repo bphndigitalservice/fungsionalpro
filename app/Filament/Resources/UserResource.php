@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Tapp\FilamentInvite\Tables\InviteAction;
 
 class UserResource extends Resource
 {
@@ -86,6 +87,7 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                InviteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

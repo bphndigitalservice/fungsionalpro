@@ -55,9 +55,11 @@ class ClientEducationResource extends Resource
                                     ->visibility('private')
                                     ->downloadable(),
                             ])
-                            ->columns(3)
+                            ->columns(3),
                     ])
-                    ->columnSpan(['lg' => fn(?ClientEducation $record) => $record === null ? 3 : 2])
+                    ->columnSpan([
+                        'lg' => fn(?ClientEducation $record) => $record === null ? 3 : 2,
+                    ]),
             ]);
     }
 
