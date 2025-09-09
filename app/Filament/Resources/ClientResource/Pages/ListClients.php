@@ -29,11 +29,11 @@ class ListClients extends ListRecords
 
         $principal = $this->getPrincipal();
 
-        if ($principal->isSuperAdmin()) {
+        if ($principal->isSuperAdmin() || $principal->hasRole('admin-pusat') || $principal->hasRole('admin')) {
             return parent::getTableQuery();
         }
 
-        if ($principal->hasRole(['admin-regional', 'verifier', 'admin-pusat'])) {
+        if ($principal->hasRole(['admin-regional', 'verifier'])) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {
