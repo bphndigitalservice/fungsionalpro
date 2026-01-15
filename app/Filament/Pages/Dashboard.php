@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\PointOverview;
+use App\Filament\Widgets\ClientsByRoleChart;
 use App\Livewire\ProfileCompletionWidget;
 use Filament\Facades\Filament;
 use Filament\Pages\Dashboard as BaseDashboard;
@@ -40,7 +41,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             ...$this->clientWidgets(),
-            //...Filament::getWidgets()
+            ...$this->adminWidgets(),
         ];
     }
 
@@ -54,6 +55,18 @@ class Dashboard extends BaseDashboard
         }
 
         return [];
+    }
+
+    public function adminWidgets(): array
+    {
+        $user = auth()->user();
+        $widgets = [];
+
+        if ((method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) || $user->hasRole(['admin', 'admin-regional', 'admin-pusat', 'verifier'])) {
+            $widgets[] = ClientsByRoleChart::class;
+        }
+
+        return $widgets;
     }
 
     public function getVisibleWidgets(): array

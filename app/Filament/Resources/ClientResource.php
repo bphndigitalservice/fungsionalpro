@@ -11,6 +11,7 @@ use App\Filament\Resources\ClientResource\Pages;
 use App\Livewire\ClientEducationInfolist;
 use App\Livewire\ClientCompetenceInfolist;
 use App\Models\Client;
+use App\Models\CRole;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
@@ -164,16 +165,25 @@ class ClientResource extends Resource
                             ]),
                     ])->query(function (Builder $query, array $data): Builder {
 
-                        if (blank($data['agency_type']) || blank($data['agency_id'])) {
+                        $agencyType = $data['agency_type'] ?? null;
+                        $agencyId = $data['agency_id'] ?? null;
+
+                        if (blank($agencyType) || blank($agencyId)) {
                             return $query;
                         }
 
                         return $query
-                            ->where('agency_type', '=', $data['agency_type'])
-                            ->where('agency_id', '=', $data['agency_id']);
+                            ->where('agency_type', '=', $agencyType)
+                            ->where('agency_id', '=', $agencyId);
                     }),
                 Tables\Filters\SelectFilter::make('status')
                     ->options(ClientStatus::class),
+                Tables\Filters\SelectFilter::make('c_role_id')
+                    ->hidden(!static::canFilterClientRoles())
+                    ->label(__('labels.table.client.role'))
+                    ->options(fn () => CRole::query()->pluck('role_name', 'id')->toArray())
+                    ->searchable()
+                    ->multiple(),
                 Tables\Filters\SelectFilter::make('assignation_type')
                     ->options(CRoleAssignation::class),
 
@@ -199,6 +209,11 @@ class ClientResource extends Resource
     public static function canFilterRegional(): bool
     {
         return auth()->user()->hasRole(['super_admin', 'admin-pusat']);
+    }
+
+    public static function canFilterClientRoles(): bool
+    {
+        return auth()->user()->hasRole(['super_admin','admin-sdm-bphn']);
     }
 
     public static function getPages(): array
