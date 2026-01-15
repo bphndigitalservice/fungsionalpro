@@ -16,6 +16,14 @@ trait CanAccessClientData
             return;
         }
 
+        if($this->getPrincipal()->hasRole('admin')) {
+            $adminAccess = \App\Models\AdminAccess::query()->where('user_id', $this->getPrincipal()->id)->limit(1);
+
+            return Client::joinSub($adminAccess, 'aa', function (JoinClause $join) {
+                $join->on('clients.c_role_id', '=', 'aa.c_role_id');
+            })->select('clients.*');
+        }
+
         if ($this->getPrincipal()->hasRole(['admin-regional', 'verifier', 'admin-pusat'])) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $this->getPrincipal()->id)->limit(1);
             $client = Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Subscribers\ClientEventSubscriber;
 use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
+use BezhanSalleh\FilamentShield\FilamentShield;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\RegistrationResponse;
 use Illuminate\Auth\AuthenticationException;
@@ -49,5 +50,8 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(UserEventSubscriber::class);
         Event::subscribe(ClientEventSubscriber::class);
         Event::subscribe(PointEventSubscriber::class);
+
+
+        FilamentShield::prohibitDestructiveCommands($this->app->isProduction());
     }
 }
