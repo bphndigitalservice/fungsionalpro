@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\AdminAccessResource\Pages;
+use App\Models\AdminAccess;
+use App\Models\User;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+class AdminAccessResource extends Resource
+{
+    protected static ?string $model = AdminAccess::class;
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\Select::make('c_role_id')
+                                    ->label(__('labels.form.crole.fields.role_name'))
+                                    ->searchable()
+                                    ->relationship('role', 'role_name')
+                                    ->preload()
+                                    ->required(),
+                                Forms\Components\Select::make('user_id')
+                                    ->label(__('labels.form.user.fields.name'))
+                                    ->searchable()
+                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role(['admin']))
+                                    ->preload()
+                                    ->required(),
+                            ])->columns(2),
+                    ]),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label(__('labels.form.user.fields.name'))
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('role.role_name')
+                    ->label(__('labels.table.crole.name'))
+                    ->badge()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListAdminAccesses::route('/'),
+            'create' => Pages\CreateAdminAccess::route('/create'),
+            'edit' => Pages\EditAdminAccess::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getNavigationGroup(): string
+    {
+        return __('labels.nav.system');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Akses Admin');
+    }
+}
