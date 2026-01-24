@@ -28,7 +28,19 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['nip', 'status', 'assignation_type', 'agency_id', 'echelon_type', 'echelon_id', 'echelon_x_text']);
+            $table->index('nip');
+            $table->index(['status', 'assignation_type']);
+            $table->index(['agency_id', 'echelon_id']);
+
+
+            // $table->unsignedBigInteger('reg_grade_id')->nullable();
+
+            // $table->foreign('reg_grade_id')
+            //     ->references('id')
+            //     ->on('reg_grades')
+            //     ->nullOnDelete()
+            //     ->cascadeOnUpdate();
+
             $table->foreign('user_id')
                 ->on('users')
                 ->references('id')

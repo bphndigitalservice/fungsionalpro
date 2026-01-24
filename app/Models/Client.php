@@ -58,6 +58,16 @@ class Client extends Model
         return $this->hasOne(ClientEducation::class)->orderBy('id', 'desc');
     }
 
+    public function activity(): HasOne
+    {
+        return $this->hasOne(ClientActivity::class)->orderBy('id', 'desc');
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(ClientActivity::class)->orderBy('id', 'ASC');
+    }
+
     public function educations(): HasMany
     {
         return $this->hasMany(ClientEducation::class)->orderBy('id', 'ASC');
@@ -143,4 +153,6 @@ class Client extends Model
     {
         return $this->hasMany(ClientCompetence::class);
     }
+
+
 }

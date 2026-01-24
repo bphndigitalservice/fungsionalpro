@@ -10,6 +10,8 @@ use App\Enums\Gender;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Livewire\ClientEducationInfolist;
 use App\Livewire\ClientCompetenceInfolist;
+use App\Livewire\ClientActivityInfolist;
+use App\Livewire\ClientActivityTable;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\RegDepartment;
@@ -79,7 +81,12 @@ class ClientResource extends Resource
                             ->schema([
                                 Forms\Components\Livewire::make(ClientCompetenceInfolist::class)
                             ]),
+                        Forms\Components\Tabs\Tab::make('Riwayat Kegiatan')
+                            ->schema([
+                                Forms\Components\Livewire::make(ClientActivityTable::class)
+                            ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_user'))
+                            ->visible(fn () => auth()->user()->hasRole('super_admin'))
                             ->schema([
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
@@ -353,6 +360,7 @@ class ClientResource extends Resource
                         ->required()
                         ->maxLength(250),
                     Forms\Components\FileUpload::make('photo')
+                        ->disk('s3')
                         ->label(__('labels.form.client.fields.photo'))
                         ->maxSize(config('fungsional-pro.max_media_file_size'))
                         ->acceptedFileTypes(config('fungsional-pro.accepted_media_type'))
@@ -402,6 +410,7 @@ class ClientResource extends Resource
                                 ->maxValue(4)
                                 ->required(),
                             Forms\Components\FileUpload::make('certificate')
+                                ->disk('s3')
                                 ->label(__('labels.form.client.fields.certificate'))
                                 ->required()
                                 ->maxFiles(1)
@@ -426,6 +435,7 @@ class ClientResource extends Resource
                             Forms\Components\TextInput::make('employee_card')
                                 ->label(__('labels.form.client.fields.employee_card')),
                             Forms\Components\FileUpload::make('file_employee_card')
+                                ->disk('s3')
                                 ->label(__('labels.form.client.fields.file_employee_card'))
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
@@ -439,6 +449,7 @@ class ClientResource extends Resource
                             Forms\Components\DatePicker::make('sk_cpns_tmt')
                                 ->label(__('labels.form.client.fields.tmt_cpns')),
                             Forms\Components\FileUpload::make('sk_cpns_file')
+                                ->disk('s3')
                                 ->label(__('labels.form.client.fields.file_sk_cpns'))
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
@@ -448,6 +459,7 @@ class ClientResource extends Resource
                             Forms\Components\DatePicker::make('sk_pns_tmt')
                                 ->label(__('labels.form.client.fields.tmt_pns')),
                             Forms\Components\FileUpload::make('sk_pns_file')
+                                ->disk('s3')
                                 ->label(__('labels.form.client.fields.file_sk_pns'))
                                 ->visibility(static::storageVisibility())
                                 ->downloadable()
@@ -466,6 +478,7 @@ class ClientResource extends Resource
                                         ->label(__('labels.form.client.fields.latest_jf_no')),
                                 ])->columns(2),
                             Forms\Components\FileUpload::make('sk_latest_jf_file')
+                                ->disk('s3')
                                 ->label(__('labels.form.client.fields.file_sk_jf_latest'))
                                 ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
@@ -483,6 +496,7 @@ class ClientResource extends Resource
                                         ->label(__('labels.form.client.fields.grade_sk_latest_no')),
                                 ])->columns(2),
                             Forms\Components\FileUpload::make('sk_latest_grade_file')
+                                ->disk('s3')
                                 ->label(__('labels.form.client.fields.file_sk_grade_latest'))
                                 ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
