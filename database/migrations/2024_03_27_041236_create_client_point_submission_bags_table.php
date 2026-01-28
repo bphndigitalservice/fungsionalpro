@@ -12,30 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('client_point_submission_bags', function (Blueprint $table) {
-            $table->ulid('id')->unique();
+            $table->ulid('id')->primary();
             $table->string('label');
             $table->dateTime('date_start');
             $table->dateTime('date_end');
             $table->boolean('is_enabled')->default(false);
-            $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('updated_by');
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
+
+            $table->foreignId('updated_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
+
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['is_enabled']);
-
-            $table->foreign('created_by')
-                ->on('users')
-                ->references('id')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-
-            $table->foreign('updated_by')
-                ->on('users')
-                ->references('id')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-
+            $table->index('is_enabled');
         });
     }
 
@@ -44,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('client_point_submission_verifications');
+        Schema::dropIfExists('client_point_submission_bags');
     }
 };

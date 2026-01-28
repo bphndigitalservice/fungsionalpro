@@ -12,19 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reg_grades', function (Blueprint $table) {
-            $table->id()->autoIncrement();
+            $table->id();
             $table->string('grade_name');
             $table->string('grade_code');
             $table->timestamps();
         });
 
-        Schema::table('clients', function (Blueprint $table) {
-            $table->foreign('reg_grade_id')
-                ->on('reg_grades')
-                ->references('id')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-        });
+
+        // Schema::table('clients', function (Blueprint $table) {
+        //     $table->foreign('reg_grade_id')
+        //         ->on('reg_grades')
+        //         ->references('id')
+        //         ->onDelete('set null')
+        //         ->onUpdate('cascade');
+        // });
     }
 
     /**

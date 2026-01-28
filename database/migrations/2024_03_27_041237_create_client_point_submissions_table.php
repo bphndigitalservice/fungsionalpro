@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('client_point_submissions', function (Blueprint $table) {
-            $table->ulid('id')->unique();
-            $table->foreignUlid('client_id');
+            $table->ulid('id')->primary();
+
+            $table->foreignUlid('client_id')
+                ->constrained('clients')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
+
             $table->string('submission_type', 128);
             $table->string('pak_number', 128);
             $table->float('point')->default(0);
@@ -24,27 +29,24 @@ return new class extends Migration
             $table->string('x_accumulated_number', 128)->nullable();
             $table->float('x_accumulated_point')->nullable();
             $table->string('x_accumulated_file', 128)->nullable();
-            $table->string('status', '50');
+            $table->string('status', 50);
             $table->boolean('is_approved')->default(false);
             $table->string('verifier_note')->nullable();
+
+            // ✅ ULID FK (FIX)
+            $table->ulid('submission_bag_id')->nullable();
+            $table->foreign('submission_bag_id')
+                ->references('id')
+                ->on('client_point_submission_bags')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
+
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('client_id')
-                ->on('clients')
-                ->references('id')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->foreign('submission_bag_id')
-                ->on('client_point_submission_bags')
-                ->references('id')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-
             $table->index(['status', 'submission_type']);
-
         });
+
     }
 
     /**
