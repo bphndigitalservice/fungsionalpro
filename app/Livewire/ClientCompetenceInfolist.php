@@ -12,12 +12,14 @@ use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
+use Filament\Infolists\Components\Section;
 
 class ClientCompetenceInfolist extends Component implements HasForms, HasInfolists
 {
     use InteractsWithInfolists;
     use InteractsWithForms;
 
+    
     protected ?Model $record;
 
     public function mount(?Model $record = null): void
@@ -25,22 +27,25 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
         $this->record = $record;
     }
 
-    public function competenceInfolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->record($this->record)
-            ->schema([
-                RepeatableEntry::make('competences')
-                    ->label('Daftar Diklat/Pelatihan')
-                    ->schema([
-                        TextEntry::make('title')->label('Pelatihan'),
-                        TextEntry::make('institution')->label('Institusi'),
-                        TextEntry::make('start_period')->label('Tanggal Mulai'),
-                        TextEntry::make('end_period')->label('Tanggal Selesai'),
-                        MinioFileEntry::make('competence_file')->label('Sertifikat'),
-                    ])->columns(2)
-            ]);
-    }
+public function competenceInfolist(Infolist $infolist): Infolist
+{
+    return $infolist
+        ->record($this->record)
+        ->schema([
+            Section::make('Daftar Diklat / Pelatihan')
+                ->schema([
+                    RepeatableEntry::make('competences')
+                        ->schema([
+                            TextEntry::make('title')->label('Pelatihan'),
+                            TextEntry::make('institution')->label('Institusi'),
+                            TextEntry::make('start_period')->label('Tanggal Mulai'),
+                            TextEntry::make('end_period')->label('Tanggal Selesai'),
+                            MinioFileEntry::make('competence_file')->label('Sertifikat'),
+                        ])
+                        ->columns(2),
+                ]),
+        ]);
+}
 
     public function render()
     {

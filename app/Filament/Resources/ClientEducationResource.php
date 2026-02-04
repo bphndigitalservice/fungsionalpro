@@ -20,6 +20,11 @@ class ClientEducationResource extends Resource
 
     protected static ?string $model = ClientEducation::class;
 
+
+    protected static ?string $navigationLabel = 'Riwayat Pendidikan';
+
+    protected static ?string $modelLabel = 'Riwayat Pendidikan';
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
@@ -46,6 +51,7 @@ class ClientEducationResource extends Resource
                                     ->maxValue(4)
                                     ->required(),
                                 Forms\Components\FileUpload::make('certificate')
+                                    ->disk('s3')
                                     ->label(__('labels.form.client.fields.certificate'))
                                     ->required()
                                     ->maxFiles(1)
@@ -107,10 +113,6 @@ class ClientEducationResource extends Resource
         return [];
     }
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Riwayat Pendidikan');
-    }
 
     public static function getNavigationGroup(): ?string
     {

@@ -11,6 +11,11 @@ class ClientActivity extends Model
     use HasFactory;
     use BelongsToClient;
 
+
+    protected $casts = [
+    'activity_details' => 'array',
+    ];
+
     public function client(){
         return $this->belongsTo(Client::class);
     }

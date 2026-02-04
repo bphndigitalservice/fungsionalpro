@@ -154,5 +154,11 @@ class Client extends Model
         return $this->hasMany(ClientCompetence::class);
     }
 
+    public function hasLatestEducation(): bool
+    {
+        return $this->latestEducation()->exists();
+    }
+
+
 
 }

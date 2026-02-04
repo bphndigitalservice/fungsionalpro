@@ -20,7 +20,8 @@
         "predis/predis": "^3.0",
         "spiral/roadrunner-cli": "^2.6.0",
         "spiral/roadrunner-http": "^3.3.0",
-        "tapp/filament-invite": "^1.0"
+        "tapp/filament-invite": "^1.0",
+        "valentin-morice/filament-json-column": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

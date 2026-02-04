@@ -16,11 +16,15 @@ class PointOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        $point = $this->getPoint();
+
         return [
-            Stat::make(__('Angka Kredit'), $this->getPoint())
-                ->descriptionIcon('heroicon-m-arrow-trending-up'),
+            Stat::make(__('Angka Kredit'), number_format($point))
+                ->extraAttributes(['class' => 'text-3xl font-bold',])
+                ->color($point > 0 ? 'success' : 'gray'),
         ];
     }
+
 
     protected function getPoint(): float
     {

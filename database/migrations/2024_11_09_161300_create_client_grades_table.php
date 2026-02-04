@@ -11,16 +11,15 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('client_grades', function (Blueprint $table) {
-            $table->ulid('id')->primary();
+            $table->id(); 
             $table->foreignId('reg_grade_id')
                 ->constrained('reg_grades')
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
             $table->enum('type', ['current', 'past']);
             $table->date('effective_date');
             $table->string('decree_number');
             $table->text('decree_file');
             $table->timestamps();
-
         });
     }
 
