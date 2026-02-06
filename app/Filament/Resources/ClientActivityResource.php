@@ -95,6 +95,11 @@ class ClientActivityResource extends Resource
                         Forms\Components\FileUpload::make('activity_file')
                             ->disk('s3')
                             ->label('Lampiran Laporan Kegiatan')
+                            ->helperText(fn () =>
+                                Client::current()?->c_role_id == 2
+                                    ? 'Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).'
+                                    : null
+                            )
                             ->required()
                             ->maxFiles(1)
                             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
