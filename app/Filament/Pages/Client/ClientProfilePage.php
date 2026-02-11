@@ -8,6 +8,8 @@ use App\Enums\Verified;
 use App\Events\ClientProfileUpdated;
 use App\Filament\Resources\ClientResource;
 use App\Models\Client;
+use App\Models\ClientGrade;
+use App\Models\ClientPosition;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;

@@ -129,32 +129,19 @@ class ClientResource extends Resource
                     ->label(__('labels.table.client.cluster'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('agenciable.name')
-                    ->label(__('labels.table.client.agency'))
+                    ->label(__('Instansi'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('echelonable.name')
                     ->label(__('labels.table.client.echelon'))
-                    ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('echelon_x_text')
-                    ->label(__('labels.table.client.echelon_text'))
-                    ->searchable()->sortable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('labels.table.client.status'))
+                    ->wrap()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('assignation_type')
                     ->label(__('labels.table.client.assignation_type'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\Filter::make('agency_id')

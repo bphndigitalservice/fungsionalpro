@@ -158,7 +158,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         try {
             $this->beginDatabaseTransaction();
-
             $data = $this->form->getState();
             $data = $this->mutateDataBeforeSubmit($data);
             $this->record = $this->handleRecordCreation($data);

@@ -24,40 +24,52 @@ class ClientDossierResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('client_document_type_id')
+                Forms\Components\Select::make('client_document_type_id')
+                    ->label('Jenis Dokumen')
+                    ->relationship('documentType', 'type')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+
+                Forms\Components\TextInput::make('doc_number')
+                    ->label('Nomor Dokumen')
                     ->required()
-                    ->maxLength(26),
-                Forms\Components\TextInput::make('client_id')
-                    ->required()
-                    ->maxLength(26),
+                    ->maxLength(255),
+
+                Forms\Components\DatePicker::make('doc_date')
+                    ->label('Tanggal Dokumen')
+                    ->required(),
+
                 Forms\Components\Textarea::make('note')
+                    ->label('Catatan')
                     ->columnSpanFull(),
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('client_document_type_id')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('client_id')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('documentType.type')
+                ->label('Jenis Dokumen')
+                ->searchable()
+                ->sortable(),
+
+            Tables\Columns\TextColumn::make('doc_number')
+                ->label('Nomor Dokumen')
+                ->searchable()
+                ->wrap(),
+
+            Tables\Columns\TextColumn::make('doc_date')
+                ->label('Tanggal')
+                ->date()
+                ->sortable(),
+
+            Tables\Columns\TextColumn::make('note')
+                ->label('Catatan')
+                ->limit(50)
+                ->wrap(),
             ])
             ->filters([
                 //Tables\Filters\TrashedFilter::make(),

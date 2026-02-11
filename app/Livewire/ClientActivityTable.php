@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Client;
 use Filament\Widgets\TableWidget;
 use Filament\Tables\Table;
 use Filament\Tables;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 use App\Models\ClientActivity;
+use Filament\Tables\Columns\TextColumn;
 
 
 class ClientActivityTable extends TableWidget
@@ -33,24 +35,57 @@ class ClientActivityTable extends TableWidget
                     : ClientActivity::query()->whereRaw('1 = 0') // empty but valid query
             )
             ->columns([
-                Tables\Columns\TextColumn::make('title')
-                    ->label('Nama Kegiatan'),
 
-                Tables\Columns\TextColumn::make('start_period')
-                    ->label('Tanggal Mulai')
-                    ->date(),
+                TextColumn::make('title')
+                    ->label('Nama Kegiatan')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('end_period')
-                    ->label('Tanggal Selesai')
-                    ->date(),
+                TextColumn::make('start_period')
+                    ->label('Tanggal')
+                    ->date()
+                    ->sortable(),
 
-                Tables\Columns\TextColumn::make('description')
-                    ->label('Deskripsi')
+                TextColumn::make('end_period')
+                    ->label('Selesai')
+                    ->date()
+                    ->visible(fn () => $this->record?->c_role_id == 1),
+
+                TextColumn::make('jam')
+                    ->label('Jam')
+                    ->getStateUsing(fn ($record) =>
+                        $record->start_time . ' - ' . $record->end_time
+                    )
+                    ->visible(fn () => $this->record?->c_role_id == 2),
+
+                    TextColumn::make('activity_details.lokasi')
+                        ->label('Lokasi')
+                        ->visible(fn () => $this->record?->c_role_id == 2)
+                        ->wrap(),
+
+                    TextColumn::make('activity_details.jumlah_peserta')
+                        ->label('Peserta')
+                        ->visible(fn () => $this->record?->c_role_id == 2),
+
+                    TextColumn::make('activity_details.penerima')
+                        ->label('Penerima')
+                        ->visible(fn () => $this->record?->c_role_id == 2)
+                        ->wrap(),
+
+                    TextColumn::make('activity_details.materi')
+                        ->label('Materi')
+                        ->wrap()
+                        ->visible(fn () => $this->record?->c_role_id == 2),
+
+                TextColumn::make('description')
+                    ->label('Deskripsi Kegiatan')
                     ->wrap(),
+
             ])
             ->actions([
                 Action::make('bukti')
-                    ->label('Bukti Kegiatan')
+                    ->label('Lampiran Laporan Kegiatan')
                     ->color('primary')
                     ->url(fn (ClientActivity $record) =>
                         Storage::disk('s3')->temporaryUrl(

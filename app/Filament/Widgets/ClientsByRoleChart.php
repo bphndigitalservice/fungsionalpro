@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
 class ClientsByRoleChart extends ChartWidget
 {
     protected static ?string $heading = 'Jabatan Fungsional';
-
+    protected static ?int $height = 320;
+    //protected int|string|array $columnSpan = 2;
+    
     protected function getData(): array
     {
         $principal = auth()->user();
@@ -79,5 +81,52 @@ class ClientsByRoleChart extends ChartWidget
     protected function getType(): string
     {
         return 'bar';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+
+            'plugins' => [
+                'legend' => [
+                    'display' => false,
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+
+            'scales' => [
+                'x' => [
+                    'ticks' => [
+                        'autoSkip' => false,
+                        'maxRotation' => 0,
+                        'minRotation' => 0,
+                        'font' => [
+                            'size' => 11,
+                        ],
+                    ],
+                    'grid' => [
+                        'display' => false,
+                    ],
+                ],
+
+                'y' => [
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'stepSize' => 1,
+                    ],
+                    'grid' => [
+                        'color' => '#e5e7eb',
+                    ],
+                ],
+            ],
+
+            'layout' => [
+                'padding' => 10,
+            ],
+        ];
     }
 }

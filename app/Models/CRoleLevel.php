@@ -12,6 +12,6 @@ class CRoleLevel extends Model
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(CRole::class);
+        return $this->belongsTo(CRole::class, 'c_role_id');
     }
 }
