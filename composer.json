@@ -19,7 +19,7 @@
         "league/flysystem-aws-s3-v3": "^3.0",
         "predis/predis": "^3.0",
         "spiral/roadrunner-cli": "^2.6.0",
-        "spiral/roadrunner-http": "^3.3.0",
+        "spiral/roadrunner-http": "^4.0.0",
         "tapp/filament-invite": "^1.0",
         "valentin-morice/filament-json-column": "^2.0"
     },
