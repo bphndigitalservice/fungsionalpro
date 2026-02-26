@@ -20,4 +20,12 @@ class ClientActivity extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function verified(): void
+    {
+        $this->update([
+            'is_verified' => true,
+            'verified_at' => now(),
+        ]);
+    }
+
 }

@@ -322,7 +322,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->visibility(config('fungsional-pro.s3.visibility'))
             ->maxSize(config('fungsional-pro.max_upload_file_size'))
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-            ->required();
+            ->required()
+            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB');
     }
 
     public static function getSKP2AkFileUploadField(): FileUpload|Component
@@ -334,6 +335,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
+            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB')
             ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
             ->required(fn (Get $get) => static::isStartFrom2023($get));
     }
@@ -347,6 +349,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
+            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB')
             ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
             ->required(fn (Get $get) => static::isStartFrom2023($get));
     }
