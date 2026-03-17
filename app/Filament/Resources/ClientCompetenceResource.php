@@ -88,11 +88,13 @@ class ClientCompetenceResource extends Resource
                             ->label('Lembaga Pelatihan')
                             ->required(),
                         FileUpload::make('competence_file')
+                            ->disk('s3')
                             ->label('Sertifikat')
                             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                             ->maxFiles(1)
                             ->downloadable()
-                            ->required(),
+                            ->required()
+                            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                     ])
             ]);
     }
@@ -133,13 +135,6 @@ class ClientCompetenceResource extends Resource
                     ->label('Lembaga Pelatihan')
                     ->searchable()
                     ->sortable(),
-
-                /*Tables\Columns\TextColumn::make('competence_file')
-                    ->label('Sertifikat')
-                    ->url(function ($record) {
-                        return $record->competence_file_url;
-                    })
-                    ->openUrlInNewTab()*/
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
@@ -162,7 +157,6 @@ class ClientCompetenceResource extends Resource
                     ->label('Sertifikat'),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
