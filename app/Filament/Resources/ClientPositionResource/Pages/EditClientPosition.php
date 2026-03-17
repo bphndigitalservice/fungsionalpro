@@ -17,4 +17,15 @@ class EditClientPosition extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Perbarui'),
+
+            $this->getCancelFormAction()
+                ->label('Batal'),
+        ];
+    }
 }
