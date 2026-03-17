@@ -90,5 +90,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         Notification::send($this, new SetPassword($token));
     }
 
+    public function adminAccesses()
+    {
+        return $this->hasMany(AdminAccess::class);
+    }
 
 }

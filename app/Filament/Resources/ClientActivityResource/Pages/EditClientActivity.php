@@ -26,4 +26,27 @@ class EditClientActivity extends EditRecord
             throw new ModelNotFoundException('You are not authorized to access this record.');
         }
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['is_verified'] = null;
+
+        $data['verification_note'] = null;
+
+        $data['verified_by'] = null;
+
+        $data['verified_at'] = null;
+
+        return $data;
+    }
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Perbarui'),
+
+            $this->getCancelFormAction()
+                ->label('Batal'),
+        ];
+    }
 }

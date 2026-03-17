@@ -17,5 +17,19 @@ class CreateClientGrade extends CreateRecord
 
         return $data;
     }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Simpan'),
+
+            $this->getCreateAnotherFormAction()
+                ->label('Simpan & Buat Lagi'),
+
+            $this->getCancelFormAction()
+                ->label('Batal'),
+        ];
+    }
 }
 

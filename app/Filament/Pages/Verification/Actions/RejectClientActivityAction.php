@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Filament\Pages\Verification\Actions;
+
+use App\Events\ClientActivityRejected;
+use Filament\Actions\Concerns\CanCustomizeProcess;
+use Filament\Forms\Components\Textarea;
+use Filament\Support\Colors\Color;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+
+class RejectClientActivityAction extends Action
+{
+    use CanCustomizeProcess;
+
+    public static function getDefaultName(): ?string
+    {
+        return 'reject_activity';
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->label(__('Tolak'));
+
+        $this->icon('heroicon-o-x-circle');
+
+        $this->color(Color::Red);
+
+        $this->requiresConfirmation();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verifier Notes Form
+        |--------------------------------------------------------------------------
+        */
+
+        $this->form([
+
+            Textarea::make('verifier_notes')
+                ->label('Catatan Verifikator')
+                ->required(),
+
+        ]);
+
+        $this->action(function (): void {
+
+            $this->process(function (
+                array $data,
+                Model $record,
+                Table $table
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Activity Verification Status
+                |--------------------------------------------------------------------------
+                */
+
+                $record->update([
+
+                    'is_verified' => false,
+
+                    'verification_note' => $data['verifier_notes'],
+
+                    'verified_by' => auth()->id(),
+
+                    'verified_at' => now(),
+
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Fire Event
+                |--------------------------------------------------------------------------
+                */
+
+                event(
+
+                    new ClientActivityRejected(
+                        $record,
+                        $data['verifier_notes']
+                    )
+
+                );
+
+            });
+
+            $this->success();
+        });
+    }
+}

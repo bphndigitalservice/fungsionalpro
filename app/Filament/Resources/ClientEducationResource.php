@@ -59,7 +59,8 @@ class ClientEducationResource extends Resource
                                     ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                     ->directory('education_certificate')
                                     ->visibility('private')
-                                    ->downloadable(),
+                                    ->downloadable()
+                                    ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                             ])
                             ->columns(3),
                     ])

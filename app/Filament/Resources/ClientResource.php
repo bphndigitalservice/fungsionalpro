@@ -405,7 +405,8 @@ class ClientResource extends Resource
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->directory('education_certificate')
                                 ->visibility('private')
-                                ->downloadable(),
+                                ->downloadable()
+                                ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ])->columns(2),
                 ])
                 ->relationship('education'),
@@ -428,7 +429,8 @@ class ClientResource extends Resource
                                 ->maxFiles(1)
                                 ->visibility(static::storageVisibility())
                                 ->downloadable()
-                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                                ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
                     Forms\Components\Section::make(__('labels.form.client.heading.client_detail_cpns_pns'))
                         ->description(__('labels.form.client.heading.client_detail_cpns_pns_desc'))
@@ -442,7 +444,8 @@ class ClientResource extends Resource
                                 ->maxFiles(1)
                                 ->visibility(static::storageVisibility())
                                 ->downloadable()
-                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                                ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                             Forms\Components\DatePicker::make('sk_pns_tmt')
                                 ->label(__('labels.form.client.fields.tmt_pns')),
                             Forms\Components\FileUpload::make('sk_pns_file')
@@ -452,7 +455,8 @@ class ClientResource extends Resource
                                 ->downloadable()
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
-                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                                ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
                     Forms\Components\Section::make(__('labels.form.client.heading.client_detail_role'))
                         ->description(__('labels.form.client.heading.client_detail_role_desc'))
@@ -470,7 +474,8 @@ class ClientResource extends Resource
                                 ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
-                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                                ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
                     Forms\Components\Section::make(__('labels.form.client.heading.client_detail_grade'))
                         ->description(__('labels.form.client.heading.client_detail_grade_desc'))
@@ -488,7 +493,8 @@ class ClientResource extends Resource
                                 ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
-                                ->maxSize(config('fungsional-pro.max_upload_file_size')),
+                                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                                ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
                 ])->relationship('detail'),
         ];
@@ -498,6 +504,12 @@ class ClientResource extends Resource
     {
         return ['nip', 'identity.name'];
     }
+
+    public static function canCreate(): bool
+{
+        return false;
+    }
+
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {

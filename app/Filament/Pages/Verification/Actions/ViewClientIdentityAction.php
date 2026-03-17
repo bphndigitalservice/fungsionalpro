@@ -7,6 +7,7 @@ use Filament\Actions\StaticAction;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Closure;
 
 class ViewClientIdentityAction extends Action
 {

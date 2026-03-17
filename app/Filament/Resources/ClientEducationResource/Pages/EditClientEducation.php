@@ -26,4 +26,15 @@ class EditClientEducation extends EditRecord
             throw new ModelNotFoundException('You are not authorized to access this record.');
         }
     }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->label('Perbarui'),
+
+            $this->getCancelFormAction()
+                ->label('Batal'),
+        ];
+    }
 }

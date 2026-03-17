@@ -14,19 +14,11 @@ class ClientProfileAccepted
 
     protected Client $client;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
     public function broadcastOn(): array
     {
         return [
