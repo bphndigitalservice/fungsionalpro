@@ -2,35 +2,39 @@
 
 namespace App\Events;
 
-use App\Models\Client;
+use App\Models\ClientActivity;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClientProfileRejected
+class ClientActivityRejected
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    protected Client $client;
+    protected ClientActivity $activity;
 
     protected ?string $verifierNotes;
 
-    public function __construct(Client $client, ?string $verifierNotes = null)
-    {
-        $this->client = $client;
+    public function __construct(
+        ClientActivity $activity,
+        ?string $verifierNotes = null
+    ) {
+
+        $this->activity = $activity;
+
         $this->verifierNotes = $verifierNotes;
     }
 
     public function broadcastOn(): array
     {
         return [
-
+            // not using broadcasting
         ];
     }
 
-    public function getClient(): Client
+    public function getActivity(): ClientActivity
     {
-        return $this->client;
+        return $this->activity;
     }
 
     public function getVerifierNotes(): ?string
