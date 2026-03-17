@@ -33,8 +33,17 @@ class ClientActivityResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
+        return $form->schema(
+
+        static::getFormSchema()
+
+        );
+    }
+
+    public static function getFormSchema(): array
+    {
+        return
+            [
                 Forms\Components\Section::make()
                     ->schema([
                         TextInput::make('title')
@@ -45,31 +54,38 @@ class ClientActivityResource extends Resource
                     ->label('Waktu Pelaksanaan Kegiatan')
                     ->schema([
 
-                        // Tanggal untuk semua c_role_id (Analis Hukum dan Penyuluh Hukum)
-                        DatePicker::make('start_period')
-                            ->label('Tanggal')
-                            ->required(),
+                DatePicker::make('start_period')
+                    ->minDate('2020-01-01')
+                    ->label(fn () =>
+                        Client::current()?->c_role_id == 1
+                            ? 'Tanggal Mulai'
+                            : 'Tanggal'
+                    )
+                    ->required(),
 
-                        // End date hanya c_role_id 1 (Analis Hukum)
                         DatePicker::make('end_period')
+                            ->minDate('2020-01-01')
                             ->label('Selesai')
                             ->visible(fn () => Client::current()?->c_role_id == 1)
                             ->required(fn () => Client::current()?->c_role_id == 1),
 
-                        // Jam hanya jika c_role_id 2 (Penyuluh Hukum)
-                        TimePicker::make('start_time')
-                            ->label('Jam Mulai')
-                            ->seconds(false)
+                        Forms\Components\Grid::make(2) 
                             ->visible(fn () => Client::current()?->c_role_id == 2)
-                            ->required(fn () => Client::current()?->c_role_id == 2),
+                            ->schema([
 
-                        TimePicker::make('end_time')
-                            ->label('Jam Selesai')
-                            ->seconds(false)
-                            ->visible(fn () => Client::current()?->c_role_id == 2)
-                            ->required(fn () => Client::current()?->c_role_id == 2),
+                                TimePicker::make('start_time')
+                                    ->label('Jam Mulai')
+                                    ->seconds(false)
+                                    ->required(),
 
+                                TimePicker::make('end_time')
+                                    ->label('Jam Selesai')
+                                    ->seconds(false)
+                                    ->required(),
+
+                            ]),
                     ])
+
                     ->columns(2),
                         Forms\Components\Section::make('Detail Kegiatan')
                             ->schema([
@@ -95,11 +111,17 @@ class ClientActivityResource extends Resource
                         Forms\Components\FileUpload::make('activity_file')
                             ->disk('s3')
                             ->label('Lampiran Laporan Kegiatan')
-                            ->helperText(fn () =>
-                                Client::current()?->c_role_id == 2
-                                    ? 'Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).'
-                                    : null
-                            )
+                            ->helperText(function () {
+                                $size = config('fungsional-pro.max_upload_file_size');
+
+                                $baseText = "Format file: PDF | Maksimal ukuran: {$size} KB.";
+
+                                if (Client::current()?->c_role_id == 2) {
+                                    return $baseText . " Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).";
+                                }
+
+                                return $baseText;
+                            })
                             ->required()
                             ->maxFiles(1)
                             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
@@ -108,8 +130,9 @@ class ClientActivityResource extends Resource
                             ->visibility('private')
                             ->downloadable(),
                     ])
-            ]);
+            ];
     }
+
 
     public static function table(Table $table): Table
     {
@@ -123,12 +146,15 @@ class ClientActivityResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('start_period')
-                    ->label('Tanggal')
+                    ->label(fn () =>
+                        Client::current()?->c_role_id == 1
+                            ? 'Tanggal Mulai'
+                            : 'Tanggal')
                     ->date()
                     ->sortable(),
 
                 TextColumn::make('end_period')
-                    ->label('Selesai')
+                    ->label('Tanggal Selesai')
                     ->date()
                     ->visible(fn () => Client::current()?->c_role_id == 1),
 
@@ -158,10 +184,53 @@ class ClientActivityResource extends Resource
                         ->wrap()
                         ->visible(fn () => Client::current()?->c_role_id == 2),
 
-                TextColumn::make('description')
-                    ->label('Deskripsi Kegiatan')
-                    ->wrap(),
+                    TextColumn::make('description')
+                        ->label('Deskripsi Kegiatan')
+                        ->wrap()
+                        ->limit(120)
+                        ->tooltip(fn ($record) => $record->description),
 
+                    TextColumn::make('is_verified')
+                        ->label('Status Verifikasi')
+                        ->getStateUsing(function ($record) {
+                            if (! $record) {
+                                return '-';
+                            }
+
+                            if (is_null($record->is_verified)) {
+                                return 'Sedang Diverifikasi';
+                            }
+
+                            return $record->is_verified
+                                ? 'Terverifikasi'
+                                : 'Ditolak';
+                            })
+                        ->badge()
+                        ->color(function ($record) {
+                            if (! $record) {
+                                return 'gray';
+                            }
+
+                            if (is_null($record->is_verified)) {
+                                return 'gray';
+                            }
+
+                            return $record->is_verified
+                                ? 'success'
+                                : 'danger';
+                            })
+
+                        ->tooltip(function ($record) {
+                            if ($record?->is_verified === false) {
+                                return "Alasan Penolakan: {$record->verification_note}";
+                            } if ($record?->is_verified === true) {
+                                return "Kegiatan telah diverifikasi";
+                            } if (is_null($record?->is_verified)) {
+                                return "Menunggu verifikasi";
+                            }
+                            return null;
+                        }),
+            
             ])
 
             ->actions([
