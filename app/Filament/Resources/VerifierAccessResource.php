@@ -13,10 +13,31 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class VerifierAccessResource extends Resource
 {
     protected static ?string $model = VerifierAccess::class;
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()?->hasRole(['super_admin']) ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->hasRole(['super_admin']) ?? false;
+    }
+
+    public static function canEdit(): bool
+    {
+        return Auth::user()?->hasRole(['super_admin']) ?? false;
+    }
+
+    public static function canDelete(): bool
+    {
+        return Auth::user()?->hasRole(['super_admin']) ?? false;
+    }
 
     public static function form(Form $form): Form
     {

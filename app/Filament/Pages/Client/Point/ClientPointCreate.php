@@ -103,7 +103,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
         return [
             $this->submitPointAction(),
-            // $this->getSubmitAnotherPointFormAction(),
             $this->cancelFormAction(),
         ];
     }
@@ -123,15 +122,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = '.Js::from($this->previousUrl).')')
             ->color('gray');
     }
-
-    // protected function getSubmitAnotherPointFormAction(): Action
-    // {
-    //     return Action::make('createAnother')
-    //         ->label(__('Submit & Submit lainnya'))
-    //         ->action('createAnother')
-    //         ->keyBindings(['mod+shift+s'])
-    //         ->color('gray');
-    // }
 
     protected function mutateDataBeforeSubmit(array $data): array
     {
@@ -168,7 +158,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                 $this->rollBackDatabaseTransaction() :
                 $this->commitDatabaseTransaction();
 
-            Log::error($exception->getMessage(), $data);
+            Log::error($exception->getMessage(), ['user_id' => auth()->id()]);
 
             $this->getErrorNotification('error', $exception->getMessage())->send();
 
@@ -176,7 +166,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         } catch (\Throwable $exception) {
             $this->rollBackDatabaseTransaction();
 
-            Log::error($exception->getMessage());
+            Log::error($exception->getMessage(), ['user_id' => auth()->id()]);
 
             if ($exception instanceof ExceedMaxPointSubmission) {
                 $this->getErrorNotification('error', $exception->getMessage())->send();
@@ -316,6 +306,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public static function getFinalPAKUploadField(): FileUpload|Component
     {
         return FileUpload::make('pak_file')
+            ->disk('s3')
             ->label(__('labels.form.client.fields.pak_file'))
             ->downloadable()
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
@@ -329,6 +320,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public static function getSKP2AkFileUploadField(): FileUpload|Component
     {
         return FileUpload::make('x_skp2ak_file')
+            ->disk('s3')
             ->label(__('labels.form.client.fields.x_skp2ak_file'))
             ->downloadable()
             ->maxSize(config('fungsional-pro.max_upload_file_size'))
@@ -343,6 +335,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public static function getAccumulatedAKFileUploadField(): FileUpload|Component
     {
         return FileUpload::make('x_accumulated_file')
+            ->disk('s3')
             ->label(__('labels.form.client.fields.x_accumulated_file'))
             ->downloadable()
             ->maxSize(config('fungsional-pro.max_upload_file_size'))

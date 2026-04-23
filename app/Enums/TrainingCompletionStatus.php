@@ -7,7 +7,7 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum TraningCompletionStatus: string implements HasLabel, HasColor, HasIcon
+enum TrainingCompletionStatus: string implements HasLabel, HasColor, HasIcon
 {
 
     case PASSED = "PASSED";

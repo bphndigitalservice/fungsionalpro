@@ -18,8 +18,6 @@ class ClientDossierResource extends Resource
 {
     protected static ?string $model = ClientDossier::class;
 
-    //protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     public static function form(Form $form): Form
     {
         return $form
@@ -72,7 +70,7 @@ class ClientDossierResource extends Resource
                 ->wrap(),
             ])
             ->filters([
-                //Tables\Filters\TrashedFilter::make(),
+                
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

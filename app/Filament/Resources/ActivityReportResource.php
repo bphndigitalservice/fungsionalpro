@@ -209,9 +209,6 @@ class ActivityReportResource extends Resource
         $user = Auth::user();
 
 
-        // if ($user->hasRole('super_admin')) {
-        //     return parent::getEloquentQuery();
-        // }
         $allowedRoleIds = AdminAccess::where('user_id', $user->id)
             ->pluck('c_role_id')
             ->toArray();

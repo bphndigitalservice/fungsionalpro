@@ -45,8 +45,6 @@ class AppServiceProvider extends ServiceProvider
         Model::unguard();
 
 
-        /*Gate::policy(Role::class, RolePolicy::class);*/
-
         Event::subscribe(UserEventSubscriber::class);
         Event::subscribe(ClientEventSubscriber::class);
         Event::subscribe(PointEventSubscriber::class);

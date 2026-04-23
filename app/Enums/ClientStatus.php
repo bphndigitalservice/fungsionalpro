@@ -17,8 +17,6 @@ enum ClientStatus: string implements HasLabel
 
     case NonActive_DoesntMeetRoleRequirement = 'non_active_doesnt_meet_role_requirement';
 
-    //case TemporarilyNonActive = 'temporarily_nonactive';
-
     public function getLabel(): ?string
     {
         return match ($this) {

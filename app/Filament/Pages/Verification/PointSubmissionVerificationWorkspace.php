@@ -52,7 +52,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     public static function canVerifying(): bool
     {
-        return !auth()->user()->isSuperAdmin() || !auth()->user()->hasRole('verifier');
+        return auth()->user()->isSuperAdmin() || auth()->user()->hasRole('verifier');
     }
 
     public static function canView(): bool

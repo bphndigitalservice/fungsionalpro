@@ -290,7 +290,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     protected function authorizeAccess(): void
     {
-        abort_unless(auth('web')->user()->can(['create_client', 'update_client']), 403);
+        abort_unless(auth('web')->user()->canAny(['create_client', 'update_client']), 403);
     }
 
     protected function getClientProfileSavedNotificationTitle(): string
