@@ -45,7 +45,21 @@ class Deploy extends Command
     {
         if ($this->isRegionDatabaseDoesntExists()) {
             $sqlPath = database_path('sql');
+            // Whitelist of allowed SQL files to prevent unauthorized execution
+            $allowedFiles = [
+                'regions.sql',
+                'seed_data.sql',
+                'provinces.sql',
+                'regencies.sql',
+            ];
+
             foreach (glob($sqlPath.DIRECTORY_SEPARATOR.'*.sql') as $sql) {
+                $filename = basename($sql);
+                if (!in_array($filename, $allowedFiles, true)) {
+                    $this->warn("Skipping unauthorized SQL file: {$filename}");
+                    continue;
+                }
+
                 $this->info("Migrating {$sql}");
                 DB::unprepared(file_get_contents($sql));
             }

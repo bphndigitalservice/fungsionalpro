@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TrainingType;
-use App\Enums\TraningCompletionStatus;
+use App\Enums\TrainingCompletionStatus;
 use App\Models\Concern\BelongsToClient;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +16,7 @@ class ClientCompetence extends Model
 
     protected $casts = [
         'category' => TrainingType::class,
-        'completion_status' => TraningCompletionStatus::class
+        'completion_status' => TrainingCompletionStatus::class
     ];
 
     public function promotionLevel(): \Illuminate\Database\Eloquent\Relations\HasOne

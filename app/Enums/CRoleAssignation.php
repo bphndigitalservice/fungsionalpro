@@ -6,7 +6,6 @@ use Filament\Support\Contracts\HasLabel;
 
 enum CRoleAssignation: string implements HasLabel
 {
-    //CPNS, Inpassing, PDJL, Penyetaraan
     case CPNS = 'cpns';
     case Inpassing = 'inpassing';
     case PDJL = 'pdjl';

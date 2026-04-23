@@ -72,7 +72,7 @@ class ClientEventSubscriber
                 $event->getVerifierNotes());
 
         } catch (\Exception $exception) {
-            Log::error($exception->getMessage(), [$client, $event->getVerifierNotes()]);
+            Log::error($exception->getMessage(), ['client_id' => $client->id]);
             DB::rollBack();
         }
 
@@ -100,7 +100,7 @@ class ClientEventSubscriber
             DB::commit();
 
         } catch (\Exception $exception) {
-            Log::error($exception->getMessage(), [$event->getClient(), $event->getVerifierNotes()]);
+            Log::error($exception->getMessage(), ['client_id' => $event->getClient()->id]);
             DB::rollBack();
         }
 

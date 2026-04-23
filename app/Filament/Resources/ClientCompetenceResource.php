@@ -87,14 +87,17 @@ class ClientCompetenceResource extends Resource
                         TextInput::make('institution')
                             ->label('Lembaga Pelatihan')
                             ->required(),
-                        FileUpload::make('competence_file')
-                            ->disk('s3')
-                            ->label('Sertifikat')
-                            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-                            ->maxFiles(1)
-                            ->downloadable()
-                            ->required()
-                            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
+FileUpload::make('competence_file')
+                             ->disk('s3')
+                             ->label('Sertifikat')
+                             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                             ->maxFiles(1)
+                             ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                             ->visibility(config('fungsional-pro.s3.visibility'))
+                             ->directory('competence-files')
+                             ->downloadable()
+                             ->required()
+                             ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                     ])
             ]);
     }

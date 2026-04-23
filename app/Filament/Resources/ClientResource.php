@@ -428,6 +428,7 @@ class ClientResource extends Resource
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
                                 ->visibility(static::storageVisibility())
+                                ->directory('employee-cards')
                                 ->downloadable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
@@ -442,6 +443,7 @@ class ClientResource extends Resource
                                 ->label(__('labels.form.client.fields.file_sk_cpns'))
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
+                                ->directory('sk-cpns')
                                 ->visibility(static::storageVisibility())
                                 ->downloadable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
@@ -452,6 +454,7 @@ class ClientResource extends Resource
                                 ->disk('s3')
                                 ->label(__('labels.form.client.fields.file_sk_pns'))
                                 ->visibility(static::storageVisibility())
+                                ->directory('sk-pns')
                                 ->downloadable()
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
@@ -473,6 +476,7 @@ class ClientResource extends Resource
                                 ->label(__('labels.form.client.fields.file_sk_jf_latest'))
                                 ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->directory('sk-jf')
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
@@ -492,6 +496,7 @@ class ClientResource extends Resource
                                 ->label(__('labels.form.client.fields.file_sk_grade_latest'))
                                 ->visibility(static::storageVisibility())
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                ->directory('sk-grade')
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),

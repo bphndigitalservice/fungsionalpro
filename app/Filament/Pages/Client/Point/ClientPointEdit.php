@@ -47,6 +47,12 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     public function mount(ClientPointSubmission $pointSubmission): void
     {
         $this->record = $this->resolveRecord($pointSubmission->id);
+
+        $currentUser = auth()->user();
+        if ($currentUser->client && $currentUser->client->id !== $this->record->client_id) {
+            abort(403, 'You do not have permission to edit this submission.');
+        }
+
         $this->fillForm($this->record->attributesToArray());
         $this->previousUrl = url()->previous();
     }
@@ -149,14 +155,14 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
                 $this->rollBackDatabaseTransaction() :
                 $this->commitDatabaseTransaction();
 
-            Log::error($exception->getMessage(), $data);
+            Log::error($exception->getMessage(), ['user_id' => auth()->id(), 'submission_id' => $pointSubmission->id ?? null]);
 
             $this->getErrorNotification('error', 'Something went wrong')->send();
 
             return;
         } catch (\Throwable $exception) {
             $this->rollBackDatabaseTransaction();
-            Log::error($exception->getMessage(), $data);
+            Log::error($exception->getMessage(), ['user_id' => auth()->id(), 'submission_id' => $pointSubmission->id ?? null]);
 
             $this->getErrorNotification('error', 'Something went wrong')->send();
 

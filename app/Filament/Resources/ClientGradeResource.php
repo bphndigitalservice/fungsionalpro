@@ -22,8 +22,6 @@ class ClientGradeResource extends Resource
 {
     protected static ?string $model = ClientGrade::class;
 
-    //protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationLabel = 'Riwayat Pangkat/Golongan';
 
     protected static ?string $modelLabel = 'Riwayat Pangkat/Golongan';

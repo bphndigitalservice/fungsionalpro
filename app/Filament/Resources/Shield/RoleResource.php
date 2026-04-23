@@ -268,7 +268,6 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function getPageOptions(): array
     {
-        Log::debug(FilamentShield::getPages());
         return collect(FilamentShield::getPages())
             ->flatMap(fn ($page) => [
                 $page['permission'] => static::shield()->hasLocalizedPermissionLabels()

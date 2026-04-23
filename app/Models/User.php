@@ -71,7 +71,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        return true;
+        // Only allow access if user has appropriate roles or is an active client
+        return $this->hasRole(['super_admin', 'admin', 'verifier']) || $this->isActiveClient();
     }
 
     public function getResetPasswordUrl(string $token, array $parameters = []): string

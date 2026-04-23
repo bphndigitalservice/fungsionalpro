@@ -14,7 +14,7 @@ class ClientsByRoleChart extends ChartWidget
 {
     protected static ?string $heading = 'Jabatan Fungsional';
     protected static ?int $height = 320;
-    //protected int|string|array $columnSpan = 2;
+    
     
     protected function getData(): array
     {
