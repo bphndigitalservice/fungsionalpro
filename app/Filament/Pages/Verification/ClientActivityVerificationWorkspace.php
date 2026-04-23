@@ -38,22 +38,11 @@ implements HasTable, HasInfolists
     protected static string $view =
         'filament.pages.client-activity-verification-workspace';
 
-    /*
-    |--------------------------------------------------------------------------
-    | MOUNT
-    |--------------------------------------------------------------------------
-    */
 
     public function mount(): void
     {
         $this->loadDefaultActiveTab();
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | NAVIGATION
-    |--------------------------------------------------------------------------
-    */
 
     protected static ?int $navigationSort = 2;
 
@@ -127,12 +116,6 @@ implements HasTable, HasInfolists
 
             ]);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | QUERY
-    |--------------------------------------------------------------------------
-    */
 
     protected function getTableQuery():
     Builder|Relation|null

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    image: ghcr.io/bphndigitalservice/fungsionalpro:sha-542c8fd
+    image: ghcr.io/bphndigitalservice/fungsionalpro:latest
     container_name: fungsionalpro
     ports:
       - "8000:8000"

@@ -1,5 +1,5 @@
-# Accepted values: 8.3 - 8.2
-ARG PHP_VERSION=8.3
+# Accepted values: 8.4 - 8.3 - 8.2
+ARG PHP_VERSION=8.4
 
 ARG COMPOSER_VERSION=latest
 
@@ -7,7 +7,7 @@ ARG COMPOSER_VERSION=latest
 # Build frontend assets with Bun
 ###########################################
 
-ARG BUN_VERSION="latest"
+ARG BUN_VERSION=1
 
 FROM oven/bun:${BUN_VERSION} AS build
 
@@ -15,7 +15,7 @@ ENV ROOT=/var/www/html
 
 WORKDIR ${ROOT}
 
-COPY --link package.json bun.lockb* ./
+COPY --link package.json bun.lock ./
 
 RUN bun install --frozen-lockfile
 
@@ -126,8 +126,9 @@ RUN composer install \
     --no-interaction \
     --no-autoloader \
     --no-ansi \
-    --no-scripts \
-    --audit
+    --no-scripts
+
+RUN composer clear-cache
 
 COPY --link --chown=${USER}:${USER} . .
 COPY --link --chown=${USER}:${USER} --from=build ${ROOT}/public public
@@ -142,6 +143,8 @@ RUN mkdir -p \
 
 COPY --link --chown=${USER}:${USER} deployment/supervisord.conf /etc/supervisor/
 COPY --link --chown=${USER}:${USER} deployment/octane/Swoole/supervisord.swoole.conf /etc/supervisor/conf.d/
+COPY --link --chown=${USER}:${USER} deployment/octane/FrankenPHP/supervisord.frankenphp.conf /etc/supervisor/conf.d/
+COPY --link --chown=${USER}:${USER} deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} deployment/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
 COPY --link --chown=${USER}:${USER} deployment/start-container /usr/local/bin/start-container

@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('/')
+            ->authGuard('web')
             ->login()
             ->registration(Register::class)
             ->emailVerification(EmailVerificationPrompt::class)
@@ -96,7 +97,9 @@ class AdminPanelProvider extends PanelProvider
             ->defaultThemeMode(ThemeMode::Light)
             ->databaseTransactions()
             ->unsavedChangesAlerts()
+            ->databaseNotifications()
             ->defaultAvatarProvider(FungsionalProAvatarProvider::class)
+            ->globalSearch(false)
             ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'));
 
     }
