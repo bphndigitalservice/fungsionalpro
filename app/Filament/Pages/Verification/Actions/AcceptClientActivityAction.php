@@ -8,6 +8,8 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use App\Events\ClientActivityAccepted;
+use App\Notifications\ActivityStatusNotification;
+use App\Models\Client;
 
 class AcceptClientActivityAction extends Action
 {
@@ -29,11 +31,21 @@ class AcceptClientActivityAction extends Action
 
         $this->action(function (): void {
             $this->process(function (array $data, Model $record, Table $table) {
+
                 $record->verified();
-                    event(new ClientActivityAccepted($record));
-                });
+
+                $client = $record->client;
+
+                $user = $client->user;
+                $user?->notify(
+                    new ActivityStatusNotification($record, 'accepted')
+                );
+
+            });
 
             $this->success();
         });
     }
+
+    
 }
