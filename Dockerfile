@@ -7,7 +7,7 @@ ARG COMPOSER_VERSION=latest
 # Build frontend assets with Bun
 ###########################################
 
-ARG BUN_VERSION="latest"
+ARG BUN_VERSION=1
 
 FROM oven/bun:${BUN_VERSION} AS build
 
@@ -15,7 +15,7 @@ ENV ROOT=/var/www/html
 
 WORKDIR ${ROOT}
 
-COPY --link package.json bun.lockb* ./
+COPY --link package.json bun.lock ./
 
 RUN bun install --frozen-lockfile
 
@@ -126,8 +126,7 @@ RUN composer install \
     --no-interaction \
     --no-autoloader \
     --no-ansi \
-    --no-scripts \
-    --ignore-platform-reqs
+    --no-scripts
 
 RUN composer clear-cache
 
@@ -144,6 +143,8 @@ RUN mkdir -p \
 
 COPY --link --chown=${USER}:${USER} deployment/supervisord.conf /etc/supervisor/
 COPY --link --chown=${USER}:${USER} deployment/octane/Swoole/supervisord.swoole.conf /etc/supervisor/conf.d/
+COPY --link --chown=${USER}:${USER} deployment/octane/FrankenPHP/supervisord.frankenphp.conf /etc/supervisor/conf.d/
+COPY --link --chown=${USER}:${USER} deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} deployment/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
 COPY --link --chown=${USER}:${USER} deployment/start-container /usr/local/bin/start-container
@@ -165,13 +166,3 @@ EXPOSE 8000
 ENTRYPOINT ["start-container"]
 
 HEALTHCHECK --start-period=5s --interval=2s --timeout=5s --retries=8 CMD healthcheck || exit 1
-
-RUN apk add --no-cache \
-    icu-dev \
-    libzip-dev \
-    zlib-dev \
-    && install-php-extensions \
-    intl \
-    zip \
-    exif \
-    gd \
