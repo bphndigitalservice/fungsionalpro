@@ -182,12 +182,14 @@ class ClientActivityResource extends Resource
                     TextColumn::make('activity_details.materi')
                         ->label('Materi')
                         ->wrap()
+                        ->limit(100)
+                        ->tooltip(fn ($record) => $record->activity_details['materi'])
                         ->visible(fn () => Client::current()?->c_role_id == 2),
 
                     TextColumn::make('description')
                         ->label('Deskripsi Kegiatan')
                         ->wrap()
-                        ->limit(120)
+                        ->limit(100)
                         ->tooltip(fn ($record) => $record->description),
 
                     TextColumn::make('is_verified')
