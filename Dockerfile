@@ -126,8 +126,9 @@ RUN composer install \
     --no-interaction \
     --no-autoloader \
     --no-ansi \
-    --no-scripts
-    
+    --no-scripts \
+    --ignore-platform-reqs
+
 RUN composer clear-cache
 
 COPY --link --chown=${USER}:${USER} . .
@@ -164,3 +165,13 @@ EXPOSE 8000
 ENTRYPOINT ["start-container"]
 
 HEALTHCHECK --start-period=5s --interval=2s --timeout=5s --retries=8 CMD healthcheck || exit 1
+
+RUN apk add --no-cache \
+    icu-dev \
+    libzip-dev \
+    zlib-dev \
+    && install-php-extensions \
+    intl \
+    zip \
+    exif \
+    gd \
