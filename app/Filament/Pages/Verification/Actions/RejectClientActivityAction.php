@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
-use App\Events\ClientActivityRejected;
+use App\Notifications\ActivityStatusNotification;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Forms\Components\Textarea;
 use Filament\Support\Colors\Color;
@@ -31,18 +31,10 @@ class RejectClientActivityAction extends Action
 
         $this->requiresConfirmation();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Verifier Notes Form
-        |--------------------------------------------------------------------------
-        */
-
         $this->form([
-
             Textarea::make('verifier_notes')
                 ->label('Catatan Verifikator')
                 ->required(),
-
         ]);
 
         $this->action(function (): void {
@@ -53,39 +45,27 @@ class RejectClientActivityAction extends Action
                 Table $table
             ) {
 
-                /*
-                |--------------------------------------------------------------------------
-                | Update Activity Verification Status
-                |--------------------------------------------------------------------------
-                */
-
+                // 1. Update record
                 $record->update([
-
                     'is_verified' => false,
-
                     'verification_note' => $data['verifier_notes'],
-
                     'verified_by' => auth()->id(),
-
                     'verified_at' => now(),
-
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | Fire Event
-                |--------------------------------------------------------------------------
-                */
+                // 2. Send notification
+                $user = $record->client->user; // adjust if relation differs
 
-                event(
-
-                    new ClientActivityRejected(
+                $user?->notify(
+                    new ActivityStatusNotification(
                         $record,
+                        'rejected',
                         $data['verifier_notes']
                     )
-
                 );
 
+                // 3. (optional) event - you can re-enable later if needed
+                // event(new ClientActivityRejected($record, $data['verifier_notes']));
             });
 
             $this->success();
