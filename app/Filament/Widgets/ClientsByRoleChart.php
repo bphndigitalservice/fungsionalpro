@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\SystemRole;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\VerifierAccess;
@@ -25,12 +26,12 @@ class ClientsByRoleChart extends ChartWidget
 
         if (method_exists($principal, 'isSuperAdmin') && $principal->isSuperAdmin()) {
             // no additional constraints
-        } elseif ($principal->hasRole('admin')) {
+        } elseif ($principal->hasSystemRole(SystemRole::Admin)) {
             $adminAccess = AdminAccess::query()->where('user_id', $principal->id)->limit(1);
             $query->joinSub($adminAccess, 'aa', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'aa.c_role_id');
             });
-        } elseif ($principal->hasRole(['admin-regional', 'verifier','admin-pusat'])) {
+        } elseif ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat)) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
             $query->joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');

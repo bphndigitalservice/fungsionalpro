@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\SystemRole;
 use App\Filament\Resources\VerifierAccessResource\Pages;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
@@ -21,22 +22,22 @@ class VerifierAccessResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
     public static function canCreate(): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
     public static function canEdit(): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
     public static function canDelete(): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
     public static function form(Form $form): Form
@@ -54,7 +55,7 @@ class VerifierAccessResource extends Resource
                                     ->required(),
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role(['verifier', 'admin-regional']))
+                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Verifier->value, SystemRole::AdminRegional->value]))
                                     ->preload()
                                     ->required(),
                             ])->columns(2),

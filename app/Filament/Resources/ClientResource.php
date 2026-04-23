@@ -7,6 +7,7 @@ use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
 use App\Enums\EducationLevel;
 use App\Enums\Gender;
+use App\Enums\SystemRole;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Livewire\ClientEducationInfolist;
 use App\Livewire\ClientCompetenceInfolist;
@@ -86,7 +87,7 @@ class ClientResource extends Resource
                                 Forms\Components\Livewire::make(ClientActivityTable::class)
                             ]),
                         Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_user'))
-                            ->visible(fn () => auth()->user()->hasRole('super_admin'))
+                            ->visible(fn () => auth()->user()->hasSystemRole(SystemRole::SuperAdmin))
                             ->schema([
                                 Forms\Components\Select::make('user_id')
                                     ->searchable()
@@ -202,12 +203,12 @@ class ClientResource extends Resource
 
     public static function canFilterRegional(): bool
     {
-        return auth()->user()->hasRole(['super_admin', 'admin-pusat']);
+        return auth()->user()->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::AdminPusat);
     }
 
     public static function canFilterClientRoles(): bool
     {
-        return auth()->user()->hasRole(['super_admin','admin-sdm-bphn']);
+        return auth()->user()->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::AdminSdmBphn);
     }
 
     public static function getPages(): array

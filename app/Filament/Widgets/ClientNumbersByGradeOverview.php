@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\SystemRole;
 use App\Models\AdminAccess;
 use App\Models\Client;
 use App\Models\RegGrade;
@@ -49,7 +50,7 @@ class ClientNumbersByGradeOverview extends StatsOverviewWidget
             return $query;
         }
 
-        if ($principal->hasRole('admin')) {
+        if ($principal->hasSystemRole(SystemRole::Admin)) {
             $adminAccess = AdminAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return $query->joinSub($adminAccess, 'aa', function (JoinClause $join) {
@@ -57,7 +58,7 @@ class ClientNumbersByGradeOverview extends StatsOverviewWidget
             })->select('clients.*');
         }
 
-        if ($principal->hasRole(['admin-regional', 'verifier','admin-pusat'])) {
+        if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat)) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return $query->joinSub($verifierAccess, 'va', function (JoinClause $join) {
