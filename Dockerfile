@@ -126,11 +126,8 @@ RUN composer install \
     --no-interaction \
     --no-autoloader \
     --no-ansi \
-    --no-scripts \
-    --prefer-dist \
-    --no-progress \
-    --audit
-
+    --no-scripts
+    
 RUN composer clear-cache
 
 COPY --link --chown=${USER}:${USER} . .
