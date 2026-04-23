@@ -7,6 +7,7 @@ use Exception;
 use Filament\Facades\Filament;
 use Filament\Pages\Auth\EmailVerification\EmailVerificationPrompt as BaseEmailVerification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\Notifications\VerifyEmail;
 
 class EmailVerificationPrompt extends BaseEmailVerification
 {
@@ -17,6 +18,7 @@ class EmailVerificationPrompt extends BaseEmailVerification
 
         return $user;
     }
+
 
     protected function sendEmailVerificationNotification(MustVerifyEmail $user): void
     {
@@ -30,11 +32,9 @@ class EmailVerificationPrompt extends BaseEmailVerification
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
-        //$notification = app(VerifyEmail::class);
-        //$notification->url = Filament::getVerifyEmailUrl($user);
+        $notification = app(VerifyEmail::class);
+        $notification->url = Filament::getVerifyEmailUrl($user);
 
-        //dd($notification);
-        die('asem');
-        //$user->notify($notification);
+        $user->notify($notification);
     }
 }
