@@ -127,7 +127,11 @@ RUN composer install \
     --no-autoloader \
     --no-ansi \
     --no-scripts \
+    --prefer-dist \
+    --no-progress \
     --audit
+
+RUN composer clear-cache
 
 COPY --link --chown=${USER}:${USER} . .
 COPY --link --chown=${USER}:${USER} --from=build ${ROOT}/public public
