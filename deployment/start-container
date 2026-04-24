@@ -7,7 +7,32 @@ running_migrations_and_seeders=${RUNNING_MIGRATIONS_AND_SEEDERS:-"false"}
 
 echo "Container mode: $container_mode"
 
+wait_for() {
+    host=${1%:*}
+    port=${1#*:}
+    max_attempts=${2:-30}
+    attempt=0
+
+    echo "Waiting for $host:$port ..."
+
+    while [ $attempt -lt $max_attempts ]; do
+        if nc -z "$host" "$port" 2>/dev/null; then
+            echo "$host:$port is available"
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        echo "Attempt $attempt/$max_attempts - $host:$port not available yet..."
+        sleep 2
+    done
+
+    echo "ERROR: Unable to connect to $host:$port after $max_attempts attempts"
+    return 1
+}
+
 initialStuff() {
+    wait_for "${REDIS_HOST:-redis}:${REDIS_PORT:-6379}" || true
+    wait_for "${DB_HOST:-mysql}:${DB_PORT:-3306}" || true
+
     php artisan storage:link; \
     php artisan optimize:clear; \
     php artisan event:cache; \
