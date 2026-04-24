@@ -10,17 +10,17 @@ class ActivityReportPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat);
+        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::AdminInstansi);
     }
 
     public function view(User $user, ClientActivity $clientActivity): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat);
+        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::AdminInstansi);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Client, SystemRole::Admin, SystemRole::SuperAdmin);
+        return $user->hasAnySystemRole(SystemRole::Client, SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi);
     }
 
     public function update(User $user, ClientActivity $clientActivity): bool
