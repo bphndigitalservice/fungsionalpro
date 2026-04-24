@@ -224,6 +224,7 @@ COPY --link --chown=${USER}:${USER} deployment/octane/FrankenPHP/supervisord.fra
 COPY --link --chown=${USER}:${USER} deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} deployment/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
+COPY --link --chown=${USER}:${USER} deployment/php-ini-security.ini ${PHP_INI_DIR}/conf.d/98-security.ini
 COPY --link --chown=${USER}:${USER} deployment/start-container /usr/local/bin/start-container
 COPY --link --chown=${USER}:${USER} deployment/healthcheck /usr/local/bin/healthcheck
 
