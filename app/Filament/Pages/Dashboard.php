@@ -63,7 +63,7 @@ class Dashboard extends BaseDashboard
         $user = auth()->user();
         $widgets = [];
 
-        if ((method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) || $user->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::Verifier)) {
+        if ((method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) || $user->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::Verifier, SystemRole::AdminInstansi)) {
             $widgets[] = ClientsByRoleChart::class;
         }
 
