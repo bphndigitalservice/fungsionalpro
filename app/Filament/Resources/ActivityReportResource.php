@@ -226,7 +226,7 @@ class ActivityReportResource extends Resource
 
         return $user
             && (
-                $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin)
+                $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi)
             );
     }
 
@@ -236,7 +236,7 @@ class ActivityReportResource extends Resource
 
         return $user
             && (
-                $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin)
+                $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi)
             );
     }
 
