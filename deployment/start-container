@@ -4,6 +4,7 @@ set -e
 container_mode=${CONTAINER_MODE:-"http"}
 octane_server=${OCTANE_SERVER}
 running_migrations_and_seeders=${RUNNING_MIGRATIONS_AND_SEEDERS:-"false"}
+export WORKER_NUMPROCS=${WORKER_NUMPROCS:-"8"}
 
 echo "Container mode: $container_mode"
 
