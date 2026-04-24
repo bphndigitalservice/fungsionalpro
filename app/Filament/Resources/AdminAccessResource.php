@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class AdminAccessResource extends Resource
@@ -27,12 +28,12 @@ class AdminAccessResource extends Resource
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
-    public static function canEdit(): bool
+    public static function canEdit(Model $record): bool
     {
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
-    public static function canDelete(): bool
+    public static function canDelete(Model $record): bool
     {
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
