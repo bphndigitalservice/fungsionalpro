@@ -68,6 +68,10 @@ services:
         tmpfs:
             - /tmp:noexec,nosuid,size=50m
             - /run:noexec,nosuid,size=10m
+            - /var/www/html/storage/logs:nosuid,size=50m
+            - /var/www/html/storage/framework/sessions:nosuid,size=10m
+            - /var/www/html/storage/framework/cache:nosuid,size=10m
+            - /var/www/html/bootstrap/cache:nosuid,size=10m
         read_only: true
         depends_on:
             redis:
@@ -101,6 +105,10 @@ services:
         tmpfs:
             - /tmp:noexec,nosuid,size=50m
             - /run:noexec,nosuid,size=10m
+            - /var/www/html/storage/logs:nosuid,size=50m
+            - /var/www/html/storage/framework/sessions:nosuid,size=10m
+            - /var/www/html/storage/framework/cache:nosuid,size=10m
+            - /var/www/html/bootstrap/cache:nosuid,size=10m
         read_only: true
         depends_on:
             redis:
