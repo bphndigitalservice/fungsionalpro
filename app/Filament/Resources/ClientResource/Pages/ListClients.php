@@ -63,7 +63,7 @@ class ListClients extends ListRecords
             return parent::getTableQuery();
         }
 
-        if($principal->hasSystemRole(SystemRole::Admin)) {
+        if($principal->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
             $adminAccess = \App\Models\AdminAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return Client::joinSub($adminAccess, 'aa', function (JoinClause $join) {
@@ -71,7 +71,7 @@ class ListClients extends ListRecords
             })->select('clients.*');
         }
 
-        if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat)) {
+        if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {

@@ -42,7 +42,7 @@ class ClientNumbersByStatusOverview extends StatsOverviewWidget
             return $query;
         }
 
-        if ($principal->hasSystemRole(SystemRole::Admin)) {
+        if ($principal->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
             $adminAccess = AdminAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return $query->joinSub($adminAccess, 'aa', function (JoinClause $join) {
@@ -50,7 +50,7 @@ class ClientNumbersByStatusOverview extends StatsOverviewWidget
             })->select('clients.*');
         }
 
-        if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat)) {
+        if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
 
             return $query->joinSub($verifierAccess, 'va', function (JoinClause $join) {
