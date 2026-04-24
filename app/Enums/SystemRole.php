@@ -12,4 +12,5 @@ enum SystemRole: string
     case AdminRegional = 'admin-regional';
     case AdminPusat    = 'admin-pusat';
     case AdminSdmBphn  = 'admin-sdm-bphn';
+    case AdminInstansi = 'admin-instansi';
 }

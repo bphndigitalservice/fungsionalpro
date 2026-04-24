@@ -18,5 +18,6 @@ class RoleSeeder extends Seeder
         Role::create(['name' => SystemRole::Admin->value, 'guard_name' => 'web']);
         Role::create(['name' => SystemRole::Verifier->value, 'guard_name' => 'web']);
         Role::create(['name' => SystemRole::AdminRegional->value, 'guard_name' => 'web']);
+        Role::create(['name' => SystemRole::AdminInstansi->value, 'guard_name' => 'web']);
     }
 }
