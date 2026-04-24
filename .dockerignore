@@ -21,9 +21,9 @@ _ide_helper_models.php
 .kiro
 skills-lock.json
 
-# ── CI/CD and deployment (not needed inside the image) ───────────────────────
+# ── CI/CD and deployment ──────────────────────────────────────────────────────
+# NOTE: deployment/ is NOT excluded — Dockerfile COPY's files from it
 .github
-deployment
 docker-compose.yml
 
 # ── Documentation and plans (information leakage risk) ────────────────────────
