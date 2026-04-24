@@ -34,11 +34,11 @@ initialStuff() {
     wait_for "${REDIS_HOST:-redis}:${REDIS_PORT:-6379}" || true
     wait_for "${DB_HOST:-mysql}:${DB_PORT:-3306}" || true
 
-    php artisan storage:link; \
-    php artisan optimize:clear; \
-    php artisan event:cache; \
-    php artisan config:cache; \
-    php artisan route:cache;
+    php artisan storage:link || true; \
+    php artisan optimize:clear || true; \
+    php artisan event:cache || true; \
+    php artisan config:cache || true; \
+    php artisan route:cache || true; \
 
     if [ "${running_migrations_and_seeders}" = "true" ]; then
         echo "Running migrations and seeding database ..."
