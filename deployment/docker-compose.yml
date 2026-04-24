@@ -35,7 +35,7 @@ x-shared-env: &shared-env
     MEMCACHED_HOST: "${MEMCACHED_HOST}"
     REDIS_CLIENT: "${REDIS_CLIENT:-phpredis}"
     REDIS_HOST: redis
-    REDIS_PASSWORD: "${REDIS_PASSWORD:-null}"
+    REDIS_PASSWORD: "${REDIS_PASSWORD}"
     REDIS_PORT: 6379
     REDIS_DB: "${REDIS_DB:-0}"
     MAIL_MAILER: "${MAIL_MAILER}"
@@ -64,6 +64,11 @@ services:
             - "${APP_PORT:-8000}:8000"
         volumes:
             - upload_data:/var/tmp
+            - ./php-ini-restrictions.ini:/usr/local/etc/php/conf.d/99-restrictions.ini:ro
+        tmpfs:
+            - /tmp:noexec,nosuid,size=50m
+            - /run:noexec,nosuid,size=10m
+        read_only: true
         depends_on:
             redis:
                 condition: service_healthy
@@ -73,12 +78,30 @@ services:
             <<: *shared-env
             CONTAINER_MODE: http
             OCTANE_SERVER: "${OCTANE_SERVER:-swoole}"
+        security_opt:
+            - no-new-privileges:true
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_BIND_SERVICE
+        deploy:
+            resources:
+                limits:
+                    cpus: '2.0'
+                    memory: 1G
+                reservations:
+                    cpus: '0.5'
+                    memory: 256M
 
     worker:
         image: ghcr.io/bphndigitalservice/fungsionalpro:latest
         restart: unless-stopped
         volumes:
             - upload_data:/var/tmp
+        tmpfs:
+            - /tmp:noexec,nosuid,size=50m
+            - /run:noexec,nosuid,size=10m
+        read_only: true
         depends_on:
             redis:
                 condition: service_healthy
@@ -88,20 +111,40 @@ services:
             <<: *shared-env
             CONTAINER_MODE: worker
             WORKER_NUMPROCS: "${WORKER_NUMPROCS:-8}"
+        security_opt:
+            - no-new-privileges:true
+        cap_drop:
+            - ALL
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 512M
+                reservations:
+                    cpus: '0.25'
+                    memory: 128M
 
     redis:
         image: redis:7-alpine
         restart: unless-stopped
-        command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+        command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --requirepass "${REDIS_PASSWORD}"
         volumes:
             - redis_data:/data
         networks:
             - app_network
         healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
+            test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
             interval: 5s
             timeout: 3s
             retries: 5
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.5'
+                    memory: 192M
+                reservations:
+                    cpus: '0.1'
+                    memory: 64M
 
 volumes:
     upload_data:
