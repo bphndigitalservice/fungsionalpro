@@ -137,30 +137,16 @@ implements HasTable, HasInfolists
                 'clients.id'
             )
 
-            ->rightJoinSub(
+            ->joinSub(
                 $verifierAccess,
                 'va',
-                function (JoinClause $join){
+                function (JoinClause $join) {
 
-                    $join->on(
-                        'clients.c_role_id',
-                        '=',
-                        'va.c_role_id'
-                    );
-
-                    $join->on(
-                        'va.entity_type',
-                        '=',
-                        'clients.agency_type'
-                    );
-
-                    $join->on(
-                        'va.entity_id',
-                        '=',
-                        'clients.agency_id'
-                    );
-
-                })
+                    $join->on('clients.c_role_id', '=', 'va.c_role_id')
+                        ->on('va.entity_type', '=', 'clients.agency_type')
+                        ->on('va.entity_id', '=', 'clients.agency_id');
+                }
+            )
 
             ->select('client_activities.*');
     }
