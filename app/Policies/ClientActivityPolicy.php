@@ -2,51 +2,71 @@
 
 namespace App\Policies;
 
-use App\Enums\SystemRole;
-use App\Models\ClientActivity;
 use App\Models\User;
+use App\Models\ClientActivity;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ClientActivityPolicy
 {
+    use HandlesAuthorization;
+
     public function viewAny(User $user): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::AdminInstansi);
+        return $user->can('view_any_client::activity');
     }
 
     public function view(User $user, ClientActivity $clientActivity): bool
     {
-        if ($user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi)) {
-            return true;
-        }
-
-        if ($user->hasAnySystemRole(SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat)) {
-            return true;
-        }
-
-        return $user->client?->id === $clientActivity->client_id;
+        return $user->can('view_client::activity');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Client, SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi);
+        return $user->can('create_client::activity');
     }
 
     public function update(User $user, ClientActivity $clientActivity): bool
     {
-        if ($user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin)) {
-            return true;
-        }
-
-        return $user->client?->id === $clientActivity->client_id;
+        return $user->can('update_client::activity');
     }
 
     public function delete(User $user, ClientActivity $clientActivity): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin);
+        return $user->can('delete_client::activity');
     }
 
     public function deleteAny(User $user): bool
     {
-        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin);
+        return $user->can('delete_any_client::activity');
+    }
+
+    public function forceDelete(User $user, ClientActivity $clientActivity): bool
+    {
+        return $user->can('force_delete_client::activity');
+    }
+
+    public function forceDeleteAny(User $user): bool
+    {
+        return $user->can('force_delete_any_client::activity');
+    }
+
+    public function restore(User $user, ClientActivity $clientActivity): bool
+    {
+        return $user->can('restore_client::activity');
+    }
+
+    public function restoreAny(User $user): bool
+    {
+        return $user->can('restore_any_client::activity');
+    }
+
+    public function replicate(User $user, ClientActivity $clientActivity): bool
+    {
+        return $user->can('replicate_client::activity');
+    }
+
+    public function reorder(User $user): bool
+    {
+        return $user->can('reorder_client::activity');
     }
 }
