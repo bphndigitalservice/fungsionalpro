@@ -37,7 +37,7 @@ wait_for() {
 
 initialStuff() {
     wait_for "${REDIS_HOST:-redis}:${REDIS_PORT:-6379}" || true
-    wait_for "${DB_HOST:-mysql}:${DB_PORT:-3306}" || true
+    wait_for "${DB_HOST:-postgres}:${DB_PORT:-5432}" || true
 
     php artisan storage:link || true
     php artisan optimize:clear || true

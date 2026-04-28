@@ -1,7 +1,7 @@
 # Accepted values: 8.4 - 8.3 - 8.2
 ARG PHP_VERSION=8.4
 
-ARG COMPOSER_VERSION=latest
+ARG COMPOSER_VERSION=2.8.9
 
 ###########################################
 # Build frontend assets with Bun
@@ -51,7 +51,12 @@ SHELL ["/bin/sh", "-eou", "pipefail", "-c"]
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
   && echo ${TZ} > /etc/timezone
 
-ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+ARG IPE_VERSION=2.5.3
+ARG IPE_SHA256=4d1bd0678b0c63531beebdc488126401f2ff5db0476819649bc29b10750a94f7
+
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/download/${IPE_VERSION}/install-php-extensions /usr/local/bin/
+
+RUN echo "${IPE_SHA256}  /usr/local/bin/install-php-extensions" | sha256sum -c
 
 RUN apk update; \
     apk upgrade; \
@@ -72,7 +77,6 @@ RUN apk update; \
     pdo_pgsql \
     opcache \
     exif \
-    pdo_mysql \
     zip \
     intl \
     gd \
@@ -82,19 +86,30 @@ RUN apk update; \
     igbinary \
     ldap \
     swoole \
+    curl \
+    dom \
+    xml \
+    simplexml \
+    fileinfo \
+    tokenizer \
+    posix \
+    pdo \
     && docker-php-source delete \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
+ARG SUPERCRONIC_VERSION=0.2.33
+
 RUN arch="$(apk --print-arch)" \
     && case "$arch" in \
-    armhf) _cronic_fname='supercronic-linux-arm' ;; \
-    aarch64) _cronic_fname='supercronic-linux-arm64' ;; \
-    x86_64) _cronic_fname='supercronic-linux-amd64' ;; \
-    x86) _cronic_fname='supercronic-linux-386' ;; \
+    armhf) _cronic_fname='supercronic-linux-arm' && _cronic_sha256='d76a1409cd1365c4bb42e1565773e820599c7fdfbd55e18c055b61d2ef66716e' ;; \
+    aarch64) _cronic_fname='supercronic-linux-arm64' && _cronic_sha256='f1f8585c66de020fef494dd636058f99949d108f569fef00016a1c8b9eb145b3' ;; \
+    x86_64) _cronic_fname='supercronic-linux-amd64' && _cronic_sha256='feefa310da569c81b99e1027b86b27b51e6ee9ab647747b49099645120cfc671' ;; \
+    x86) _cronic_fname='supercronic-linux-386' && _cronic_sha256='245063d7cda695319139fccc02ff1d25a0fa6f3773330db103f3b16d170c31f2' ;; \
     *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
     esac \
-    && wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.29/${_cronic_fname}" \
+    && wget -q "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/${_cronic_fname}" \
     -O /usr/bin/supercronic \
+    && echo "${_cronic_sha256}  /usr/bin/supercronic" | sha256sum -c \
     && chmod +x /usr/bin/supercronic \
     && mkdir -p /etc/supercronic \
     && echo "*/1 * * * * php ${ROOT}/artisan schedule:run --no-interaction" > /etc/supercronic/laravel
@@ -103,8 +118,9 @@ RUN addgroup -g ${WWWGROUP} ${USER} \
     && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
 
 RUN mkdir -p /var/log/supervisor /var/run/supervisor \
-    && chown -R ${USER}:${USER} ${ROOT} /var/log /var/run \
-    && chmod -R a+rw ${ROOT} /var/log /var/run
+    && chown -R ${USER}:${USER} ${ROOT} /var/log/supervisor /var/run/supervisor \
+    && chmod -R a+rw ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    && chmod 750 /var/log/supervisor /var/run/supervisor
 
 RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 
@@ -198,6 +214,21 @@ RUN apk update; \
     libzip \
     oniguruma \
     icu-libs \
+    libavif \
+    openldap \
+    libpq \
+    librdkafka \
+    lz4-libs \
+    libssh2 \
+    libmemcached-libs \
+    bzip2-libs \
+    brotli-libs \
+    zstd-libs \
+    c-ares \
+    libxml2 \
+    libxslt \
+    libcurl \
+    busybox-extras \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
@@ -213,8 +244,9 @@ RUN addgroup -g ${WWWGROUP} ${USER} \
     && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
 
 RUN mkdir -p /var/log/supervisor /var/run/supervisor \
-    && chown -R ${USER}:${USER} ${ROOT} /var/log /var/run \
-    && chmod -R a+rw ${ROOT} /var/log /var/run
+    && chown -R ${USER}:${USER} ${ROOT} /var/log/supervisor /var/run/supervisor \
+    && chmod -R a+rw ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    && chmod 750 /var/log/supervisor /var/run/supervisor
 
 COPY --from=builder --chown=${USER}:${USER} ${ROOT} ${ROOT}
 
