@@ -117,7 +117,7 @@ RUN arch="$(apk --print-arch)" \
 RUN addgroup -g ${WWWGROUP} ${USER} \
     && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
 
-RUN mkdir -p /var/log/supervisor /var/run/supervisor \
+RUN mkdir -p /var/log/supervisor /var/run/supervisor ${ROOT}/storage ${ROOT}/bootstrap/cache \
     && chown -R ${USER}:${USER} ${ROOT} /var/log/supervisor /var/run/supervisor \
     && chmod -R a+rw ${ROOT}/storage ${ROOT}/bootstrap/cache \
     && chmod 750 /var/log/supervisor /var/run/supervisor
@@ -243,7 +243,7 @@ RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 RUN addgroup -g ${WWWGROUP} ${USER} \
     && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
 
-RUN mkdir -p /var/log/supervisor /var/run/supervisor \
+RUN mkdir -p /var/log/supervisor /var/run/supervisor ${ROOT}/storage ${ROOT}/bootstrap/cache \
     && chown -R ${USER}:${USER} ${ROOT} /var/log/supervisor /var/run/supervisor \
     && chmod -R a+rw ${ROOT}/storage ${ROOT}/bootstrap/cache \
     && chmod 750 /var/log/supervisor /var/run/supervisor
