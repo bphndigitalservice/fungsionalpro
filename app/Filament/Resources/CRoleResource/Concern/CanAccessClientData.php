@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CRoleResource\Concern;
 
+use App\Enums\SystemRole;
 use App\Models\Client;
 use App\Models\User;
 use App\Models\VerifierAccess;
@@ -16,7 +17,7 @@ trait CanAccessClientData
             return;
         }
 
-        if($this->getPrincipal()->hasRole('admin')) {
+        if($this->getPrincipal()->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
             $adminAccess = \App\Models\AdminAccess::query()->where('user_id', $this->getPrincipal()->id)->limit(1);
 
             return Client::joinSub($adminAccess, 'aa', function (JoinClause $join) {
@@ -24,7 +25,7 @@ trait CanAccessClientData
             })->select('clients.*');
         }
 
-        if ($this->getPrincipal()->hasRole(['admin-regional', 'verifier', 'admin-pusat'])) {
+        if ($this->getPrincipal()->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
             $verifierAccess = VerifierAccess::query()->where('user_id', $this->getPrincipal()->id)->limit(1);
             $client = Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');

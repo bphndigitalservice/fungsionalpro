@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\SystemRole;
 use App\Filament\Resources\ActivityReportResource\Pages;
 use App\Filament\Resources\ActivityReportResource\RelationManagers;
 use App\Models\ActivityReport;
@@ -225,8 +226,7 @@ class ActivityReportResource extends Resource
 
         return $user
             && (
-                $user->hasRole('admin')
-                || $user->hasRole('super_admin')
+                $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi)
             );
     }
 
@@ -236,8 +236,7 @@ class ActivityReportResource extends Resource
 
         return $user
             && (
-                $user->hasRole('admin')
-                || $user->hasRole('super_admin')
+                $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi)
             );
     }
 

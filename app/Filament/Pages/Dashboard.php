@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\SystemRole;
 use App\Filament\Widgets\PointOverview;
 use App\Filament\Widgets\ClientsByRoleChart;
 use App\Livewire\ProfileCompletionWidget;
@@ -47,7 +48,7 @@ class Dashboard extends BaseDashboard
 
     public function clientWidgets(): array
     {
-        if (auth()->user()->hasRole(['client'])) {
+        if (auth()->user()->hasSystemRole(SystemRole::Client)) {
             return [
                 ProfileCompletionWidget::class,
                 PointOverview::class,
@@ -62,7 +63,7 @@ class Dashboard extends BaseDashboard
         $user = auth()->user();
         $widgets = [];
 
-        if ((method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) || $user->hasRole(['admin', 'admin-regional', 'admin-pusat', 'verifier'])) {
+        if ((method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) || $user->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::Verifier, SystemRole::AdminInstansi)) {
             $widgets[] = ClientsByRoleChart::class;
         }
 

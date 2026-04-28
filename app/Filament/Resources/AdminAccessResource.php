@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\SystemRole;
 use App\Filament\Resources\AdminAccessResource\Pages;
 use App\Models\AdminAccess;
 use App\Models\User;
@@ -10,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class AdminAccessResource extends Resource
@@ -18,22 +20,22 @@ class AdminAccessResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
     public static function canCreate(): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
-    public static function canEdit(): bool
+    public static function canEdit(Model $record): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
-    public static function canDelete(): bool
+    public static function canDelete(Model $record): bool
     {
-        return Auth::user()?->hasRole(['super_admin']) ?? false;
+        return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
     public static function form(Form $form): Form
@@ -53,7 +55,7 @@ class AdminAccessResource extends Resource
                                 Forms\Components\Select::make('user_id')
                                     ->label(__('labels.form.user.fields.name'))
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role(['admin']))
+                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Admin->value]))
                                     ->preload()
                                     ->required(),
                             ])->columns(2),

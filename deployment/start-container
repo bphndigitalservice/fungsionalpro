@@ -4,19 +4,50 @@ set -e
 container_mode=${CONTAINER_MODE:-"http"}
 octane_server=${OCTANE_SERVER}
 running_migrations_and_seeders=${RUNNING_MIGRATIONS_AND_SEEDERS:-"false"}
+export WORKER_NUMPROCS=${WORKER_NUMPROCS:-"8"}
 
 echo "Container mode: $container_mode"
 
+if [ -z "${APP_KEY}" ]; then
+    echo "ERROR: APP_KEY is not set. Application cannot start."
+    exit 1
+fi
+
+wait_for() {
+    host=${1%:*}
+    port=${1#*:}
+    max_attempts=${2:-30}
+    attempt=0
+
+    echo "Waiting for $host:$port ..."
+
+    while [ $attempt -lt $max_attempts ]; do
+        if nc -z "$host" "$port" 2>/dev/null; then
+            echo "$host:$port is available"
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        echo "Attempt $attempt/$max_attempts - $host:$port not available yet..."
+        sleep 2
+    done
+
+    echo "ERROR: Unable to connect to $host:$port after $max_attempts attempts"
+    return 1
+}
+
 initialStuff() {
-    php artisan storage:link; \
-    php artisan optimize:clear; \
-    php artisan event:cache; \
-    php artisan config:cache; \
-    php artisan route:cache;
+    wait_for "${REDIS_HOST:-redis}:${REDIS_PORT:-6379}" || true
+    wait_for "${DB_HOST:-postgres}:${DB_PORT:-5432}" || true
+
+    php artisan storage:link || true
+    php artisan optimize:clear || true
+    php artisan event:cache || true
+    php artisan config:cache || true
+    php artisan route:cache || true
 
     if [ "${running_migrations_and_seeders}" = "true" ]; then
         echo "Running migrations and seeding database ..."
-        php artisan migrate --isolated --seed --force;
+        php artisan migrate --isolated --seed --force
     fi
 }
 

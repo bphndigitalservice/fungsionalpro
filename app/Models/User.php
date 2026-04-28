@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\Verifier\InteractWithClientData;
+use App\Enums\SystemRole;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
@@ -61,18 +62,27 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function isActiveClient(): bool
     {
-        return $this->hasRole('client') && !is_null($this->client);
+        return $this->hasSystemRole(SystemRole::Client) && !is_null($this->client);
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole(['super_admin']);
+        return $this->hasSystemRole(SystemRole::SuperAdmin);
     }
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        // Only allow access if user has appropriate roles or is an active client
-        return $this->hasRole(['super_admin', 'admin', 'verifier']) || $this->isActiveClient();
+        return $this->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::Admin, SystemRole::Verifier) || $this->isActiveClient();
+    }
+
+    public function hasSystemRole(SystemRole $role): bool
+    {
+        return $this->hasRole($role->value);
+    }
+
+    public function hasAnySystemRole(SystemRole ...$roles): bool
+    {
+        return $this->hasRole(array_map(fn ($r) => $r->value, $roles));
     }
 
     public function getResetPasswordUrl(string $token, array $parameters = []): string

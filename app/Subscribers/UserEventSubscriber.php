@@ -2,6 +2,7 @@
 
 namespace App\Subscribers;
 
+use App\Enums\SystemRole;
 use Filament\Events\Auth\Registered;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Events\Dispatcher;
@@ -12,7 +13,7 @@ class UserEventSubscriber
     protected Authenticatable $user;
 
     protected array $defaultRoles = [
-        'client', 'panel_user',
+        SystemRole::Client->value, SystemRole::PanelUser->value,
     ];
 
     public function handleRegisteredUser(Registered $event): void

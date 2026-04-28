@@ -1,35 +1,90 @@
-/.phpunit.cache
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/app/public
-/storage/debugbar
-/storage/ssr
-/storage/clockwork
-/storage/logs
-/storage/pail
+# ── Version control ──────────────────────────────────────────────────────────
+.git
+.gitattributes
+.gitignore
+
+# ── IDEs and editors ─────────────────────────────────────────────────────────
+.idea
+.vscode
+.fleet
+.DS_Store
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+.php-cs-fixer.cache
+
+# ── Agent / AI tooling (never ship to prod) ──────────────────────────────────
+.agents
+.claude
+.junie
+.kilocode
+.kiro
+skills-lock.json
+
+# ── CI/CD and deployment ──────────────────────────────────────────────────────
+# NOTE: deployment/ is NOT excluded — Dockerfile COPY's files from it
+.github
+docker-compose.yml
+
+# ── Documentation and plans (information leakage risk) ────────────────────────
+docs
+*.md
+!README.md
+
+# ── Environment files with secrets (MUST be excluded) ────────────────────────
+.env
+.env.*
+!.env.template
+
+# ── Authentication and secrets ────────────────────────────────────────────────
+auth.json
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+storage/*.key
+
+# ── Test suites (never in production) ─────────────────────────────────────────
+tests
+phpunit.xml
+.phpunit.cache
 .phpunit.result.cache
-Homestead.json
-Homestead.yaml
+.phpunit.database.checksum
+pint.json
+
+# ── Node (only build artifacts needed, not dev deps) ───────────────────────────
+node_modules
+package-lock.json
 npm-debug.log
 yarn-error.log
-/vendor
-.env.backup
-/.idea/sonarlint
-.phpstorm.meta.php
-_ide_helper_models.php
-_ide_helper.php
-.php-cs-fixer.cache
-.husky
-/.vscode
-**/.DS_Store
-/public/page-cache
-.phpunit.database.checksum
-.phpunit.cache
+public/hot
+
+# ── Vendor is re-installed inside the build ────────────────────────────────────
+vendor
+
+# ── Runtime artifacts that should not be baked in ─────────────────────────────
+public/build
+public/page-cache
+public/storage
+storage/debugbar
+storage/ssr
+storage/clockwork
+storage/logs
+storage/pail
+storage/app/public
+
+# ── Octane runtime binaries (downloaded at build or not needed) ─────────────────
 rr
 .rr.yaml
 frankenphp
 .config
 .data
+tmp
+
+# ── Homestead (local dev only) ─────────────────────────────────────────────────
+Homestead.json
+Homestead.yaml
+
+# ── Husky git hooks ────────────────────────────────────────────────────────────
+.husky

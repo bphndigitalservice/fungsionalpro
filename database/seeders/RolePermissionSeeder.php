@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\SystemRole;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
@@ -12,7 +13,7 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $superAdmin = Role::findByName('super_admin');
+        $superAdmin = Role::findByName(SystemRole::SuperAdmin->value);
 
         foreach ($superAdmin->permissions() as $permission) {
             $superAdmin->revokePermissionTo($permission);
@@ -20,11 +21,11 @@ class RolePermissionSeeder extends Seeder
 
         $superAdmin->givePermissionTo($this->superAdminPermissions());
 
-        Role::findByName('client')
+        Role::findByName(SystemRole::Client->value)
             ->givePermissionTo($this->clientPermissions());
-        Role::findByName('verifier')
+        Role::findByName(SystemRole::Verifier->value)
             ->givePermissionTo($this->verifierPermissions());
-        Role::findByName('admin')
+        Role::findByName(SystemRole::Admin->value)
             ->givePermissionTo($this->adminPermissions());
     }
 

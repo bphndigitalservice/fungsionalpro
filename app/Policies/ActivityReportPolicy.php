@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\SystemRole;
 use App\Models\ClientActivity;
 use App\Models\User;
 
@@ -9,22 +10,22 @@ class ActivityReportPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['admin', 'super_admin', 'verifier', 'admin-regional', 'admin-pusat']);
+        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::AdminInstansi);
     }
 
     public function view(User $user, ClientActivity $clientActivity): bool
     {
-        return $user->hasRole(['admin', 'super_admin', 'verifier', 'admin-regional', 'admin-pusat']);
+        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::Verifier, SystemRole::AdminRegional, SystemRole::AdminPusat, SystemRole::AdminInstansi);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole(['client', 'admin', 'super_admin']);
+        return $user->hasAnySystemRole(SystemRole::Client, SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi);
     }
 
     public function update(User $user, ClientActivity $clientActivity): bool
     {
-        if ($user->hasRole(['admin', 'super_admin'])) {
+        if ($user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin)) {
             return true;
         }
 
@@ -33,11 +34,11 @@ class ActivityReportPolicy
 
     public function delete(User $user, ClientActivity $clientActivity): bool
     {
-        return $user->hasRole(['admin', 'super_admin']);
+        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin);
     }
 
     public function deleteAny(User $user): bool
     {
-        return $user->hasRole(['admin', 'super_admin']);
+        return $user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin);
     }
 }

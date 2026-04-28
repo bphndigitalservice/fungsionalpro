@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Verification;
 
 use App\Concerns\Components\HasCustomPageTab;
 use App\Enums\PointSubmissionStatus;
+use App\Enums\SystemRole;
 use App\Filament\Pages\Verification\Actions\VerifyPointSubmissionAction;
 use App\Models\ClientPointSubmission;
 use App\Models\User;
@@ -52,7 +53,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     public static function canVerifying(): bool
     {
-        return auth()->user()->isSuperAdmin() || auth()->user()->hasRole('verifier');
+        return auth()->user()->isSuperAdmin() || auth()->user()->hasSystemRole(SystemRole::Verifier);
     }
 
     public static function canView(): bool
