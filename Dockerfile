@@ -232,6 +232,8 @@ RUN apk update; \
     libxml2 \
     libxslt \
     libcurl \
+    libxpm \
+    firebird \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
