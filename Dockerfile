@@ -51,8 +51,8 @@ SHELL ["/bin/sh", "-eou", "pipefail", "-c"]
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
   && echo ${TZ} > /etc/timezone
 
-ARG IPE_VERSION=2.5.3
-ARG IPE_SHA256=4d1bd0678b0c63531beebdc488126401f2ff5db0476819649bc29b10750a94f7
+ARG IPE_VERSION=2.10.20
+ARG IPE_SHA256=d1eaf1a8a57fd36647ab46d55a781d49d3929aeaad038a1734793d3d21467de7
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/download/${IPE_VERSION}/install-php-extensions /usr/local/bin/
 
