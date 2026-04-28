@@ -221,7 +221,7 @@ RUN apk update; \
     lz4-libs \
     libssh2 \
     libmemcached-libs \
-    bzip2-libs \
+    bzip2 \
     brotli-libs \
     zstd-libs \
     c-ares \
