@@ -73,15 +73,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        if ($this->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::Admin, SystemRole::Verifier)) {
-            return true;
-        }
-
-        if ($this->isActiveClient()) {
-            return true;
-        }
-
-        return auth()->check(); 
+        return $this->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::Admin, SystemRole::Verifier) || $this->isActiveClient();
     }
 
     public function hasSystemRole(SystemRole $role): bool
