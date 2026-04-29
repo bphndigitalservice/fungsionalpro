@@ -98,14 +98,14 @@ RUN apk update; \
     && docker-php-source delete \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-ARG SUPERCRONIC_VERSION=0.2.33
+ARG SUPERCRONIC_VERSION=0.2.45
 
 RUN arch="$(apk --print-arch)" \
     && case "$arch" in \
-    armhf) _cronic_fname='supercronic-linux-arm' && _cronic_sha256='d76a1409cd1365c4bb42e1565773e820599c7fdfbd55e18c055b61d2ef66716e' ;; \
-    aarch64) _cronic_fname='supercronic-linux-arm64' && _cronic_sha256='f1f8585c66de020fef494dd636058f99949d108f569fef00016a1c8b9eb145b3' ;; \
-    x86_64) _cronic_fname='supercronic-linux-amd64' && _cronic_sha256='feefa310da569c81b99e1027b86b27b51e6ee9ab647747b49099645120cfc671' ;; \
-    x86) _cronic_fname='supercronic-linux-386' && _cronic_sha256='245063d7cda695319139fccc02ff1d25a0fa6f3773330db103f3b16d170c31f2' ;; \
+    armhf) _cronic_fname='supercronic-linux-arm' && _cronic_sha256='a44561f9897cb010d1a8fc8d91785552b7edbe1c6cee36f5d5beb0a928dcc827' ;; \
+    aarch64) _cronic_fname='supercronic-linux-arm64' && _cronic_sha256='c0f21174f7bb3c80a9b33567ba0cfbeb3e51e765fe9808267ba72a1ac88c3dba' ;; \
+    x86_64) _cronic_fname='supercronic-linux-amd64' && _cronic_sha256='bb6da5af8d5547c9a5cbb4cf58d9f5541f0433df2188bfe4f1a54b04ad253db6' ;; \
+    x86) _cronic_fname='supercronic-linux-386' && _cronic_sha256='7a527fd0ad6005286336a45edb8ea62752aa189858e49761a67d6ed0d07cb33f' ;; \
     *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
     esac \
     && curl -sSfL "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/${_cronic_fname}" \
