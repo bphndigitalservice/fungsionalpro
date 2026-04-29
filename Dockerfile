@@ -232,11 +232,11 @@ RUN apk update; \
     libxml2 \
     libxslt \
     libcurl \
-    libxpm \
-    firebird \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=builder /usr/lib/libfbclient.so* /usr/lib/
+COPY --from=builder /usr/lib/libXpm.so* /usr/lib/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 COPY --from=builder /usr/bin/supercronic /usr/bin/supercronic
 COPY --from=builder /etc/supercronic/laravel /etc/supercronic/laravel
