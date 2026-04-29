@@ -16,6 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Tapp\FilamentInvite\Notifications\SetPassword;
 
 
+
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     use HasFactory, HasPanelShield, HasRoles, Notifiable;
@@ -72,7 +73,15 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        return $this->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::Admin, SystemRole::Verifier) || $this->isActiveClient();
+        if ($this->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::Admin, SystemRole::Verifier)) {
+            return true;
+        }
+
+        if ($this->isActiveClient()) {
+            return true;
+        }
+
+        return auth()->check(); 
     }
 
     public function hasSystemRole(SystemRole $role): bool
