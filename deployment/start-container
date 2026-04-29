@@ -22,13 +22,17 @@ wait_for() {
     echo "Waiting for $host:$port ..."
 
     while [ $attempt -lt $max_attempts ]; do
-        if nc -z "$host" "$port" 2>/dev/null; then
-            echo "$host:$port is available"
-            return 0
-        fi
-        attempt=$((attempt + 1))
-        echo "Attempt $attempt/$max_attempts - $host:$port not available yet..."
-        sleep 2
+        curl -s --connect-timeout 2 --max-time 2 "http://${host}:${port}" > /dev/null 2>&1 || {
+            rc=$?
+            if [ $rc -eq 6 ] || [ $rc -eq 7 ] || [ $rc -eq 28 ]; then
+                attempt=$((attempt + 1))
+                echo "Attempt $attempt/$max_attempts - $host:$port not available yet..."
+                sleep 2
+                continue
+            fi
+        }
+        echo "$host:$port is available"
+        return 0
     done
 
     echo "ERROR: Unable to connect to $host:$port after $max_attempts attempts"
@@ -37,7 +41,7 @@ wait_for() {
 
 initialStuff() {
     wait_for "${REDIS_HOST:-redis}:${REDIS_PORT:-6379}" || true
-    wait_for "${DB_HOST:-mysql}:${DB_PORT:-3306}" || true
+    wait_for "${DB_HOST:-postgres}:${DB_PORT:-5432}" || true
 
     php artisan storage:link || true
     php artisan optimize:clear || true

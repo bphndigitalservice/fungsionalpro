@@ -1,13 +1,15 @@
 # Accepted values: 8.4 - 8.3 - 8.2
 ARG PHP_VERSION=8.4
 
-ARG COMPOSER_VERSION=latest
+ARG COMPOSER_VERSION=2.8.9
+
+ARG ALPINE_VERSION=3.21
 
 ###########################################
 # Build frontend assets with Bun
 ###########################################
 
-ARG BUN_VERSION=1
+ARG BUN_VERSION=1.2.9
 
 FROM oven/bun:${BUN_VERSION} AS build
 
@@ -29,7 +31,7 @@ RUN bun run build
 
 FROM composer:${COMPOSER_VERSION} AS vendor
 
-FROM php:${PHP_VERSION}-cli-alpine AS builder
+FROM php:${PHP_VERSION}-cli-alpine${ALPINE_VERSION} AS builder
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
@@ -51,13 +53,17 @@ SHELL ["/bin/sh", "-eou", "pipefail", "-c"]
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
   && echo ${TZ} > /etc/timezone
 
-ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+ARG IPE_VERSION=2.10.20
+ARG IPE_SHA256=d1eaf1a8a57fd36647ab46d55a781d49d3929aeaad038a1734793d3d21467de7
+
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/download/${IPE_VERSION}/install-php-extensions /usr/local/bin/
+
+RUN echo "${IPE_SHA256}  /usr/local/bin/install-php-extensions" | sha256sum -c
 
 RUN apk update; \
     apk upgrade; \
     apk add --no-cache \
     curl \
-    wget \
     git \
     ca-certificates \
     supervisor \
@@ -72,7 +78,6 @@ RUN apk update; \
     pdo_pgsql \
     opcache \
     exif \
-    pdo_mysql \
     zip \
     intl \
     gd \
@@ -82,31 +87,41 @@ RUN apk update; \
     igbinary \
     ldap \
     swoole \
+    curl \
+    dom \
+    xml \
+    simplexml \
+    fileinfo \
+    tokenizer \
+    posix \
+    pdo \
     && docker-php-source delete \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
+ARG SUPERCRONIC_VERSION=0.2.45
+
 RUN arch="$(apk --print-arch)" \
     && case "$arch" in \
-    armhf) _cronic_fname='supercronic-linux-arm' ;; \
-    aarch64) _cronic_fname='supercronic-linux-arm64' ;; \
-    x86_64) _cronic_fname='supercronic-linux-amd64' ;; \
-    x86) _cronic_fname='supercronic-linux-386' ;; \
+    armhf) _cronic_fname='supercronic-linux-arm' && _cronic_sha256='a44561f9897cb010d1a8fc8d91785552b7edbe1c6cee36f5d5beb0a928dcc827' ;; \
+    aarch64) _cronic_fname='supercronic-linux-arm64' && _cronic_sha256='c0f21174f7bb3c80a9b33567ba0cfbeb3e51e765fe9808267ba72a1ac88c3dba' ;; \
+    x86_64) _cronic_fname='supercronic-linux-amd64' && _cronic_sha256='bb6da5af8d5547c9a5cbb4cf58d9f5541f0433df2188bfe4f1a54b04ad253db6' ;; \
+    x86) _cronic_fname='supercronic-linux-386' && _cronic_sha256='7a527fd0ad6005286336a45edb8ea62752aa189858e49761a67d6ed0d07cb33f' ;; \
     *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
     esac \
-    && wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.29/${_cronic_fname}" \
-    -O /usr/bin/supercronic \
+    && curl -sSfL "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/${_cronic_fname}" \
+    -o /usr/bin/supercronic \
+    && echo "${_cronic_sha256}  /usr/bin/supercronic" | sha256sum -c \
     && chmod +x /usr/bin/supercronic \
     && mkdir -p /etc/supercronic \
     && echo "*/1 * * * * php ${ROOT}/artisan schedule:run --no-interaction" > /etc/supercronic/laravel
 
 RUN addgroup -g ${WWWGROUP} ${USER} \
-    && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
-
-RUN mkdir -p /var/log/supervisor /var/run/supervisor \
-    && chown -R ${USER}:${USER} ${ROOT} /var/log /var/run \
-    && chmod -R a+rw ${ROOT} /var/log /var/run
-
-RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
+    && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER} \
+    && cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini \
+    && mkdir -p /var/log/supervisor /var/run/supervisor ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    && chown -R ${USER}:${USER} ${ROOT} /var/log/supervisor /var/run/supervisor \
+    && chmod -R a+rw ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    && chmod 750 /var/log/supervisor /var/run/supervisor
 
 USER ${USER}
 
@@ -155,13 +170,18 @@ RUN chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 # Production stage: minimal runtime
 ###########################################
 
-FROM php:${PHP_VERSION}-cli-alpine AS production
+FROM php:${PHP_VERSION}-cli-alpine${ALPINE_VERSION} AS production
 
 LABEL maintainer="SMortexa <seyed.me720@gmail.com>"
 LABEL org.opencontainers.image.title="Laravel Octane Dockerfile"
 LABEL org.opencontainers.image.description="Production-ready Dockerfile for Laravel Octane"
 LABEL org.opencontainers.image.source=https://github.com/exaco/laravel-octane-dockerfile
 LABEL org.opencontainers.image.licenses=MIT
+
+ARG VCS_REF
+ARG VERSION
+LABEL org.opencontainers.image.revision=${VCS_REF}
+LABEL org.opencontainers.image.version=${VERSION}
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
@@ -198,23 +218,38 @@ RUN apk update; \
     libzip \
     oniguruma \
     icu-libs \
+    libavif \
+    openldap \
+    libpq \
+    librdkafka \
+    lz4-libs \
+    libssh2 \
+    libmemcached-libs \
+    bzip2 \
+    brotli-libs \
+    zstd-libs \
+    c-ares \
+    libxml2 \
+    libxslt \
+    libcurl \
+    libxpm \
+    libx11 \
+    liburing \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=builder /usr/lib/libfbclient.so* /usr/lib/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-COPY --from=builder /usr/local/etc/php/ /usr/local/etc/php/
-COPY --from=builder /usr/local/lib/php/ /usr/local/lib/php/
 COPY --from=builder /usr/bin/supercronic /usr/bin/supercronic
 COPY --from=builder /etc/supercronic/laravel /etc/supercronic/laravel
 
-RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
-
-RUN addgroup -g ${WWWGROUP} ${USER} \
-    && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
-
-RUN mkdir -p /var/log/supervisor /var/run/supervisor \
-    && chown -R ${USER}:${USER} ${ROOT} /var/log /var/run \
-    && chmod -R a+rw ${ROOT} /var/log /var/run
+RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini \
+    && addgroup -g ${WWWGROUP} ${USER} \
+    && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER} \
+    && mkdir -p /var/log/supervisor /var/run/supervisor ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    && chown -R ${USER}:${USER} ${ROOT} /var/log/supervisor /var/run/supervisor \
+    && chmod -R a+rw ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    && chmod 750 /var/log/supervisor /var/run/supervisor
 
 COPY --from=builder --chown=${USER}:${USER} ${ROOT} ${ROOT}
 

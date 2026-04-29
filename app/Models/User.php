@@ -16,6 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Tapp\FilamentInvite\Notifications\SetPassword;
 
 
+
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     use HasFactory, HasPanelShield, HasRoles, Notifiable;
