@@ -3,53 +3,51 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-
+use Filament\Notifications\Notification as FilamentNotification;
+use Filament\Notifications\Actions\Action;
+use App\Filament\Resources\ClientActivityResource;
 
 class ActivityStatusNotification extends Notification
 {
+    use Queueable;
+
     protected $record;
     protected $status;
-    protected $message;
 
-    public function __construct($record, string $status, ?string $message = null)
+    public function __construct($record, string $status)
     {
         $this->record = $record;
         $this->status = $status;
-        $this->message = $message;
     }
 
-    public function via($notifiable)
+    public function via($notifiable): array
     {
-        return ['database']; 
+        return ['database'];
     }
 
-    public function toDatabase($notifiable)
-{
-    return [
-        'title' => $this->status === 'accepted'
-            ? 'Aktivitas Diterima'
-            : 'Aktivitas Ditolak',
+    public function toDatabase($notifiable): array
+    {
+        $isAccepted = $this->status === 'accepted';
+        $statusText = $isAccepted ? 'diverifikasi' : 'ditolak';
+        
+          $bodyText = "Kegiatan '{$this->record->title}' Anda telah {$statusText}.";
+        
+        if ($this->record->verification_note) {
+            $bodyText .= "\nCatatan: {$this->record->verification_note}";
+        }
 
-        'body' => $this->message ?? (
-            $this->status === 'accepted'
-                ? 'Aktivitas kamu disetujui.'
-                : 'Aktivitas kamu ditolak.'
-        ),
-
-        'icon' => $this->status === 'accepted'
-            ? 'heroicon-o-check-circle'
-            : 'heroicon-o-x-circle',
-
-        'color' => $this->status === 'accepted'
-            ? 'success'
-            : 'danger',
-
-        // 'url' => \App\Filament\Resources\ClientActivityResource::getUrl('view', [
-        //     'record' => $this->record,
-        // ]),
-    ];
-}
+        return FilamentNotification::make()
+            ->title($isAccepted ? 'Kegiatan Diverifikasi' : 'Kegiatan Ditolak')
+            ->body($bodyText)
+            ->icon($isAccepted ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+            ->iconColor($isAccepted ? 'success' : 'danger')
+            ->actions([
+                Action::make('view')
+                    ->label('Lihat Detail')
+                    ->url(ClientActivityResource::getUrl('index'))
+                    ->markAsRead(),
+            ])
+            ->getDatabaseMessage();
+    }
 }
