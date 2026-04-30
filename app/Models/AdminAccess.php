@@ -4,9 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo; // Add this import
 
 class AdminAccess extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'c_role_id',
+        'entity_type',
+        'entity_id',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -15,5 +23,10 @@ class AdminAccess extends Model
     public function role(): BelongsTo
     {
         return $this->belongsTo(CRole::class, 'c_role_id', 'id');
+    }
+
+    public function accessible(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'entity_type', 'entity_id');
     }
 }
