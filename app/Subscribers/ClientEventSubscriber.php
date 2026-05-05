@@ -14,6 +14,7 @@ use App\Models\VClientNote;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\IdentityVerificationNotification;
 
 class ClientEventSubscriber
 {
@@ -44,6 +45,10 @@ class ClientEventSubscriber
             'verifier_notes' => 'ACK OK',
         ]);
 
+        if ($client->user) {
+            $client->user->notify(new IdentityVerificationNotification($client, 'accepted'));
+        }
+
         ProcessAcceptedProfile::dispatch($client)->onQueue('emails');
 
     }
@@ -66,6 +71,14 @@ class ClientEventSubscriber
             ]);
 
             DB::commit();
+
+            if ($client->user) {
+                $client->user->notify(new IdentityVerificationNotification(
+                    $client, 
+                    'rejected', 
+                    $event->getVerifierNotes()
+                ));
+            }
 
             ProcessRejectedProfile::dispatch($client->user->email,
                 $client->crole->role_name,
