@@ -64,10 +64,9 @@ class AdminAccessResource extends Resource
                                     ->required(),
                             ])->columns(2),
 
-                        // Add this MorphToSelect Group here
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\MorphToSelect::make('accessible') // Ensure the relation in AdminAccess model is named 'accessible'
+                                Forms\Components\MorphToSelect::make('accessible') 
                                     ->types([
                                         Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
                                             ->titleAttribute('name'),
@@ -109,7 +108,6 @@ class AdminAccessResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

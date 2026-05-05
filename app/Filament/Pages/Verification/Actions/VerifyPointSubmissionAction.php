@@ -3,6 +3,8 @@
 namespace App\Filament\Pages\Verification\Actions;
 
 use App\Enums\Acceptance;
+use App\Events\PointSubmissionAccepted;
+use App\Events\PointSubmissionRejected;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
@@ -42,8 +44,10 @@ class VerifyPointSubmissionAction extends Action
             ToggleButtons::make('is_verified')
                 ->live()
                 ->required()
-                ->options(Acceptance::class)->inline(),
-            Textarea::make('verifier_note')->required(fn (Get $get) => $get('is_verified') == Acceptance::Reject->value),
+                ->options(Acceptance::class)
+                ->inline(),
+            Textarea::make('verifier_note')
+                ->required(fn (Get $get) => $get('is_verified') == Acceptance::Reject->value),
         ]);
 
         $this->fillForm(function (Model $record, Table $table): array {
@@ -61,11 +65,20 @@ class VerifyPointSubmissionAction extends Action
         });
 
         $this->action(function (): void {
-            $this->process(function (array $data, Model $record, Table $table) {
-                $record->verify($data['is_verified'], $data['verifier_note']);
-            });
-        });
+            $this->process(function (array $data, Model $record) {
 
+                $status = $data['is_verified'] instanceof Acceptance 
+                    ? $data['is_verified'] 
+                    : Acceptance::from($data['is_verified']);
+
+                $record->verify(
+                    $status === Acceptance::Accept, 
+                    $data['verifier_note']
+                );
+            });
+
+            $this->success();
+        });
     }
 
     public function mutateRecordDataUsing(?Closure $callback): static
