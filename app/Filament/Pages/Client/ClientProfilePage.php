@@ -144,8 +144,8 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         return [
             ...static::$record->attributesToArray(),
             'identity' => static::$record->identity->attributesToArray() ?? [],
-            'education' => static::$record->education->attributesToArray() ?? [],
-            'detail' => static::$record->detail->attributesToArray() ?? [],
+            'education' => static::$record->education?->attributesToArray() ?? [],
+            'detail' => static::$record->detail?->attributesToArray() ?? [],
         ];
     }
 

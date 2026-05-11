@@ -7,13 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Drop old primary key
         DB::statement('ALTER TABLE master_clients DROP CONSTRAINT master_clients_pkey');
 
-        // Drop old id column
         DB::statement('ALTER TABLE master_clients DROP COLUMN id');
 
-        // Recreate integer auto increment id
         DB::statement('ALTER TABLE master_clients ADD COLUMN id BIGSERIAL PRIMARY KEY');
     }
 

@@ -15,6 +15,8 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Client;
+use App\Observers\ClientObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(ClientEventSubscriber::class);
         Event::subscribe(PointEventSubscriber::class);
 
+        Client::observe(ClientObserver::class);
 
         FilamentShield::prohibitDestructiveCommands($this->app->isProduction());
     }
