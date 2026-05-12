@@ -94,13 +94,13 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
             ClientCluster::LocalRegency->value => RegRegency::class,
         };
 
-        $data['echelon_type'] = match ($data['type']) {
-            ClientCluster::Central->value => RegDepartmentEchelon1::class,
-            ClientCluster::LocalProvince->value => RegProvince::class,
-            ClientCluster::LocalRegency->value => RegRegency::class,
-        };
-
-        $data['echelon_x_text'] = $data['type'] == ClientCluster::Central->value ? null : $data['type'];
+        if ($data['type'] === ClientCluster::Central->value) {
+            $data['echelon_type'] = RegDepartmentEchelon1::class;
+            $data['echelon_x_text'] = null;
+        } else {
+            $data['echelon_id'] = null;
+            $data['echelon_type'] = null;
+        }
 
         return $data;
     }

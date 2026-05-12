@@ -227,93 +227,111 @@ class ClientResource extends Resource
     }
 
     public static function getClientBasicInformationForm(?callable $callback): array
-    {
-        return [
-            Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\TextInput::make('nip')
-                        ->label(__('labels.form.client.fields.nip'))
-                        ->unique(table: Client::class, ignorable: $callback)
-                        ->required()
-                        ->placeholder('19930101XXXXXXXXX')
-                        ->minLength(18)
-                        ->maxLength(18)
-                        ->rules('regex:/^\d+$/'),
-                    Forms\Components\Select::make('reg_grade_id')
-                        ->label(__('labels.form.client.fields.grade'))
-                        ->relationship('grade', 'grade_code')
-                        ->required(),
-                ])->columns(2),
-            Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\Select::make('c_role_id')
-                        ->label(__('labels.form.client.fields.crole_name'))
-                        ->live()
-                        ->relationship('crole', 'role_name', function (Builder $query) {
-                            $query->where('active', '=', true);
-                        })
-                        ->required(),
-                    Forms\Components\Select::make('c_role_level_id')
-                        ->label(__('labels.form.client.fields.crole_grade'))
-                        ->relationship('croleLevel', 'level', fn(Builder $query, Forms\Get $get) => $query->where('c_role_id', $get('c_role_id') == '' ? 0 : $get('c_role_id')))
-                        ->required(),
-                ])->columns(2),
-            Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\Select::make('type')
-                        ->label(__('labels.form.client.fields.client_cluster'))
-                        ->options(ClientCluster::class)
-                        ->afterStateUpdated(function (?string $state, Forms\Set $set) {
-                            if ($state == 'central') {
-                                $set('echelon_type', RegDepartmentEchelon1::class);
-                            }
-                        })
-                        ->live()
-                        ->required(),
-                    Forms\Components\Select::make('status')
-                        ->label(__('labels.form.client.fields.status'))
-                        ->options(ClientStatus::class)
-                        ->required(),
-                ])->columns(2),
-            Forms\Components\Select::make('assignation_type')
-                ->options(CRoleAssignation::class)
-                ->label(__('labels.form.client.fields.assignation_type'))
-                ->required(),
-            Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\Select::make('agency_id')
-                        ->label(__('labels.form.client.fields.agency'))
-                        ->live()
-                        ->searchable()
-                        ->required(fn(Forms\Get $get) => $get('type') == 'local_province')
-                        ->hidden(fn(Forms\Get $get): bool => $get('type') != 'local_province')
-                        ->options(RegProvince::query()->pluck('name', 'id')),
-                    Forms\Components\Select::make('agency_id')
-                        ->label(__('labels.form.client.fields.agency'))
-                        ->live()
-                        ->searchable()
-                        ->required(fn(Forms\Get $get) => $get('type') == 'local_regency')
-                        ->hidden(fn(Forms\Get $get) => $get('type') != 'local_regency')
-                        ->options(RegRegency::query()->pluck('name', 'id')),
-                    Forms\Components\Select::make('agency_id')
-                        ->label(__('labels.form.client.fields.agency'))
-                        ->live()
-                        ->searchable()
-                        ->required(fn(Forms\Get $get) => $get('type') == 'central')
-                        ->hidden(fn(Forms\Get $get) => $get('type') != 'central')
-                        ->options(RegDepartment::query()->pluck('name', 'id')),
-                    Forms\Components\TextInput::make('echelon_x_text')
-                        ->label(__('labels.form.client.fields.echelon'))
-                        ->required(fn(Forms\Get $get) => $get('type') != 'central')
-                        ->hidden(fn(Forms\Get $get) => $get('type') == 'central'),
-                    Forms\Components\Select::make('echelon_id')
-                        ->label(__('labels.form.client.fields.echelon'))
-                        ->options(fn(Forms\Get $get) => RegDepartmentEchelon1::query()->where('department_id', $get('agency_id'))->pluck('name', 'id'))
-                        ->required(fn(Forms\Get $get) => $get('type') == 'central')
-                        ->hidden(fn(Forms\Get $get) => $get('type') != 'central'),
-                ])->columns(2),
-        ];
-    }
+{
+    return [
+        Forms\Components\Group::make()
+            ->schema([
+                Forms\Components\TextInput::make('nip')
+                    ->label(__('labels.form.client.fields.nip'))
+                    ->unique(table: Client::class, ignorable: $callback)
+                    ->required()
+                    ->placeholder('19930101XXXXXXXXX')
+                    ->minLength(18)
+                    ->maxLength(18)
+                    ->rules('regex:/^\d+$/'),
+
+                Forms\Components\Select::make('reg_grade_id')
+                    ->label(__('labels.form.client.fields.grade'))
+                    ->relationship('grade', 'grade_code')
+                    ->required(),
+            ])->columns(2),
+
+        Forms\Components\Group::make()
+            ->schema([
+                Forms\Components\Select::make('c_role_id')
+                    ->label(__('labels.form.client.fields.crole_name'))
+                    ->live()
+                    ->relationship('crole', 'role_name', function (Builder $query) {
+                        $query->where('active', true);
+                    })
+                    ->required(),
+
+                Forms\Components\Select::make('c_role_level_id')
+                    ->label(__('labels.form.client.fields.crole_grade'))
+                    ->relationship(
+                        'croleLevel',
+                        'level',
+                        fn (Builder $query, Forms\Get $get) =>
+                            $query->where('c_role_id', $get('c_role_id') ?: 0)
+                    )
+                    ->required(),
+            ])->columns(2),
+
+        Forms\Components\Group::make()
+            ->schema([
+                Forms\Components\Select::make('type')
+                    ->label(__('labels.form.client.fields.client_cluster'))
+                    ->options(ClientCluster::class)
+                    ->live()
+                    ->afterStateUpdated(function (?string $state, Forms\Set $set) {
+                        $set('agency_id', null);
+                        $set('echelon_id', null);
+                        $set('echelon_x_text', null);
+
+                        if ($state === 'central') {
+                            $set('echelon_type', RegDepartmentEchelon1::class);
+                        } elseif ($state === 'local_province') {
+                            $set('echelon_type', RegProvince::class);
+                        } elseif ($state === 'local_regency') {
+                            $set('echelon_type', RegRegency::class);
+                        }
+                    })
+                    ->required(),
+
+                Forms\Components\Select::make('status')
+                    ->label(__('labels.form.client.fields.status'))
+                    ->options(ClientStatus::class)
+                    ->required(),
+            ])->columns(2),
+
+        Forms\Components\Select::make('assignation_type')
+            ->options(CRoleAssignation::class)
+            ->label(__('labels.form.client.fields.assignation_type'))
+            ->required(),
+
+        Forms\Components\Group::make()
+            ->schema([
+                Forms\Components\Select::make('agency_id')
+                    ->label(__('labels.form.client.fields.agency'))
+                    ->live()
+                    ->searchable()
+                    ->options(function (Forms\Get $get) {
+                        return match ($get('type')) {
+                            'central' => RegDepartment::query()->pluck('name', 'id'),
+                            'local_province' => RegProvince::query()->pluck('name', 'id'),
+                            'local_regency' => RegRegency::query()->pluck('name', 'id'),
+                            default => [],
+                        };
+                    })
+                    ->required(),
+
+                Forms\Components\TextInput::make('echelon_x_text')
+                    ->label(__('labels.form.client.fields.echelon'))
+                    ->required(fn (Forms\Get $get) => $get('type') !== 'central')
+                    ->hidden(fn (Forms\Get $get) => $get('type') === 'central'),
+
+                Forms\Components\Select::make('echelon_id')
+                    ->label(__('labels.form.client.fields.echelon'))
+                    ->options(fn (Forms\Get $get) =>
+                        RegDepartmentEchelon1::query()
+                            ->where('department_id', $get('agency_id'))
+                            ->pluck('name', 'id')
+                    )
+                    ->required(fn (Forms\Get $get) => $get('type') === 'central')
+                    ->hidden(fn (Forms\Get $get) => $get('type') !== 'central'),
+            ])->columns(2),
+    ];
+}
 
     public static function getClientIdentityForm(): array
     {
