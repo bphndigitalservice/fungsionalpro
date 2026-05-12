@@ -84,7 +84,7 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
     }
 
 
-    function mutateFormDataBeforeSave(array $data): array
+    public function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = auth('web')->user()->id;
 
@@ -94,12 +94,16 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
             ClientCluster::LocalRegency->value => RegRegency::class,
         };
 
+        $data['echelon_type'] = match ($data['type']) {
+            ClientCluster::Central->value => RegDepartmentEchelon1::class,
+            ClientCluster::LocalProvince->value => RegProvince::class,
+            ClientCluster::LocalRegency->value => RegRegency::class,
+        };
+
         if ($data['type'] === ClientCluster::Central->value) {
-            $data['echelon_type'] = RegDepartmentEchelon1::class;
             $data['echelon_x_text'] = null;
         } else {
             $data['echelon_id'] = null;
-            $data['echelon_type'] = null;
         }
 
         return $data;
