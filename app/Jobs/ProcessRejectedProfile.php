@@ -14,18 +14,12 @@ class ProcessRejectedProfile implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(private readonly string $email,
-        private readonly string $croleName,
-        private readonly string $verifierNotes)
+
+    public function __construct(private readonly string $email, private readonly string $croleName, private readonly string $verifierNotes)
     {
+        
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         Mail::to($this->email)

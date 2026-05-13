@@ -53,8 +53,7 @@ class RejectClientActivityAction extends Action
                     'verified_at' => now(),
                 ]);
 
-                // 2. Send notification
-                $user = $record->client->user; // adjust if relation differs
+                $user = $record->client->user;
 
                 $user?->notify(
                     new ActivityStatusNotification(
@@ -64,8 +63,6 @@ class RejectClientActivityAction extends Action
                     )
                 );
 
-                // 3. (optional) event - you can re-enable later if needed
-                // event(new ClientActivityRejected($record, $data['verifier_notes']));
             });
 
             $this->success();

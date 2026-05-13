@@ -84,7 +84,7 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
     }
 
 
-    function mutateFormDataBeforeSave(array $data): array
+    public function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = auth('web')->user()->id;
 
@@ -100,7 +100,11 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
             ClientCluster::LocalRegency->value => RegRegency::class,
         };
 
-        $data['echelon_x_text'] = $data['type'] == ClientCluster::Central->value ? null : $data['type'];
+        if ($data['type'] === ClientCluster::Central->value) {
+            $data['echelon_x_text'] = null;
+        } else {
+            $data['echelon_id'] = null;
+        }
 
         return $data;
     }

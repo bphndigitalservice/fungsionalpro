@@ -6,20 +6,16 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Notifications\Actions\Action;
-use App\Filament\Resources\ClientActivityResource;
 
-class ActivityStatusNotification extends Notification
+class IdentityVerificationNotification extends Notification
 {
     use Queueable;
 
-    protected $record;
-    protected $status;
-
-    public function __construct($record, string $status)
-    {
-        $this->record = $record;
-        $this->status = $status;
-    }
+    public function __construct(
+        protected $record, 
+        protected string $status, 
+        protected ?string $reason = null
+    ) {}
 
     public function via($notifiable): array
     {
@@ -29,23 +25,25 @@ class ActivityStatusNotification extends Notification
     public function toDatabase($notifiable): array
     {
         $isAccepted = $this->status === 'accepted';
-        $statusText = $isAccepted ? 'diverifikasi' : 'ditolak';
         
-          $bodyText = "Kegiatan '{$this->record->title}' Anda telah {$statusText}.";
+        $statusTitle = $isAccepted ? 'Identitas Diverifikasi' : 'Verifikasi Identitas Ditolak';
+        $statusText = $isAccepted ? 'telah berhasil diverifikasi' : 'gagal diverifikasi';
         
-        if ($this->record->verification_note) {
-            $bodyText .= "\nCatatan: {$this->record->verification_note}";
+        $bodyText = "Identitas Anda {$statusText}.";
+        
+        if (!$isAccepted && $this->reason) {
+            $bodyText .= " Alasan: {$this->reason}";
         }
 
         return FilamentNotification::make()
-            ->title($isAccepted ? 'Kegiatan Diverifikasi' : 'Kegiatan Ditolak')
+            ->title($statusTitle)
             ->body($bodyText)
             ->icon($isAccepted ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
             ->iconColor($isAccepted ? 'success' : 'danger')
             ->actions([
                 Action::make('view')
-                    ->label('Lihat Detail')
-                    ->url(ClientActivityResource::getUrl('index'))
+                    ->label('Lihat Profil')
+                    ->url(fn() => route('filament.admin.pages.client-profile-page')) 
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

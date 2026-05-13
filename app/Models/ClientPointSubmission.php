@@ -80,13 +80,19 @@ class ClientPointSubmission extends Model
         event(new PointSubmissionAccepted($this));
     }
 
-    public function reject(string $note): void
+
+    public function reject(?string $note): void 
     {
         $data = $this->prepareVerificationData(false);
-        $data['verifier_note'] = $note;
+        
+        // Provide a default note if null to avoid DB errors
+        $data['verifier_note'] = $note ?? 'No reason provided'; 
+        
         unset($data['verified_at']);
         $data['status'] = PointSubmissionStatus::ShouldRevise;
 
         $this->update($data);
+        
+        event(new \App\Events\PointSubmissionRejected($this, $data['verifier_note']));
     }
 }

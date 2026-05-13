@@ -71,10 +71,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     {
         return $form
             ->schema([
-                Select::make('submission_bag_id')
-                    ->label(__('Periode'))
-                    ->required()
-                    ->relationship('bag', 'label'),
+                ClientPointCreate::getYearField(),
                 ClientPointCreate::getSubmissionTypeField(),
                 ClientPointCreate::getSKP2AKConversionForm(),
                 ClientPointCreate::getSKPAccumulation(),
