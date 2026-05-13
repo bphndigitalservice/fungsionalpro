@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\AvatarProviders\FungsionalProAvatarProvider;
 use App\Filament\Pages\Authx\EmailVerificationPrompt;
 use App\Filament\Pages\Authx\Register;
+use App\Filament\Pages\Authx\Login;
 use App\Filament\Pages\Dashboard;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -33,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('/')
             ->authGuard('web')
-            ->login()
+            ->login(Login::class)
             ->registration(Register::class)
             ->emailVerification(EmailVerificationPrompt::class)
             ->passwordReset()

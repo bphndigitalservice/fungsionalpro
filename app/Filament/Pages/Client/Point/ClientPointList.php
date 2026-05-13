@@ -49,8 +49,14 @@ class ClientPointList extends Page implements HasInfolists, HasTable
                 TextColumn::make('status')->searchable(),
                 TextColumn::make('is_approved')
                     ->label('Rejected/Accepted')
-                    ->state(fn (Model $record) => $record->status == PointSubmissionStatus::Verified || $record->status == PointSubmissionStatus::ShouldRevise ? $record->is_approved : 'Sedang diverifikasi')
-                    ->description(fn (Model $record) => $record->status != PointSubmissionStatus::Verified ? $record->verifier_note : null),
+                    ->state(function (Model $record) {
+                        return ($record->status == PointSubmissionStatus::Verified || $record->status == PointSubmissionStatus::ShouldRevise) 
+                            ? $record->is_approved 
+                            : 'Sedang diverifikasi';
+                    })
+                    ->tooltip(fn (Model $record): ?string => $record->verifier_note)
+                    ->copyable()
+                    ->copyableState(fn (Model $record) => $record->verifier_note),
             ])->actions([
                 ViewPointSubmission::make(),
                 Action::make('Update')

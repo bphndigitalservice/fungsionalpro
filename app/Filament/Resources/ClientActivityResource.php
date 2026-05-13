@@ -90,17 +90,21 @@ class ClientActivityResource extends Resource
                         Forms\Components\Section::make('Detail Kegiatan')
                             ->schema([
                                 TextInput::make('activity_details.lokasi')
-                                    ->label('Lokasi / Tempat Kegiatan'),
+                                    ->label('Lokasi / Tempat Kegiatan')
+                                    ->required(),
 
                                 TextInput::make('activity_details.jumlah_peserta')
                                     ->numeric()
-                                    ->label('Jumlah Peserta'),
+                                    ->label('Jumlah Peserta')
+                                    ->required(),
 
                                 TextInput::make('activity_details.penerima')
-                                    ->label('Penerima'),
+                                    ->label('Penerima')
+                                    ->required(),
 
                                 Textarea::make('activity_details.materi')
-                                    ->label('Materi'),
+                                    ->label('Materi')
+                                    ->required(),
                             ])
                             ->visible(fn () => Client::current()?->c_role_id == 2),
 
