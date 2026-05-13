@@ -32,8 +32,8 @@ enum Acceptance: int implements HasColor, HasIcon, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Accept => 'Accept',
-            self::Reject => 'Reject',
+            self::Accept => 'Accepted',
+            self::Reject => 'Rejected',
         };
     }
 }

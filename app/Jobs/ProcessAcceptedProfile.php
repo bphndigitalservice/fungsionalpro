@@ -15,17 +15,11 @@ class ProcessAcceptedProfile implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(private readonly Client $client)
     {
-        //
+        
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         Mail::to($this->client->user->email)

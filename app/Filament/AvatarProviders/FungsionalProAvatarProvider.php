@@ -14,7 +14,7 @@ class FungsionalProAvatarProvider implements AvatarProvider
     public function get(Model|Authenticatable $record): string
     {
         if ($record->isActiveClient() && !is_null($record->client)) {
-            $url = Storage::temporaryUrl($record->client->identity->photo, now()->addHours(2));
+            $url = $record->client->identity->photo_url;
             return $url ?? $this->getFallbackAvatarUrl($record);
         }
 

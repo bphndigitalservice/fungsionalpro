@@ -20,6 +20,7 @@ class AcceptClientActivityAction extends Action
         return 'accept_activity';
     }
 
+    
     public function setUp(): void
     {
         parent::setUp();

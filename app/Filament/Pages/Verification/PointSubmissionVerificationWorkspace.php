@@ -22,7 +22,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\JoinClause;
 
 class PointSubmissionVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
@@ -43,11 +42,36 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
                 TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('is_approved'),
+                
+                TextColumn::make('is_approved')
+                    ->label('Status Persetujuan')
+                    ->tooltip(fn (Model $record): ?string => $record->verifier_note)
+                    ->state(function (Model $record) {
+                        if ($record->status === PointSubmissionStatus::Submitted) {
+                            return 'Belum diproses';
+                        }
+
+                        return $record->is_approved;
+                    })
+                    ->color(fn (Model $record) => 
+                        $record->status === PointSubmissionStatus::Submitted ? 'gray' : null
+                    )
+                    ->icon(fn (Model $record) => 
+                        $record->status === PointSubmissionStatus::Submitted ? 'heroicon-o-clock' : null
+                    ),
+
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()->hidden(fn(Model $record) => !static::canVerifying() || $record->status == PointSubmissionStatus::Verified),
+                VerifyPointSubmissionAction::make()
+                    ->hidden(fn(Model $record) => 
+                        !static::canVerifying() || 
+                        // Hide "Periksa" once it leaves the Submitted state
+                        in_array($record->status, [
+                            PointSubmissionStatus::Verified, 
+                            PointSubmissionStatus::ShouldRevise
+                        ])
+                    ),
             ]);
     }
 
@@ -90,15 +114,30 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return __('labels.page.v_client_point_submission.title');
     }
 
-
     public function getTabs(): array
     {
         return [
             'all' => Tab::make(__('All')),
+
+            // Only items currently awaiting a decision
             'new' => Tab::make(__('New'))
-                ->badge($this->getTableQuery()->whereNull('client_point_submissions.verified_at')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('client_point_submissions.verified_at')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('client_point_submissions.verified_at')),
+                ->badge(
+                    $this->getTableQuery()
+                        ->where('client_point_submissions.status', PointSubmissionStatus::Submitted)
+                        ->count()
+                )
+                ->modifyQueryUsing(fn(Builder $query) => 
+                    $query->where('client_point_submissions.status', PointSubmissionStatus::Submitted)
+                ),
+
+            // Items already handled (Accepted or Rejected)
+            'processed' => Tab::make(__('Processed'))
+                ->modifyQueryUsing(fn(Builder $query) => 
+                    $query->whereIn('client_point_submissions.status', [
+                        PointSubmissionStatus::Verified,
+                        PointSubmissionStatus::ShouldRevise
+                    ])
+                ),
         ];
     }
 
@@ -106,11 +145,4 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     {
         return 'new';
     }
-
-    /*public function getTableRecordKey(Model $record): string
-    {
-        return $record->getKey() ?? uniqid('client_point_submission_');
-    }*/
-
-
 }

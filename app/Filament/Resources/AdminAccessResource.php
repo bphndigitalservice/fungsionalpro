@@ -13,6 +13,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use App\Models\RegDepartment;
+use App\Models\RegProvince;
+use App\Models\RegRegency;
 
 class AdminAccessResource extends Resource
 {
@@ -44,6 +47,7 @@ class AdminAccessResource extends Resource
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
+                        // Existing User & Role Group
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Select::make('c_role_id')
@@ -58,6 +62,19 @@ class AdminAccessResource extends Resource
                                     ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Admin->value]))
                                     ->preload()
                                     ->required(),
+                            ])->columns(2),
+
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\MorphToSelect::make('accessible') 
+                                    ->types([
+                                        Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
+                                            ->titleAttribute('name'),
+                                        Forms\Components\MorphToSelect\Type::make(RegProvince::class)
+                                            ->titleAttribute('name'),
+                                        Forms\Components\MorphToSelect\Type::make(RegRegency::class)
+                                            ->titleAttribute('name'),
+                                    ]),
                             ])->columns(2),
                     ]),
             ]);
@@ -75,6 +92,12 @@ class AdminAccessResource extends Resource
                     ->label(__('labels.table.crole.name'))
                     ->badge()
                     ->sortable(),
+                
+                // Add this column to show the Region/Department
+                Tables\Columns\TextColumn::make('accessible.name')
+                    ->label(__('Ruang Regional'))
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -85,7 +108,6 @@ class AdminAccessResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
