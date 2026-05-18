@@ -17,6 +17,7 @@ use App\Models\Client;
 use App\Models\CRole;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
+use App\Models\RegProvinceEchelon1;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
 use Filament\Forms;
@@ -315,11 +316,6 @@ class ClientResource extends Resource
                     })
                     ->required(),
 
-                Forms\Components\TextInput::make('echelon_x_text')
-                    ->label(__('labels.form.client.fields.echelon'))
-                    ->required(fn (Forms\Get $get) => $get('type') !== 'central')
-                    ->hidden(fn (Forms\Get $get) => $get('type') === 'central'),
-
                 Forms\Components\Select::make('echelon_id')
                     ->label(__('labels.form.client.fields.echelon'))
                     ->options(fn (Forms\Get $get) =>
@@ -329,6 +325,16 @@ class ClientResource extends Resource
                     )
                     ->required(fn (Forms\Get $get) => $get('type') === 'central')
                     ->hidden(fn (Forms\Get $get) => $get('type') !== 'central'),
+
+                Forms\Components\Select::make('echelon_x_text')
+                    ->label(__('labels.form.client.fields.echelon'))
+                    ->options(fn (Forms\Get $get) =>
+                        RegProvinceEchelon1::query()
+                            ->where('reg_province_id', $get('agency_id'))
+                            ->pluck('name', 'id')
+                    )
+                    ->required(fn (Forms\Get $get) => $get('type') === 'local_province')
+                    ->hidden(fn (Forms\Get $get) => $get('type') !== 'local_province'),
             ])->columns(2),
     ];
 }
