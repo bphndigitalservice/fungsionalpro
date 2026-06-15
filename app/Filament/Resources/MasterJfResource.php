@@ -50,7 +50,8 @@ class MasterJfResource extends Resource
                     ->searchable(),
                 Forms\Components\TextInput::make('jabatan'),
                 Forms\Components\TextInput::make('instansi'),
-                Forms\Components\TextInput::make('unit_kerja'),
+                Forms\Components\TextInput::make('unit_kerja')
+                    ->label('Unit Kerja'),
                 Forms\Components\Select::make('pengangkatan')
                     ->label('Pengangkatan')
                     ->options([
@@ -167,7 +168,7 @@ class MasterJfResource extends Resource
                     }),
             ])
         ->actions([
-            Tables\Actions\EditAction::make(),
+            //Tables\Actions\EditAction::make(),
         ]);
     }
 

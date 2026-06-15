@@ -5,6 +5,7 @@ namespace App\Observers;
 
 use App\Models\Client;
 use App\Services\ClientMatchingService;
+use App\Models\User;
 
 class ClientObserver
 {
@@ -20,14 +21,12 @@ class ClientObserver
         $master = $this->service->findMasterByNip($client->nip);
 
         if ($master) {
-
+            // Process raw excel values into database standard IDs
             $this->service->applyMasterData($client, $master);
             $client->is_verified = \App\Enums\Verified::Unverified; 
         } else {
+            // Normal fallbacks if NIP is not present in master excel records
             $client->is_verified = \App\Enums\Verified::Unverified;
-            
-            $client->c_role_level_id = $client->c_role_level_id ?? null; 
-            $client->reg_grade_id = $client->reg_grade_id ?? null;      
             $client->status = $client->status ?? null;
             $client->assignation_type = $client->assignation_type ?? null;
         }
@@ -36,15 +35,18 @@ class ClientObserver
     public function created(Client $client): void
     {
         $master = $this->service->findMasterByNip($client->nip);
-        
         $extractedGender = $this->service->getGenderFromNip($client->nip);
+        
+        // Fetch the user data safely using the foreign key directly
+        // to bypass premature relation caching issues
+        $user = User::find($client->user_id);
 
         $client->identity()->create([
-            'name'           => $master->name ?? $client->user->name,
+            'name'           => $master->nama ?? ($user->name ?? 'User'),
             'academic_title' => $master->academic_title ?? null,
-            'gender'         => $master->gender ?? $extractedGender,
-            'address'        => $master->address ?? '-', 
-            'phone_number'   => $master->phone_number ?? '-',
+            'gender'         => $extractedGender,
+            'address'        => '-', 
+            'phone_number'   => '-',
         ]);
     }
 }
