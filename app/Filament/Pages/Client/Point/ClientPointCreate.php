@@ -19,6 +19,7 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -75,10 +76,16 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                 static::getSKP2AKConversionForm(),
                 static::getSKPAccumulation(),
                 static::getFinalAKForm(),
+
+                // File SKP component runs first here
+                static::getSKPFileUploadField(),
+
+                // Predikat Kinerja component follows right underneath
+                static::getPerformancePredicateField(),
+
                 static::getSKP2AkFileUploadField(),
                 static::getAccumulatedAKFileUploadField(),
                 static::getFinalPAKUploadField(),
-
             ]);
     }
 
@@ -100,7 +107,6 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     public function getFormActions(): array
     {
-
         return [
             $this->submitPointAction(),
             $this->cancelFormAction(),
@@ -182,12 +188,10 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         $redirectUrl = $this->getRedirectUrl();
 
         $this->redirect($redirectUrl, navigate: FilamentView::hasSpaMode() && is_app_url($redirectUrl));
-
     }
 
     public function handleRecordCreation($data): ClientPointSubmission
     {
-
         $record = new ClientPointSubmission($data);
         $record->save();
 
@@ -244,6 +248,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                     TextInput::make('x_skp2ak_number')
                         ->label(__('Nomor Konversi Predikat Kinerja'))
                         ->required(fn (Get $get) => static::isStartFrom2023($get)),
+
                     TextInput::make('x_skp2ak_point')
                         ->label(__('Nilai Angka Kredit Hasil Konversi'))
                         ->numeric()
@@ -315,6 +320,44 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->required()
             ->helperText('Format file: PDF | Ukuran maksimal: 750 KB');
+    }
+
+    public static function getSKPFileUploadField(): FileUpload|Component
+    {
+        return FileUpload::make('skp_file')
+            ->disk('s3')
+            ->label('File SKP')
+            ->downloadable()
+            ->maxSize(config('fungsional-pro.max_upload_file_size'))
+            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+            ->directory(config('fungsional-pro.s3.directory.pak_files'))
+            ->visibility(config('fungsional-pro.s3.visibility'))
+            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB')
+            ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
+            ->required(fn (Get $get) => static::isStartFrom2023($get));
+    }
+
+    public static function getPerformancePredicateField(): ToggleButtons|Component
+    {
+        return ToggleButtons::make('performance_predicate')
+            ->label('Predikat Kinerja')
+            ->options([
+                'SANGAT_BAIK' => 'Sangat Baik',
+                'BAIK' => 'Baik',
+                'BUTUH_PERBAIKAN' => 'Butuh Perbaikan',
+                'KURANG' => 'Kurang',
+                'SANGAT_KURANG' => 'Sangat Kurang',
+            ])
+            ->colors([
+                'SANGAT_BAIK' => 'success',
+                'BAIK' => 'info',
+                'BUTUH_PERBAIKAN' => 'warning',
+                'KURANG' => 'danger',
+                'SANGAT_KURANG' => 'danger',
+            ])
+            ->inline()
+            ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
+            ->required(fn (Get $get) => static::isStartFrom2023($get));
     }
 
     public static function getSKP2AkFileUploadField(): FileUpload|Component

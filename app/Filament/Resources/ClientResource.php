@@ -144,6 +144,9 @@ class ClientResource extends Resource
                 Tables\Columns\TextColumn::make('assignation_type')
                     ->label(__('labels.table.client.assignation_type'))
                     ->searchable(),
+                Tables\Columns\TextColumn::make('jenis_kepegawaian')
+                    ->label('Jenis Kepegawaian')
+                    ->searchable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('agency_id')
@@ -295,10 +298,30 @@ class ClientResource extends Resource
                     ->required(),
             ])->columns(2),
 
-        Forms\Components\Select::make('assignation_type')
-            ->options(CRoleAssignation::class)
-            ->label(__('labels.form.client.fields.assignation_type'))
-            ->required(),
+        Forms\Components\Group::make()
+            ->schema([
+                Forms\Components\Select::make('assignation_type')
+                    ->options(CRoleAssignation::class)
+                    ->label(__('labels.form.client.fields.assignation_type'))
+                    ->required()
+                    ->live() // Makes the component reactive when changed
+                    ->afterStateUpdated(function (?string $state, Forms\Set $set) {
+                        if (blank($state)) {
+                            $set('jenis_kepegawaian', null);
+                        } elseif ($state !== 'cpns') {
+                            $set('jenis_kepegawaian', 'PNS');
+                        }
+                    }),
+
+                Forms\Components\Select::make('jenis_kepegawaian')
+                    ->label('Jenis Kepegawaian')
+                    ->options([
+                        'PNS' => 'PNS',
+                        'PPPK' => 'PPPK',
+                    ])
+                    ->required()
+                    ->hidden(fn (Forms\Get $get) => blank($get('assignation_type'))),
+            ])->columns(2),
 
         Forms\Components\Group::make()
             ->schema([
@@ -344,12 +367,17 @@ class ClientResource extends Resource
         return [
             Forms\Components\Group::make()
                 ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('labels.form.client.fields.name'))
+                        ->formatStateUsing(fn(?Model $record) => $record == null ? auth()->user()->name : $record->name)
+                        ->required(),
+
                     Forms\Components\Group::make()
                         ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->label(__('labels.form.client.fields.name'))
-                                ->formatStateUsing(fn(?Model $record) => $record == null ? auth()->user()->name : $record->name)
-                                ->required(),
+                            Forms\Components\TextInput::make('title_prefix')
+                                ->label('Gelar Depan')
+                                ->hint('e.g: Dr., H.'),
+
                             Forms\Components\TextInput::make('academic_title')
                                 ->label(__('labels.form.client.fields.academic_title'))
                                 ->hint('e.g: S.H, M.H')

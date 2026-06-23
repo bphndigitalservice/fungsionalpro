@@ -23,7 +23,7 @@ class ClientMatchingService
 
             if (str_contains($master->nama, ',')) {
                 $parts = explode(',', $master->nama, 2);
-                $master->clean_name = trim($parts[0]);   
+                $master->clean_name = trim($parts[0]);
                 $master->academic_title = trim($parts[1]);
             }
         }
@@ -41,90 +41,106 @@ class ClientMatchingService
 
         if ($role) {
             $client->c_role_id = $role->id;
-            
+
             $level = CRoleLevel::where('c_role_id', $role->id)
                 ->get()
                 ->first(function ($cLevel) use ($rawJabatan) {
                     return stripos($rawJabatan, $cLevel->level) !== false;
                 });
-                
-            $client->c_role_level_id = $level ? $level->id : 1; 
 
-        if (!empty($master->gol_ruang)) {
-            $rawGolongan = $master->gol_ruang;
+            $client->c_role_level_id = $level ? $level->id : 1;
 
-            $grade = RegGrade::get()->first(function ($g) use ($rawGolongan) {
-                $matchCode = !empty($g->grade_code) && stripos($rawGolongan, $g->grade_code) !== false;
-                
-                $matchName = !empty($g->grade_name) && stripos($rawGolongan, $g->grade_name) !== false;
+            if (!empty($master->gol_ruang)) {
+                $rawGolongan = $master->gol_ruang;
 
-                return $matchCode || $matchName;
-            });
+                $grade = RegGrade::get()->first(function ($g) use ($rawGolongan) {
+                    $matchCode = !empty($g->grade_code) && stripos($rawGolongan, $g->grade_code) !== false;
 
-            if ($grade) {
-                $client->reg_grade_id = $grade->id;
+                    $matchName = !empty($g->grade_name) && stripos($rawGolongan, $g->grade_name) !== false;
+
+                    return $matchCode || $matchName;
+                });
+
+                if ($grade) {
+                    $client->reg_grade_id = $grade->id;
+                }
             }
-        }
 
-        $rawInstansi = strtolower($master->instansi ?? '');
-        $agencyType = 'central';
-        $agencyModel = RegDepartment::class;
+            $rawInstansi = strtolower($master->instansi ?? '');
+            $agencyType = 'central';
+            $agencyModel = RegDepartment::class;
 
-        if (str_contains($rawInstansi, 'provinsi') || str_contains($rawInstansi, 'prov.')) {
-            $agencyType = 'local_province';
-            $agencyModel = RegProvince::class;
-        } elseif (str_contains($rawInstansi, 'kabupaten') || str_contains($rawInstansi, 'kota') || str_contains($rawInstansi, 'kab.')) {
-            $agencyType = 'local_regency';
-            $agencyModel = RegRegency::class;
-        }
-
-        $client->type = $agencyType;
-        $client->agency_type = $agencyModel;
-
-        $lookupName = $master->unit_kerja ?? $master->instansi;
-        if ($lookupName) {
-            $agency = $agencyModel::where('name', 'LIKE', "%{$lookupName}%")->first();
-            if ($agency) {
-                $client->agency_id = $agency->id;
+            if (str_contains($rawInstansi, 'provinsi') || str_contains($rawInstansi, 'prov.')) {
+                $agencyType = 'local_province';
+                $agencyModel = RegProvince::class;
+            } elseif (str_contains($rawInstansi, 'kabupaten') || str_contains($rawInstansi, 'kota') || str_contains($rawInstansi, 'kab.')) {
+                $agencyType = 'local_regency';
+                $agencyModel = RegRegency::class;
             }
-        }
 
-        $rawStatus = strtolower($master->status ?? '');
-        $client->status = match(true) {
-            str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active') => 'active',
-            str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign') => 'non_active_resign',
-            str_contains($rawStatus, 'ctln') => 'non_active_ctln',
-            str_contains($rawStatus, 'belajar') => 'non_active_study_leave',
-            default => 'active',
-        };
+            $client->type = $agencyType;
+            $client->agency_type = $agencyModel;
 
-        if (!empty($master->pengangkatan)) {
-            $rawPengangkatan = strtolower($master->pengangkatan); 
+            $lookupName = $master->unit_kerja ?? $master->instansi;
+            if ($lookupName) {
+                $agency = $agencyModel::where('name', 'LIKE', "%{$lookupName}%")->first();
+                if ($agency) {
+                    $client->agency_id = $agency->id;
+                }
+            }
 
-            $client->assignation_type = match (true) {
-                str_contains($rawPengangkatan, 'cpns') || str_contains($rawPengangkatan, 'pppk') => 'cpns',
-                
-                str_contains($rawPengangkatan, 'inpassing') => 'inpassing',
-                str_contains($rawPengangkatan, 'pdjl')      => 'pdjl',
-                str_contains($rawPengangkatan, 'setara')    => 'penyetaraan', 
-                
-                default => 'cpns', 
+            $rawStatus = strtolower($master->status ?? '');
+            $client->status = match (true) {
+                str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active')
+                => \App\Enums\ClientStatus::Active,
+
+                str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign')
+                => \App\Enums\ClientStatus::NonActive_Resign,
+
+                str_contains($rawStatus, 'sementara') || str_contains($rawStatus, 'suspend') || str_contains($rawStatus, 'skors')
+                => \App\Enums\ClientStatus::NonActive_Suspended,
+
+                str_contains($rawStatus, 'ctln')
+                => \App\Enums\ClientStatus::NonActive_CTLN,
+
+                str_contains($rawStatus, 'belajar') || str_contains($rawStatus, 'study')
+                => \App\Enums\ClientStatus::NonActive_StudyLeave,
+
+                str_contains($rawStatus, 'luar jabatan') || str_contains($rawStatus, 'external')
+                => \App\Enums\ClientStatus::NonActive_ExternalAssignment,
+
+                str_contains($rawStatus, 'tidak memenuhi') || str_contains($rawStatus, 'requirement')
+                => \App\Enums\ClientStatus::NonActive_DoesntMeetRoleRequirement,
+
+                default => null,
             };
-        } else {
-            $client->assignation_type = 'cpns'; 
+
+            if (!empty($master->pengangkatan)) {
+                $rawPengangkatan = strtolower($master->pengangkatan);
+
+                $client->assignation_type = match (true) {
+                    str_contains($rawPengangkatan, 'cpns') || str_contains($rawPengangkatan, 'pppk' || str_contains($rawPengangkatan, 'pertama')) => 'cpns',
+                    str_contains($rawPengangkatan, 'inpassing') => 'inpassing',
+                    str_contains($rawPengangkatan, 'pdjl') => 'pdjl',
+                    str_contains($rawPengangkatan, 'penyetaraan') => 'penyetaraan',
+                    default => null,
+                };
+            } else {
+                $client->assignation_type = null;
+            }
         }
     }
 
-    public function getGenderFromNip(string $nip): ?string
-    {
-        if (strlen($nip) < 15) return null;
+        public function getGenderFromNip(string $nip): ?string
+        {
+            if (strlen($nip) < 15) return null;
 
-        $genderDigit = $nip[14];
+            $genderDigit = $nip[14];
 
-        return match ($genderDigit) {
-            '1' => 'male',
-            '2' => 'female',
-            default => null,
-        };
+            return match ($genderDigit) {
+                '1' => 'male',
+                '2' => 'female',
+                default => null,
+            };
+        }
     }
-}

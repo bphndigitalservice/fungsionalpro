@@ -17,7 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class ClientActivityTable extends TableWidget
 {
-    
+
     protected ?Model $record = null;
     protected static ?string $heading = 'Daftar Kegiatan';
 
@@ -32,7 +32,7 @@ class ClientActivityTable extends TableWidget
             ->query(
                 $this->record
                     ? $this->record->activities()->getQuery()
-                    : ClientActivity::query()->whereRaw('1 = 0') // empty but valid query
+                    : ClientActivity::query()->whereRaw('1 = 0')
             )
             ->columns([
 
@@ -76,11 +76,23 @@ class ClientActivityTable extends TableWidget
                     TextColumn::make('activity_details.materi')
                         ->label('Materi')
                         ->wrap()
+                        ->limit(100)
+                        ->tooltip(fn ($record) => $record->description)
                         ->visible(fn () => $this->record?->c_role_id == 2),
 
                 TextColumn::make('description')
                     ->label('Deskripsi Kegiatan')
-                    ->wrap(),
+                    ->wrap()
+                    ->limit(100)
+                    ->tooltip(fn ($record) => $record->description),
+
+                TextColumn::make('is_verified')
+                    ->label('Status Verifikasi')
+                    ->formatStateUsing(fn (?bool $state): string => match ($state) {
+                        true => 'Sudah Diverifikasi',
+                        false => 'Belum Diverifikasi',
+                        default => '-',
+                    })
 
             ])
             ->actions([

@@ -22,6 +22,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Storage;
 
 class ClientPointList extends Page implements HasInfolists, HasTable
 {
@@ -46,12 +47,13 @@ class ClientPointList extends Page implements HasInfolists, HasTable
                 TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true)->searchable(),
                 TextColumn::make('date_of_pak')->date(),
                 TextColumn::make('submission_type')->badge(),
+
                 TextColumn::make('status')->searchable(),
                 TextColumn::make('is_approved')
                     ->label('Rejected/Accepted')
                     ->state(function (Model $record) {
-                        return ($record->status == PointSubmissionStatus::Verified || $record->status == PointSubmissionStatus::ShouldRevise) 
-                            ? $record->is_approved 
+                        return ($record->status == PointSubmissionStatus::Verified || $record->status == PointSubmissionStatus::ShouldRevise)
+                            ? $record->is_approved
                             : 'Sedang diverifikasi';
                     })
                     ->tooltip(fn (Model $record): ?string => $record->verifier_note)
@@ -59,6 +61,7 @@ class ClientPointList extends Page implements HasInfolists, HasTable
                     ->copyableState(fn (Model $record) => $record->verifier_note),
             ])->actions([
                 ViewPointSubmission::make(),
+
                 Action::make('Update')
                     ->hidden(fn (Model $record) => $record->status != PointSubmissionStatus::ShouldRevise)
                     ->url(fn (Model $record) => ClientPointEdit::getUrl(['pointSubmission' => $record->id])),
