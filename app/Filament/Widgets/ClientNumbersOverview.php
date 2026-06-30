@@ -52,7 +52,6 @@ class ClientNumbersOverview extends StatsOverviewWidget
             })->select('clients.*');
         }
 
-        // default: no access -> empty result
         return $query->whereRaw('1 = 0');
     }
 }

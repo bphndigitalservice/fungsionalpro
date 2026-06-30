@@ -6,14 +6,33 @@ use App\Enums\SystemRole;
 use App\Filament\Widgets\PointOverview;
 use App\Filament\Widgets\ClientsByRoleChart;
 use App\Livewire\ProfileCompletionWidget;
+use App\Models\Client;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard extends BaseDashboard
 {
     protected static string $routePath = '/';
+
+    public function mount(): void
+    {
+        $user = Auth::user();
+        if ($user && $user->hasSystemRole(SystemRole::Client)) {
+            $client = Client::where('user_id', $user->id)->first();
+            if ($client && $client->identity?->photo === null) {
+                Notification::make()
+                    ->title('Perhatian')
+                    ->body('Lengkapi Pengisian Identitas Terlebih Dahulu')
+                    ->warning()
+                    ->persistent()
+                    ->send();
+            }
+        }
+    }
 
     protected static ?int $navigationSort = -2;
 

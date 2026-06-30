@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Enums\EducationLevel;
 use App\Filament\Resources\ClientEducationResource\Pages;
 use App\Models\Client;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientEducationResource extends Resource
 {
+    use ChecksPhotoUpload;
+
     protected static ?string $model = ClientEducation::class;
 
     protected static ?string $navigationLabel = 'Riwayat Pendidikan';
@@ -38,7 +41,7 @@ class ClientEducationResource extends Resource
                                     ->required(),
 
                                 Forms\Components\TextInput::make('university_name')
-                                    ->label(__('labels.form.client.fields.university_name'))
+                                    ->label(__('Universitas'))
                                     ->required(),
 
                                 Forms\Components\TextInput::make('program_name')
@@ -158,10 +161,5 @@ class ClientEducationResource extends Resource
     public static function getRoutePath(): string
     {
         return '/c/educations';
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return Client::current() !== null;
     }
 }

@@ -76,7 +76,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         if ($this->hasAnySystemRole(SystemRole::SuperAdmin, SystemRole::Admin, SystemRole::Verifier) || $this->isActiveClient()) {
             return true;
         }
-        return auth()->check(); 
+        return auth()->check();
     }
 
     public function hasSystemRole(SystemRole $role): bool
@@ -88,6 +88,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return $this->hasRole(array_map(fn ($r) => $r->value, $roles));
     }
+
 
     public function getResetPasswordUrl(string $token, array $parameters = []): string
     {

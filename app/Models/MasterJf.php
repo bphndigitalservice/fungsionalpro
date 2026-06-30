@@ -17,5 +17,6 @@ class MasterJf extends Model
         'instansi',
         'pengangkatan',
         'status',
+        'type',
     ];
 }

@@ -21,9 +21,8 @@ class ClientObserver
         $master = $this->service->findMasterByNip($client->nip);
 
         if ($master) {
-            // Process raw excel values into database standard IDs
             $this->service->applyMasterData($client, $master);
-            $client->is_verified = \App\Enums\Verified::Unverified; 
+            $client->is_verified = \App\Enums\Verified::Unverified;
         } else {
             // Normal fallbacks if NIP is not present in master excel records
             $client->is_verified = \App\Enums\Verified::Unverified;
@@ -36,16 +35,14 @@ class ClientObserver
     {
         $master = $this->service->findMasterByNip($client->nip);
         $extractedGender = $this->service->getGenderFromNip($client->nip);
-        
-        // Fetch the user data safely using the foreign key directly
-        // to bypass premature relation caching issues
+
         $user = User::find($client->user_id);
 
         $client->identity()->create([
             'name'           => $master->nama ?? ($user->name ?? 'User'),
             'academic_title' => $master->academic_title ?? null,
             'gender'         => $extractedGender,
-            'address'        => '-', 
+            'address'        => '-',
             'phone_number'   => '-',
         ]);
     }

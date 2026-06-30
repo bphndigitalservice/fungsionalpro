@@ -3,29 +3,24 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MasterJfResource\Pages;
-use App\Filament\Resources\MasterJfResource\RelationManagers;
 use App\Models\MasterJf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Auth;
-
 use App\Imports\MasterJfImport;
+use Illuminate\Support\Facades\Storage;
 
 class MasterJfResource extends Resource
 {
     protected static ?string $model = MasterJf::class;
     protected static ?int $navigationSort = 3;
 
-    
     public static function form(Form $form): Form
     {
         return $form
@@ -50,6 +45,8 @@ class MasterJfResource extends Resource
                     ->searchable(),
                 Forms\Components\TextInput::make('jabatan'),
                 Forms\Components\TextInput::make('instansi'),
+                Forms\Components\TextInput::make('type')
+                    ->label('Tipe'),
                 Forms\Components\TextInput::make('unit_kerja')
                     ->label('Unit Kerja'),
                 Forms\Components\Select::make('pengangkatan')
@@ -78,49 +75,54 @@ class MasterJfResource extends Resource
                             => 'Tidak Memenuhi Persyaratan Jabatan',
                     ])
                     ->searchable()
-                    ->preload()
+                    ->preload(),
+                Forms\Components\Select::make('status_kepegawaian')
+                    ->label('Status Kepegawaian')
+                    ->options([
+                        'PNS' => 'PNS',
+                        'PPPK' => 'PPPK',
+                    ])
+                    ->searchable()
+                    ->preload(),
             ]);
     }
 
-   public static function table(Table $table): Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('nip')
                     ->label('NIP')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('gol_ruang')
                     ->label('Golongan/Ruang')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('jabatan')
                     ->label('Jabatan')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('unit_kerja')
                     ->label('Unit Kerja')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('instansi')
                     ->label('Instansi')
                     ->searchable(),
-
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Tipe')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('pengangkatan')
                     ->label('Pengangkatan')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status'),
+                Tables\Columns\TextColumn::make('status_kepegawaian')
+                    ->label('Status Kepegawaian')
+                    ->searchable(),
             ])
-
             ->headerActions([
                 Action::make('import')
                     ->label('Import Data')
-
                     ->form([
                         FileUpload::make('file')
                             ->label('File Excel')
@@ -132,13 +134,14 @@ class MasterJfResource extends Resource
                             ->helperText('Format file: .xlsx atau .xls. Maksimal ukuran file 5 MB.')
                             ->required(),
                     ])
-
                     ->action(function (array $data) {
                         try {
 
+                            $filePath = Storage::disk('public')->path($data['file']);
+
                             Excel::import(
                                 new MasterJfImport,
-                                storage_path('app/public/' . $data['file'])
+                                $filePath
                             );
 
                             Notification::make()
@@ -147,7 +150,6 @@ class MasterJfResource extends Resource
                                 ->send();
 
                         } catch (\Exception $e) {
-
                             $message = $e->getMessage();
 
                             if (
@@ -167,16 +169,9 @@ class MasterJfResource extends Resource
                         }
                     }),
             ])
-        ->actions([
-            //Tables\Actions\EditAction::make(),
-        ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+            ->actions([
+                // Tables\Actions\EditAction::make(),
+            ]);
     }
 
     public static function getPages(): array
@@ -196,7 +191,7 @@ class MasterJfResource extends Resource
     {
         return __('Import Data Klien');
     }
-    
+
     public static function getModelLabel(): string
     {
         return __('Import Data Klien');

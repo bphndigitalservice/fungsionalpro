@@ -38,6 +38,20 @@ class ClientPointList extends Page implements HasInfolists, HasTable
     public function mount(): void
     {
         static::canView();
+
+        $client = Client::current();
+        if ($client && $client->identity?->photo === null) {
+            abort(403);
+        }
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $client = Client::current();
+        if ($client) {
+            return $client->identity?->photo !== null;
+        }
+        return true;
     }
 
     public function table(Table $table): Table

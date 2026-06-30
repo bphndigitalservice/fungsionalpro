@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class RegProvince extends Model
 {
+
     use HasFactory;
 
     public $timestamps = false;
@@ -31,5 +32,10 @@ class RegProvince extends Model
     public function access(): MorphOne
     {
         return $this->morphOne(VerifierAccess::class, 'access');
+    }
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class, 'reg_province_id', 'id');
     }
 }

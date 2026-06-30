@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\TrainingCompletionStatus; // Make sure this is imported
+use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
 use App\Models\Client;
 use App\Models\ClientCompetence;
@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientCompetenceResource extends Resource
 {
+    use ChecksPhotoUpload;
+
     protected static ?string $model = ClientCompetence::class;
     protected static ?string $navigationLabel = 'Diklat/Pelatihan';
     protected static ?string $modelLabel = 'Diklat/Pelatihan';
@@ -174,10 +176,5 @@ class ClientCompetenceResource extends Resource
     public static function getRoutePath(): string
     {
         return '/c/courses';
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return Client::current() !== null;
     }
 }

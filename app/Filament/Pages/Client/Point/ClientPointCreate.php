@@ -63,8 +63,23 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     public function mount(): void
     {
         static::canView();
+
+        $client = Client::current();
+        if ($client && $client->identity?->photo === null) {
+            abort(403);
+        }
+
         $this->fillForm();
         $this->previousUrl = url()->previous();
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $client = Client::current();
+        if ($client) {
+            return $client->identity?->photo !== null;
+        }
+        return true;
     }
 
     public function form(Form $form): Form
@@ -77,10 +92,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                 static::getSKPAccumulation(),
                 static::getFinalAKForm(),
 
-                // File SKP component runs first here
                 static::getSKPFileUploadField(),
 
-                // Predikat Kinerja component follows right underneath
                 static::getPerformancePredicateField(),
 
                 static::getSKP2AkFileUploadField(),
