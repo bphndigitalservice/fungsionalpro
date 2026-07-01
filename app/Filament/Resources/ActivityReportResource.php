@@ -11,8 +11,15 @@ use App\Models\AdminAccess;
 use App\Models\Client;
 use App\Models\RegProvince;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -67,20 +74,108 @@ class ActivityReportResource extends Resource
         return [
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\TextInput::make('title')
+                    Grid::make(2)
+                        ->schema([
+                            Select::make('jenis_kegiatan')
+                                ->label('Jenis Kegiatan')
+                                ->options(static::getJenisKegiatanOptions())
+                                ->live()
+                                ->visible(fn () => Client::current()?->c_role_id == 2)
+                                ->required(fn () => Client::current()?->c_role_id == 2),
+
+                            Select::make('reg_province_id')
+                                ->label('Provinsi Pelaksanaan Kegiatan')
+                                ->options(RegProvince::pluck('name', 'id'))
+                                ->searchable()
+                                ->visible(fn () => Client::current()?->c_role_id == 2)
+                                ->required(fn () => Client::current()?->c_role_id == 2),
+                        ]),
+
+                    TextInput::make('title')
                         ->label('Nama Kegiatan')
                         ->columnSpanFull()
                         ->required(),
+
                     Forms\Components\Fieldset::make()
                         ->label('Waktu Pelaksanaan Kegiatan')
                         ->schema([
-                            Forms\Components\DatePicker::make('start_period')->minDate('2020-01-01')->required(),
-                            Forms\Components\DatePicker::make('end_period')->minDate('2020-01-01'),
-                        ])->columns(2),
-                    Forms\Components\Textarea::make('description')
+                            DatePicker::make('start_period')
+                                ->minDate('2020-01-01')
+                                ->label(fn () =>
+                                    Client::current()?->c_role_id == 1
+                                        ? 'Tanggal Mulai'
+                                        : 'Tanggal'
+                                )
+                                ->required(),
+
+                            DatePicker::make('end_period')
+                                ->minDate('2020-01-01')
+                                ->label('Selesai')
+                                ->visible(fn () => Client::current()?->c_role_id == 1)
+                                ->required(fn () => Client::current()?->c_role_id == 1),
+
+                            Forms\Components\Grid::make(2)
+                                ->visible(fn () => Client::current()?->c_role_id == 2)
+                                ->schema([
+                                    TimePicker::make('start_time')
+                                        ->label('Jam Mulai')
+                                        ->seconds(false)
+                                        ->required(),
+
+                                    TimePicker::make('end_time')
+                                        ->label('Jam Selesai')
+                                        ->seconds(false)
+                                        ->required(),
+                                ]),
+                        ])
+                        ->columns(2),
+
+                    Forms\Components\Section::make('Detail Kegiatan')
+                        ->schema([
+                            TextInput::make('activity_details.lokasi')
+                                ->label('Lokasi / Tempat Kegiatan')
+                                ->required(),
+
+                            TextInput::make('activity_details.jumlah_peserta')
+                                ->numeric()
+                                ->label('Jumlah Peserta')
+                                ->required(),
+
+                            TextInput::make('activity_details.penerima')
+                                ->label('Penerima')
+                                ->required(),
+
+                            Textarea::make('activity_details.materi')
+                                ->label(fn (Get $get) => in_array((int)$get('jenis_kegiatan'), [3, 4]) ? 'Jenis Kasus' : 'Materi')
+                                ->required(),
+                        ])
+                        ->visible(fn () => Client::current()?->c_role_id == 2),
+
+                    Textarea::make('description')
                         ->label('Deskripsi Kegiatan')
                         ->rows(5)
                         ->required(),
+
+                    FileUpload::make('activity_file')
+                        ->disk('s3')
+                        ->label('Lampiran Laporan Kegiatan')
+                        ->helperText(function () {
+                            $size = config('fungsional-pro.max_upload_file_size');
+                            $baseText = "Format file: PDF | Maksimal ukuran: {$size} KB.";
+
+                            if (Client::current()?->c_role_id == 2) {
+                                return $baseText . " Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).";
+                            }
+
+                            return $baseText;
+                        })
+                        ->required()
+                        ->maxFiles(1)
+                        ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                        ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                        ->directory('activity_file')
+                        ->visibility('private')
+                        ->downloadable(),
                 ])
         ];
     }
@@ -249,7 +344,6 @@ class ActivityReportResource extends Resource
                     ExportBulkAction::make()
                         ->exporter(ActivityReportExporter::class)
                         ->label('Ekspor Baris Terpilih'),
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -263,9 +357,22 @@ class ActivityReportResource extends Resource
     {
         return [
             'index' => Pages\ListActivityReports::route('/'),
-            'create' => Pages\CreateActivityReport::route('/create'),
-            'edit' => Pages\EditActivityReport::route('/{record}/edit'),
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
     }
 
     public static function getEloquentQuery(): Builder

@@ -55,11 +55,14 @@ class Register extends BaseRegister
 
                                         $set('search_message', null);
                                         $set('search_message_type', null);
+                                        $set('client_found', false);
 
-                                        $client = Client::where('nip', $nip)->first();
+                                        $client = Client::where('nip', $nip)->with('user')->first();
                                         if ($client) {
+                                            $set('email', $client->user->email);
                                             $set('search_message', 'Anda sudah memiliki akun. Silahkan login');
                                             $set('search_message_type', 'danger');
+                                            $set('client_found', true);
                                             return;
                                         }
 
@@ -106,6 +109,7 @@ class Register extends BaseRegister
 
                         Hidden::make('search_message'),
                         Hidden::make('search_message_type'),
+                        Hidden::make('client_found')->default(false),
                         Placeholder::make('search_message_display')
                             ->label(false)
                             ->content(fn(Get $get) => new \Illuminate\Support\HtmlString(
@@ -120,7 +124,8 @@ class Register extends BaseRegister
 
                         TextInput::make('name')
                             ->label('Nama Lengkap')
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (Get $get) => $get('client_found')),
 
                         Select::make('c_role_id')
                             ->label('Jabatan Fungsional')
@@ -129,7 +134,7 @@ class Register extends BaseRegister
                                 2 => 'Penyuluh Hukum',
                             ])
                             ->required()
-                            ->disabled(fn (Get $get) => $get('search_message') !== null)
+                            ->disabled(fn (Get $get) => $get('c_role_id') !== null || $get('client_found'))
                             ->dehydrated(),
 
                         Select::make('agency_type')
@@ -140,7 +145,8 @@ class Register extends BaseRegister
                                 'local_regency' => 'Kab/Kota',
                             ])
                             ->live()
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (Get $get) => $get('client_found')),
 
                         Select::make('agency_id')
                             ->label('Instansi')
@@ -157,23 +163,26 @@ class Register extends BaseRegister
                                     default => [],
                                 };
                             })
-                            ->disabled(fn (Get $get) => ! $get('agency_type')),
+                            ->disabled(fn (Get $get) => ! $get('agency_type') || $get('client_found')),
 
                         TextInput::make('email')
                             ->label('Email')
                             ->email()
                             ->required()
-                            ->unique('users', 'email'),
+                            ->unique('users', 'email')
+                            ->disabled(fn (Get $get) => $get('client_found')),
 
                         TextInput::make('password')
                             ->label('Password')
                             ->password()
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (Get $get) => $get('client_found')),
 
                         TextInput::make('passwordConfirmation')
                             ->label('Konfirmasi Password')
                             ->password()
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (Get $get) => $get('client_found')),
 
                     ])
                     ->statePath('data'),
@@ -229,6 +238,7 @@ class Register extends BaseRegister
             'c_role_id' => $data['c_role_id'],
             'agency_id' => $data['agency_id'],
             'type' => $data['agency_type'],
+            'agency_type' => $this->getAgencyModel($data['agency_type']),
         ]);
 
         return $user;
