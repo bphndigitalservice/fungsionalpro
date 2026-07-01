@@ -18,20 +18,18 @@ class ActivityReportExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('id')
-                ->label('No. Sistem'),
-
-            // Pulls the employee/client's name for the admin view
             ExportColumn::make('client.identity.name')
-                ->label('Nama Pegawai / Client'),
-                
-            ExportColumn::make('title')
-                ->label('Kegiatan'),
+                ->label('Nama'),
 
-            // Reuses the types central array from your ClientActivityResource
+            ExportColumn::make('client.identity.nip')
+                ->label('NIP'),
+
             ExportColumn::make('jenis_kegiatan')
                 ->label('Jenis Kegiatan')
                 ->formatStateUsing(fn ($state) => ClientActivityResource::getJenisKegiatanOptions()[(int)$state] ?? '-'),
+
+            ExportColumn::make('title')
+                ->label('Kegiatan'),
 
             ExportColumn::make('reg_province_id')
                 ->label('Provinsi Pelaksanaan')
@@ -47,8 +45,8 @@ class ActivityReportExporter extends Exporter
 
             ExportColumn::make('jam')
                 ->label('Waktu/Jam')
-                ->getStateUsing(fn (ClientActivity $record) => 
-                    $record->start_time && $record->end_time 
+                ->getStateUsing(fn (ClientActivity $record) =>
+                    $record->start_time && $record->end_time
                         ? Carbon::parse($record->start_time)->format('H:i') . ' - ' . Carbon::parse($record->end_time)->format('H:i')
                         : '-'
                 ),

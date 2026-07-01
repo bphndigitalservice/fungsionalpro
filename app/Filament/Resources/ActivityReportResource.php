@@ -89,6 +89,16 @@ class ActivityReportResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('client.identity.name')
+                    ->label('Nama')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('client.nip')
+                    ->label('NIP')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('title')
                     ->label('Nama Kegiatan')
                     ->wrap()
@@ -218,23 +228,24 @@ class ActivityReportResource extends Resource
                             fn (Builder $query, $year): Builder => $query->whereYear('start_period', $year)
                         );
                     })
-            ])  
+            ])
             ->headerActions([
-                ExportAction::make()
+                ExportAction::make('export_all')
+                    ->label('Ekspor Pelaporan Kegiatan')
                     ->exporter(ActivityReportExporter::class)
-                    ->color('success') 
-                    ->button() 
+                    ->modifyQueryUsing(fn (Builder $query) => static::getEloquentQuery())
+                    ->color('success')
+                    ->button()
                     ->icon('heroicon-m-arrow-down-tray'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()->label('Lihat Detail')->modalHeading('Detail Kegiatan'), 
+                Tables\Actions\ViewAction::make()->label('Lihat Detail')->modalHeading('Detail Kegiatan'),
                 MediaAction::make()
                     ->media(fn(Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
                     ->label('Lampiran Laporan Kegiatan'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    // 4. Added Bulk Export option inside checked rows action menu
                     ExportBulkAction::make()
                         ->exporter(ActivityReportExporter::class)
                         ->label('Ekspor Baris Terpilih'),

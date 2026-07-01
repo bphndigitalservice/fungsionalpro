@@ -17,21 +17,21 @@ class ClientExporter extends Exporter
         return [
             ExportColumn::make('nip')
                 ->label('NIP'),
-                
+
             ExportColumn::make('identity.name')
                 ->label('Nama Lengkap'),
-                
+
             ExportColumn::make('crole.role_name')
                 ->label('Jabatan'),
-                
+
             ExportColumn::make('croleLevel.level')
                 ->label('Jenjang Jabatan'),
-                
+
             ExportColumn::make('point.point')
                 ->label('Angka Kredit / Point'),
-                
+
             ExportColumn::make('type')
-                ->label('Klaster Kelompok')
+                ->label('Kelompok Instansi')
                 ->formatStateUsing(function ($state) {
                     $value = $state instanceof \BackedEnum ? $state->value : $state;
                     return match ($value) {
@@ -41,28 +41,27 @@ class ClientExporter extends Exporter
                         default => $value,
                     };
                 }),
-                
+
             ExportColumn::make('agenciable.name')
-                ->label('Instansi Kerja Induk'),
-                
+                ->label('Instansi'),
+
             ExportColumn::make('echelonable.name')
-                ->label('Unit Eselon'),
-                
+                ->label('Unit Kerja'),
+
             ExportColumn::make('status')
                 ->label('Status Pegawai')
                 ->formatStateUsing(function ($state) {
-                    // If it's a BackedEnum, grab its value (or try ->getLabel() if you have HasLabel implemented)
                     return $state instanceof \BackedEnum ? $state->value : $state;
                 }),
-                
+
             ExportColumn::make('assignation_type')
                 ->label('Jenis Pengangkatan')
                 ->formatStateUsing(function ($state) {
                     return $state instanceof \BackedEnum ? $state->value : $state;
                 }),
-                
+
             ExportColumn::make('jenis_kepegawaian')
-                ->label('Status Kepegawaian'),
+                ->label('Jenis Kepegawaian'),
         ];
     }
 

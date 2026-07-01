@@ -19,12 +19,6 @@ class ClientActivityExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('id')
-                ->label('No. Sistem'),
-                
-            ExportColumn::make('title')
-                ->label('Nama Kegiatan'),
-
             ExportColumn::make('jenis_kegiatan')
                 ->label('Jenis Kegiatan')
                 ->formatStateUsing(fn ($state) => match ((int) $state) {
@@ -32,6 +26,9 @@ class ClientActivityExporter extends Exporter
                     2 => 'Penyuluhan Hukum',
                     default => '-',
                 }),
+
+            ExportColumn::make('title')
+                ->label('Nama Kegiatan'),
 
             ExportColumn::make('reg_province_id')
                 ->label('Provinsi Pelaksanaan')
@@ -47,8 +44,8 @@ class ClientActivityExporter extends Exporter
 
             ExportColumn::make('jam')
                 ->label('Waktu/Jam')
-                ->getStateUsing(fn (ClientActivity $record) => 
-                    $record->start_time && $record->end_time 
+                ->getStateUsing(fn (ClientActivity $record) =>
+                    $record->start_time && $record->end_time
                         ? Carbon::parse($record->start_time)->format('H:i') . ' - ' . Carbon::parse($record->end_time)->format('H:i')
                         : '-'
                 ),
