@@ -16,4 +16,10 @@ class ListUsers extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    // ⚠️ Check if this function exists inside your ListUsers.php file:
+    protected function isTablePaginationEnabled(): bool
+    {
+        return true; // Ensure this is true, or remove the method entirely!
+    }
 }

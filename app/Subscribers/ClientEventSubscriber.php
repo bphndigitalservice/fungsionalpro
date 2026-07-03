@@ -97,7 +97,6 @@ class ClientEventSubscriber
 
         DB::beginTransaction();
         try {
-            // reset verification
             $client->update([
                 'is_verified' => null,
                 'verified_at' => null,
