@@ -26,6 +26,8 @@ class ViewPointSubmission extends ViewAction
             ClientPointCreate::getSKP2AKConversionForm()->disabled($disabled),
             ClientPointCreate::getSKPAccumulation()->disabled($disabled),
             ClientPointCreate::getFinalAKForm()->disabled($disabled),
+            ClientPointCreate::getSKPFileUploadField()->disabled($disabled),
+            ClientPointCreate::getPerformancePredicateField()->disabled($disabled),
             ClientPointCreate::getSKP2AkFileUploadField()->disabled($disabled),
             ClientPointCreate::getAccumulatedAKFileUploadField()->disabled($disabled),
             ClientPointCreate::getFinalPAKUploadField()->disabled($disabled),

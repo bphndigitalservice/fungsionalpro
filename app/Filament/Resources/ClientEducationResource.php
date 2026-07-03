@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Enums\EducationLevel;
 use App\Filament\Resources\ClientEducationResource\Pages;
 use App\Models\Client;
@@ -10,16 +11,15 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class ClientEducationResource extends Resource
 {
+    use ChecksPhotoUpload;
 
     protected static ?string $model = ClientEducation::class;
-
 
     protected static ?string $navigationLabel = 'Riwayat Pendidikan';
 
@@ -39,17 +39,30 @@ class ClientEducationResource extends Resource
                                     ->label(__('labels.form.client.fields.education_level'))
                                     ->options(EducationLevel::class)
                                     ->required(),
+
                                 Forms\Components\TextInput::make('university_name')
-                                    ->label(__('labels.form.client.fields.university_name'))
+                                    ->label(__('Universitas'))
                                     ->required(),
+
                                 Forms\Components\TextInput::make('program_name')
                                     ->label(__('labels.form.client.fields.program_name'))
                                     ->required(),
+
                                 Forms\Components\TextInput::make('gpa')
                                     ->label(__('labels.form.client.fields.gpa'))
                                     ->numeric()
                                     ->maxValue(4)
                                     ->required(),
+
+                                Forms\Components\DatePicker::make('certificate_date')
+                                    ->label('Tanggal Ijazah')
+                                    ->native(false)
+                                    ->required(),
+                            ])
+                            ->columns(3),
+
+                        Forms\Components\Group::make()
+                            ->schema([
                                 Forms\Components\FileUpload::make('certificate')
                                     ->disk('s3')
                                     ->label(__('labels.form.client.fields.certificate'))
@@ -61,8 +74,19 @@ class ClientEducationResource extends Resource
                                     ->visibility('private')
                                     ->downloadable()
                                     ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
+
+                                Forms\Components\FileUpload::make('title_inclusion_file')
+                                    ->disk('s3')
+                                    ->label('Lembar Pencantuman Gelar')
+                                    ->maxFiles(1)
+                                    ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                                    ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                                    ->directory('title_inclusion_files')
+                                    ->visibility('private')
+                                    ->downloadable()
+                                    ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                             ])
-                            ->columns(3),
+                            ->columns(2),
                     ])
                     ->columnSpan([
                         'lg' => fn(?ClientEducation $record) => $record === null ? 3 : 2,
@@ -90,6 +114,11 @@ class ClientEducationResource extends Resource
                     ->label(__('labels.form.client.fields.gpa'))
                     ->sortable()
                     ->searchable(),
+
+                TextColumn::make('certificate_date')
+                    ->label('Tanggal Ijazah')
+                    ->date()
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('level')
@@ -97,9 +126,10 @@ class ClientEducationResource extends Resource
                     ->options(EducationLevel::class),
             ])
             ->actions([
-                MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->certificate, now()->addMinutes(10)))
-                    ->label('Ijazah'),
+                Tables\Actions\ViewAction::make()
+                    ->label('Lihat Detail')
+                    ->modalHeading('Detail Riwayat Pendidikan'),
+
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -113,7 +143,6 @@ class ClientEducationResource extends Resource
     {
         return [];
     }
-
 
     public static function getNavigationGroup(): ?string
     {
@@ -129,15 +158,8 @@ class ClientEducationResource extends Resource
         ];
     }
 
-
     public static function getRoutePath(): string
     {
         return '/c/educations';
     }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return Client::current() !== null;
-    }
-
 }

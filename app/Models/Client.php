@@ -45,6 +45,11 @@ class Client extends Model
         return $this->belongsTo(CRole::class, 'c_role_id', 'id');
     }
 
+    public function regProvince(): BelongsTo
+    {
+        return $this->belongsTo(RegProvince::class, 'reg_province_id', 'id');
+    }
+
     public function croleLevel(): BelongsTo
     {
         return $this->belongsTo(CRoleLevel::class, 'c_role_level_id', 'id')->orderBy('id', 'asc');
