@@ -24,9 +24,9 @@ class ProfileCompletionWidget extends Widget implements HasForms, HasInfolists
 
     public function mount(): void
     {
-        $client = Client::where('user_id', auth()->user()->id);
-        if ($client->exists()) {
-            $this->client = $client->first();
+        $client = Client::where('user_id', auth()->user()->id)->first();
+        if ($client) {
+            $this->client = $client;
         }
     }
 

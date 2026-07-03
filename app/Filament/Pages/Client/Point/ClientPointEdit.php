@@ -76,6 +76,8 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
                 ClientPointCreate::getSKP2AKConversionForm(),
                 ClientPointCreate::getSKPAccumulation(),
                 ClientPointCreate::getFinalAKForm(),
+                ClientPointCreate::getSKPFileUploadField(),
+                ClientPointCreate::getPerformancePredicateField(),
                 ClientPointCreate::getSKP2AkFileUploadField(),
                 ClientPointCreate::getAccumulatedAKFileUploadField(),
                 ClientPointCreate::getFinalPAKUploadField(),

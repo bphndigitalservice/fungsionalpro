@@ -13,7 +13,8 @@ class UserEventSubscriber
     protected Authenticatable $user;
 
     protected array $defaultRoles = [
-        SystemRole::Client->value, SystemRole::PanelUser->value,
+        SystemRole::PanelUser->value,
+        SystemRole::Client->value,
     ];
 
     public function handleRegisteredUser(Registered $event): void

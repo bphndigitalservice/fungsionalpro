@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
-use App\Filament\Resources\ClientCompetenceResource\RelationManagers;
 use App\Models\Client;
 use App\Models\ClientCompetence;
 use Filament\Forms;
@@ -22,11 +22,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientCompetenceResource extends Resource
 {
+    use ChecksPhotoUpload;
 
     protected static ?string $model = ClientCompetence::class;
-
     protected static ?string $navigationLabel = 'Diklat/Pelatihan';
-
     protected static ?string $modelLabel = 'Diklat/Pelatihan';
 
     public static function form(Form $form): Form
@@ -55,25 +54,14 @@ class ClientCompetenceResource extends Resource
                         TextInput::make('certificate_number')
                             ->label('Nomor Sertifikat')
                             ->required(),
+
+                        // Dynamically pulled everything directly from your Enum setup!
                         ToggleButtons::make('completion_status')
                             ->label('Status')
-                            ->options([
-                                'PASSED' => 'Lulus',
-                                'FAILED' => 'Tidak Lulus',
-                                'SATISFACTORY' => 'Memuaskan',
-                            ])
-                            ->icons([
-                                'PASSED' => 'heroicon-s-check-circle',
-                                'FAILED' => 'heroicon-s-x-circle',
-                                'SATISFACTORY' => 'heroicon-s-hand-thumb-up',
-                            ])
-                            ->colors([
-                                'PASSED' => 'success',
-                                'FAILED' => 'danger',
-                                'SATISFACTORY' => 'warning',
-                            ])
+                            ->options(TrainingCompletionStatus::class)
                             ->inline()
                             ->required(),
+
                         Forms\Components\Fieldset::make()
                             ->label('Waktu Pelaksanaan Pelatihan/Diklat')
                             ->schema([
@@ -87,17 +75,17 @@ class ClientCompetenceResource extends Resource
                         TextInput::make('institution')
                             ->label('Lembaga Pelatihan')
                             ->required(),
-FileUpload::make('competence_file')
-                             ->disk('s3')
-                             ->label('Sertifikat')
-                             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-                             ->maxFiles(1)
-                             ->maxSize(config('fungsional-pro.max_upload_file_size'))
-                             ->visibility(config('fungsional-pro.s3.visibility'))
-                             ->directory('competence-files')
-                             ->downloadable()
-                             ->required()
-                             ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
+                        FileUpload::make('competence_file')
+                            ->disk('s3')
+                            ->label('Sertifikat')
+                            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                            ->maxFiles(1)
+                            ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                            ->visibility(config('fungsional-pro.s3.visibility'))
+                            ->directory('competence-files')
+                            ->downloadable()
+                            ->required()
+                            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                     ])
             ]);
     }
@@ -111,10 +99,6 @@ FileUpload::make('competence_file')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category')
                     ->label('Jenis Diklat/Pelatihan')
-                    /*->([
-                        'PROMOTION_TRAINING' => 'Diklat Fungsional',
-                        'TECHNICAL_TRAINING' => 'Diklat/Pelatihan Teknis',
-                    ])*/
                     ->sortable(),
                 Tables\Columns\TextColumn::make('promotionLevel.level')
                     ->label('Jenjang Diklat Fungsional')
@@ -125,6 +109,7 @@ FileUpload::make('competence_file')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('completion_status')
                     ->label('Status')
+                    ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_period')
                     ->label('Awal Pelatihan')
@@ -148,11 +133,7 @@ FileUpload::make('competence_file')
                     ]),
                 Tables\Filters\SelectFilter::make('completion_status')
                     ->label('Status')
-                    ->options([
-                        'PASSED' => 'Lulus',
-                        'FAILED' => 'Tidak Lulus',
-                        'SATISFACTORY' => 'Memuaskan',
-                    ]),
+                    ->options(TrainingCompletionStatus::class),
             ])
             ->actions([
                 MediaAction::make()
@@ -169,9 +150,7 @@ FileUpload::make('competence_file')
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -189,7 +168,6 @@ FileUpload::make('competence_file')
         return __('labels.nav.client_menu');
     }
 
-
     private static function storageVisibility(): string
     {
         return config('fungsional-pro.s3.visibility');
@@ -199,11 +177,4 @@ FileUpload::make('competence_file')
     {
         return '/c/courses';
     }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return Client::current() !== null;
-    }
-
-
 }
