@@ -66,7 +66,7 @@ class AdminAccessResource extends Resource
 
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\MorphToSelect::make('accessible') 
+                                Forms\Components\MorphToSelect::make('accessible')
                                     ->types([
                                         Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
                                             ->titleAttribute('name'),
@@ -93,7 +93,6 @@ class AdminAccessResource extends Resource
                     ->badge()
                     ->sortable(),
                 
-                // Add this column to show the Region/Department
                 Tables\Columns\TextColumn::make('accessible.name')
                     ->label(__('Ruang Regional'))
                     ->searchable(),

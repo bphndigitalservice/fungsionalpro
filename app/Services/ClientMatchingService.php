@@ -176,7 +176,7 @@ class ClientMatchingService
         }
 
         // 4. RegDepartment check
-        if (RegDepartment::where('name', 'like', "%{$instansi}%")->exists()) {
+        if (RegDepartment::whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($instansi) . '%'])->exists()) {
             return ['central', RegDepartment::class];
         }
 

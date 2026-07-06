@@ -153,7 +153,14 @@ class ClientActivityResource extends Resource
                     Textarea::make('description')
                         ->label('Deskripsi Kegiatan')
                         ->rows(5)
-                        ->required(),
+                        ->required()
+                        ->helperText(function (Get $get) {
+                            $jenisKegiatan = (int) $get('jenis_kegiatan');
+                            if (in_array($jenisKegiatan, [6, 8, 10])) {
+                                return 'Catatan: Untuk jenis kegiatan ini, mohon cantumkan atau lampirkan tautan (link) media pada kolom deskripsi.';
+                            }
+                            return null;
+                        }),
 
                     Forms\Components\FileUpload::make('activity_file')
                         ->disk('s3')
@@ -193,12 +200,14 @@ class ClientActivityResource extends Resource
                     ->label('Jenis Kegiatan')
                     ->searchable()
                     ->sortable()
+                    ->visible(fn () => Client::current()?->c_role_id == 2)
                     ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int)$state] ?? '-'),
 
                 TextColumn::make('reg_province_id')
                     ->label('Provinsi')
                     ->searchable()
                     ->sortable()
+                    ->visible(fn () => Client::current()?->c_role_id == 2)
                     ->formatStateUsing(function ($state) {
                         if (! $state) return '-';
                         return RegProvince::find($state)?->name ?? '-';
@@ -294,7 +303,8 @@ class ClientActivityResource extends Resource
             ->filters([
                 SelectFilter::make('jenis_kegiatan')
                     ->label('Jenis Kegiatan')
-                    ->options(static::getJenisKegiatanOptions()),
+                    ->options(static::getJenisKegiatanOptions())
+                    ->visible(fn () => Client::current()?->c_role_id == 2),
 
                 Filter::make('tahun_kegiatan')
                     ->form([

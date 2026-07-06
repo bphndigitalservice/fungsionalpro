@@ -136,7 +136,7 @@ class MasterJfResource extends Resource
                     ])
                     ->action(function (array $data) {
                         try {
-
+                            set_time_limit(300);
                             $filePath = Storage::disk('public')->path($data['file']);
 
                             Excel::import(

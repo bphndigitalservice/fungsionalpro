@@ -6,6 +6,7 @@ use App\Models\Client;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Filament\Support\Contracts\HasLabel;
 use OpenSpout\Common\Entity\Style\Style;
 
 class ClientExporter extends Exporter
@@ -33,13 +34,7 @@ class ClientExporter extends Exporter
             ExportColumn::make('type')
                 ->label('Kelompok Instansi')
                 ->formatStateUsing(function ($state) {
-                    $value = $state instanceof \BackedEnum ? $state->value : $state;
-                    return match ($value) {
-                        'central' => 'Pusat',
-                        'local_province' => 'Daerah Provinsi',
-                        'local_regency' => 'Daerah Kabupaten/Kota',
-                        default => $value,
-                    };
+                    return $state instanceof HasLabel ? $state->getLabel() : $state;
                 }),
 
             ExportColumn::make('agenciable.name')
@@ -51,13 +46,13 @@ class ClientExporter extends Exporter
             ExportColumn::make('status')
                 ->label('Status Pegawai')
                 ->formatStateUsing(function ($state) {
-                    return $state instanceof \BackedEnum ? $state->value : $state;
+                    return $state instanceof HasLabel ? $state->getLabel() : $state;
                 }),
 
             ExportColumn::make('assignation_type')
                 ->label('Jenis Pengangkatan')
                 ->formatStateUsing(function ($state) {
-                    return $state instanceof \BackedEnum ? $state->value : $state;
+                    return $state instanceof HasLabel ? $state->getLabel() : $state;
                 }),
 
             ExportColumn::make('jenis_kepegawaian')

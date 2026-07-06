@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Enums\TrainingCompletionStatus;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
 use App\Models\Client;
 use App\Models\ClientCompetence;
@@ -55,13 +56,17 @@ class ClientCompetenceResource extends Resource
                             ->label('Nomor Sertifikat')
                             ->required(),
 
-                        // Dynamically pulled everything directly from your Enum setup!
                         ToggleButtons::make('completion_status')
                             ->label('Status')
                             ->options(TrainingCompletionStatus::class)
                             ->inline()
                             ->required(),
-
+                        TextInput::make('jam_pelajaran')
+                            ->label('Jam Pelajaran (JP)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->placeholder('Masukkan total JP')
+                            ->suffix('JP'),
                         Forms\Components\Fieldset::make()
                             ->label('Waktu Pelaksanaan Pelatihan/Diklat')
                             ->schema([
@@ -103,6 +108,9 @@ class ClientCompetenceResource extends Resource
                 Tables\Columns\TextColumn::make('promotionLevel.level')
                     ->label('Jenjang Diklat Fungsional')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('jam_pelajaran')
+                    ->label('Jam Pelajaran')
+                    ->formatStateUsing(fn ($state) => ($state && $state > 0) ? $state . ' JP' : ''),
                 Tables\Columns\TextColumn::make('certificate_number')
                     ->label('Nomor Sertifikat')
                     ->searchable()
@@ -133,7 +141,7 @@ class ClientCompetenceResource extends Resource
                     ]),
                 Tables\Filters\SelectFilter::make('completion_status')
                     ->label('Status')
-                    ->options(TrainingCompletionStatus::class),
+                    ->options(collect(TrainingCompletionStatus::cases())->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])->toArray()),
             ])
             ->actions([
                 MediaAction::make()

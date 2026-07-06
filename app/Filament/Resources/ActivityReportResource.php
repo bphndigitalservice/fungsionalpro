@@ -204,12 +204,14 @@ class ActivityReportResource extends Resource
                     ->label('Jenis Kegiatan')
                     ->searchable()
                     ->sortable()
+                    ->visible(fn () => Client::current()?->c_role_id == 2)
                     ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int)$state] ?? '-'),
 
                 TextColumn::make('reg_province_id')
                     ->label('Provinsi')
                     ->searchable()
                     ->sortable()
+                    ->visible(fn () => Client::current()?->c_role_id == 2)
                     ->formatStateUsing(function ($state) {
                         if (! $state) return '-';
                         return RegProvince::find($state)?->name ?? '-';
@@ -305,7 +307,8 @@ class ActivityReportResource extends Resource
             ->filters([
                 SelectFilter::make('jenis_kegiatan')
                     ->label('Jenis Kegiatan')
-                    ->options(static::getJenisKegiatanOptions()),
+                    ->options(static::getJenisKegiatanOptions())
+                    ->visible(fn () => Client::current()?->c_role_id == 2),
 
                 Filter::make('tahun_kegiatan')
                     ->form([

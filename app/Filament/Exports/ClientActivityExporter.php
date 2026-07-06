@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports;
 
+use App\Models\Client;
 use App\Models\ClientActivity;
 use App\Models\RegProvince;
 use Filament\Actions\Exports\ExportColumn;
@@ -18,61 +19,72 @@ class ClientActivityExporter extends Exporter
 
     public static function getColumns(): array
     {
-        return [
-            ExportColumn::make('jenis_kegiatan')
+        $roleId = Client::current()?->c_role_id;
+
+        $columns = [
+        ];
+
+        if ($roleId == 2) {
+            $columns[] = ExportColumn::make('jenis_kegiatan')
                 ->label('Jenis Kegiatan')
                 ->formatStateUsing(fn ($state) => match ((int) $state) {
                     1 => 'Konsultasi Hukum',
                     2 => 'Penyuluhan Hukum',
                     default => '-',
-                }),
+                });
+        }
 
-            ExportColumn::make('title')
-                ->label('Nama Kegiatan'),
+        $columns[] = ExportColumn::make('title')
+            ->label('Nama Kegiatan');
 
-            ExportColumn::make('reg_province_id')
+        if ($roleId == 2) {
+            $columns[] = ExportColumn::make('reg_province_id')
                 ->label('Provinsi Pelaksanaan')
-                ->formatStateUsing(fn ($state) => $state ? RegProvince::find($state)?->name ?? '-' : '-'),
+                ->formatStateUsing(fn ($state) => $state ? RegProvince::find($state)?->name ?? '-' : '-');
+        }
 
-            ExportColumn::make('start_period')
-                ->label('Tanggal Mulai')
-                ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-'),
+        $columns[] = ExportColumn::make('start_period')
+            ->label('Tanggal Mulai')
+            ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-');
 
-            ExportColumn::make('end_period')
-                ->label('Tanggal Selesai')
-                ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-'),
+        $columns[] = ExportColumn::make('end_period')
+            ->label('Tanggal Selesai')
+            ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-');
 
-            ExportColumn::make('jam')
+        if ($roleId == 2) {
+            $columns[] = ExportColumn::make('jam')
                 ->label('Waktu/Jam')
                 ->getStateUsing(fn (ClientActivity $record) =>
                     $record->start_time && $record->end_time
                         ? Carbon::parse($record->start_time)->format('H:i') . ' - ' . Carbon::parse($record->end_time)->format('H:i')
                         : '-'
-                ),
+                );
 
-            ExportColumn::make('activity_details.lokasi')
-                ->label('Lokasi / Tempat'),
+            $columns[] = ExportColumn::make('activity_details.lokasi')
+                ->label('Lokasi / Tempat');
 
-            ExportColumn::make('activity_details.jumlah_peserta')
+            $columns[] = ExportColumn::make('activity_details.jumlah_peserta')
                 ->label('Jumlah Peserta')
-                ->formatStateUsing(fn ($state) => $state ? number_format((int)$state, 0, ',', '.') : '0'),
+                ->formatStateUsing(fn ($state) => $state ? number_format((int)$state, 0, ',', '.') : '0');
 
-            ExportColumn::make('activity_details.penerima')
-                ->label('Penerima Manfaat'),
+            $columns[] = ExportColumn::make('activity_details.penerima')
+                ->label('Penerima Manfaat');
 
-            ExportColumn::make('activity_details.materi')
-                ->label('Materi / Kasus'),
+            $columns[] = ExportColumn::make('activity_details.materi')
+                ->label('Materi / Kasus');
+        }
 
-            ExportColumn::make('description')
-                ->label('Deskripsi Lengkap'),
+        $columns[] = ExportColumn::make('description')
+            ->label('Deskripsi Lengkap');
 
-            ExportColumn::make('is_verified')
-                ->label('Status Verifikasi')
-                ->formatStateUsing(function ($state) {
-                    if (is_null($state)) return 'Sedang Diverifikasi';
-                    return $state ? 'Terverifikasi' : 'Ditolak';
-                }),
-        ];
+        $columns[] = ExportColumn::make('is_verified')
+            ->label('Status Verifikasi')
+            ->formatStateUsing(function ($state) {
+                if (is_null($state)) return 'Sedang Diverifikasi';
+                return $state ? 'Terverifikasi' : 'Ditolak';
+            });
+
+        return $columns;
     }
 
     /**
@@ -83,7 +95,7 @@ class ClientActivityExporter extends Exporter
         return (new Style())
             ->setFontSize(11)
             ->setFontName('Arial')
-            ->setShouldWrapText(false); // Keeps columns running straight without breaking awkwardly mid-sentence
+            ->setShouldWrapText(false);
     }
 
     /**

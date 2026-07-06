@@ -80,8 +80,8 @@ class Register extends BaseRegister
                                             $set('agency_type', $type);
 
                                             // Need to lookup agency_id
-                                            $cleanUnitKerja = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->unit_kerja);
-                                            $cleanInstansi = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->instansi);
+                                            $cleanUnitKerja = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->unit_kerja ?? '');
+                                            $cleanInstansi = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->instansi ?? '');
 
                                             $agency = $model::where('name', '=', $cleanUnitKerja)->first();
                                             if (!$agency && $cleanInstansi) {
