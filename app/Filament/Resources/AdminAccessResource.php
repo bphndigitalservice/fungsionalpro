@@ -92,7 +92,7 @@ class AdminAccessResource extends Resource
                     ->label(__('labels.table.crole.name'))
                     ->badge()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('accessible.name')
                     ->label(__('Ruang Regional'))
                     ->searchable(),
