@@ -2,8 +2,9 @@
 
 namespace App\Subscribers;
 
+use Filament\Auth\Events\Registered;
+use Exception;
 use App\Enums\SystemRole;
-use Filament\Events\Auth\Registered;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +23,7 @@ class UserEventSubscriber
         try {
             $this->user = $event->getUser();
             $this->setDefaultRole();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error($exception->getMessage());
 
             return;

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Client;
 use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
 
 class ClientNumbersOverview extends StatsOverviewWidget
 {
@@ -16,7 +16,7 @@ class ClientNumbersOverview extends StatsOverviewWidget
         $count = $this->baseClientQuery()->toBase()->count();
 
         return [
-            Card::make('Total Klien', number_format($count))
+            Stat::make('Total Klien', number_format($count))
                 ->icon('heroicon-o-users'),
         ];
     }

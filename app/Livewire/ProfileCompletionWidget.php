@@ -2,6 +2,9 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
 use App\Models\Client;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -9,17 +12,17 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 
-class ProfileCompletionWidget extends Widget implements HasForms, HasInfolists
+class ProfileCompletionWidget extends Widget implements HasForms, HasInfolists, HasActions, HasActions, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithInfolists;
     use InteractsWithForms;
     use HasWidgetShield;
 
-    protected static string $view = 'livewire.profile-completion-widget';
+    protected string $view = 'livewire.profile-completion-widget';
     protected ?Client $client = null;
 
     public function mount(): void
@@ -30,11 +33,11 @@ class ProfileCompletionWidget extends Widget implements HasForms, HasInfolists
         }
     }
 
-    public function completionInfolist(Infolist $infolist)
+    public function completionInfolist(Schema $schema)
     {
-        return $infolist
+        return $schema
             ->record($this->client)
-            ->schema([
+            ->components([
                 IconEntry::make('Pendidikan Terakhir')
                     ->state(fn(Model $record)=>$record->hasLatestEducation())
                     ->icons([

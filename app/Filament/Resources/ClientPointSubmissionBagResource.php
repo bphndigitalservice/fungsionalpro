@@ -2,11 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ClientPointSubmissionBagResource\Pages\ListClientPointSubmissionBags;
+use App\Filament\Resources\ClientPointSubmissionBagResource\Pages\CreateClientPointSubmissionBag;
+use App\Filament\Resources\ClientPointSubmissionBagResource\Pages\ViewClientPointSubmissionBag;
+use App\Filament\Resources\ClientPointSubmissionBagResource\Pages\EditClientPointSubmissionBag;
 use App\Enums\PointSubmissionPeriod;
 use App\Filament\Resources\ClientPointSubmissionBagResource\Pages;
 use App\Models\ClientPointSubmissionBag;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,21 +29,21 @@ class ClientPointSubmissionBagResource extends Resource
 {
     protected static ?string $model = ClientPointSubmissionBag::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('label')
+                        TextInput::make('label')
                             ->label(__('Name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Select::make('rules')
+                        Select::make('rules')
                             ->label(__('Rules'))
                             ->options(PointSubmissionPeriod::class)
                             ->multiple(),
-                        Forms\Components\Toggle::make('is_enabled')
+                        Toggle::make('is_enabled')
                             ->required(),
                     ])->columnSpan(5),
             ]);
@@ -39,24 +53,24 @@ class ClientPointSubmissionBagResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('label')
+                TextColumn::make('label')
                     ->label(__('Name'))
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_enabled')
+                IconColumn::make('is_enabled')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('rules'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('rules'),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
+                TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -64,13 +78,13 @@ class ClientPointSubmissionBagResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -85,10 +99,10 @@ class ClientPointSubmissionBagResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientPointSubmissionBags::route('/'),
-            'create' => Pages\CreateClientPointSubmissionBag::route('/create'),
-            'view' => Pages\ViewClientPointSubmissionBag::route('/{record}'),
-            'edit' => Pages\EditClientPointSubmissionBag::route('/{record}/edit'),
+            'index' => ListClientPointSubmissionBags::route('/'),
+            'create' => CreateClientPointSubmissionBag::route('/create'),
+            'view' => ViewClientPointSubmissionBag::route('/{record}'),
+            'edit' => EditClientPointSubmissionBag::route('/{record}/edit'),
         ];
     }
 

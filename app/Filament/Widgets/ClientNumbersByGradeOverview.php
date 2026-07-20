@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\RegGrade;
 use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
 use Illuminate\Support\Facades\DB;
 
 class ClientNumbersByGradeOverview extends StatsOverviewWidget
@@ -30,7 +30,7 @@ class ClientNumbersByGradeOverview extends StatsOverviewWidget
         $cards = [];
         foreach ($rows as $row) {
             $label = $row->reg_grade_id ? ($gradeNames[$row->reg_grade_id] ?? ('Grade #' . $row->reg_grade_id)) : 'Tidak diketahui';
-            $cards[] = Card::make($label, number_format((int) $row->total))
+            $cards[] = Stat::make($label, number_format((int) $row->total))
                 ->icon('heroicon-o-academic-cap');
         }
 

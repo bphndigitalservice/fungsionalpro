@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use Filament\Actions\Action;
+use Filament\Panel;
 use App\Enums\PointSubmissionStatus;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use App\Models\Client;
@@ -13,7 +15,6 @@ use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -33,7 +34,7 @@ class ClientPointList extends Page implements HasInfolists, HasTable
         makeTable as makeBaseTable;
     }
 
-    protected static string $view = 'filament.pages.client-client-point-list';
+    protected string $view = 'filament.pages.client-client-point-list';
 
     public function mount(): void
     {
@@ -73,7 +74,7 @@ class ClientPointList extends Page implements HasInfolists, HasTable
                     ->tooltip(fn (Model $record): ?string => $record->verifier_note)
                     ->copyable()
                     ->copyableState(fn (Model $record) => $record->verifier_note),
-            ])->actions([
+            ])->recordActions([
                 ViewPointSubmission::make(),
 
                 Action::make('Update')
@@ -108,7 +109,7 @@ class ClientPointList extends Page implements HasInfolists, HasTable
         return __('labels.page.client_point_list.title');
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return '/c/points';
     }

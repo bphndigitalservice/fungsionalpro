@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
-class ExceedMaxPointSubmission extends \Exception
+use Exception;
+
+class ExceedMaxPointSubmission extends Exception
 {
     public function __construct()
     {

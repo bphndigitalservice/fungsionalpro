@@ -3,6 +3,17 @@
 namespace App\Filament\Resources;
 
 // 1. Import your newly created exporter class
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ViewAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Resources\ActivityReportResource\Pages\ListActivityReports;
+use App\Services\ClientAccessService;
 use App\Filament\Exports\ActivityReportExporter;
 use App\Enums\SystemRole;
 use App\Filament\Resources\ActivityReportResource\Pages;
@@ -14,17 +25,11 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-// 2. Import the required export actions
-use Filament\Tables\Actions\ExportAction;
-use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -63,15 +68,15 @@ class ActivityReportResource extends Resource
             10 => 'MedSos/Media Digital Lainnya',
         ];
     }
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(static::getFormSchema());
+        return $schema->components(static::getFormSchema());
     }
 
     public static function getFormSchema(): array
     {
         return [
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
                     Grid::make(2)
                         ->schema([
@@ -95,7 +100,7 @@ class ActivityReportResource extends Resource
                         ->columnSpanFull()
                         ->required(),
 
-                    Forms\Components\Fieldset::make()
+                    Fieldset::make()
                         ->label('Waktu Pelaksanaan Kegiatan')
                         ->schema([
                             DatePicker::make('start_period')
@@ -113,7 +118,7 @@ class ActivityReportResource extends Resource
                                 ->visible(fn () => Client::current()?->c_role_id == 1)
                                 ->required(fn () => Client::current()?->c_role_id == 1),
 
-                            Forms\Components\Grid::make(2)
+                            Grid::make(2)
                                 ->visible(fn () => Client::current()?->c_role_id == 2)
                                 ->schema([
                                     TimePicker::make('start_time')
@@ -129,7 +134,7 @@ class ActivityReportResource extends Resource
                         ])
                         ->columns(2),
 
-                    Forms\Components\Section::make('Detail Kegiatan')
+                    Section::make('Detail Kegiatan')
                         ->schema([
                             TextInput::make('activity_details.lokasi')
                                 ->label('Lokasi / Tempat Kegiatan')
@@ -307,7 +312,7 @@ class ActivityReportResource extends Resource
                     ->visible(fn () => Client::current()?->c_role_id == 2),
 
                 Filter::make('tahun_kegiatan')
-                    ->form([
+                    ->schema([
                         Select::make('tahun')
                             ->label('Tahun')
                             ->options(
@@ -335,14 +340,14 @@ class ActivityReportResource extends Resource
                     ->button()
                     ->icon('heroicon-m-arrow-down-tray'),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()->label('Lihat Detail')->modalHeading('Detail Kegiatan'),
+            ->recordActions([
+                ViewAction::make()->label('Lihat Detail')->modalHeading('Detail Kegiatan'),
                 MediaAction::make()
                     ->media(fn(Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
                     ->label('Lampiran Laporan Kegiatan'),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     ExportBulkAction::make()
                         ->exporter(ActivityReportExporter::class)
                         ->label('Ekspor Baris Terpilih'),
@@ -358,7 +363,7 @@ class ActivityReportResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListActivityReports::route('/'),
+            'index' => ListActivityReports::route('/'),
         ];
     }
 
@@ -389,7 +394,7 @@ class ActivityReportResource extends Resource
             return parent::getEloquentQuery();
         }
 
-        $scopedClientIds = app(\App\Services\ClientAccessService::class)
+        $scopedClientIds = app(ClientAccessService::class)
             ->scopedQuery($user)
             ->select('clients.id');
 

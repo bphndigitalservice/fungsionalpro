@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ClientResource\Pages;
 
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use App\Enums\ClientCluster;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\CRoleResource\Concern\CanAccessClientData;
@@ -57,8 +59,8 @@ class EditClient extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 

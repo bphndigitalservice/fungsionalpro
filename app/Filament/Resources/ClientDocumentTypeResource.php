@@ -2,11 +2,26 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use App\Filament\Resources\ClientDocumentTypeResource\Pages\ListClientDocumentTypes;
+use App\Filament\Resources\ClientDocumentTypeResource\Pages\CreateClientDocumentType;
+use App\Filament\Resources\ClientDocumentTypeResource\Pages\ViewClientDocumentType;
+use App\Filament\Resources\ClientDocumentTypeResource\Pages\EditClientDocumentType;
 use App\Filament\Resources\ClientDocumentTypeResource\Pages;
 use App\Filament\Resources\ClientDocumentTypeResource\RelationManagers;
 use App\Models\ClientDocumentType;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -17,17 +32,17 @@ class ClientDocumentTypeResource extends Resource
 {
     protected static ?string $model = ClientDocumentType::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('type')
+        return $schema
+            ->components([
+                TextInput::make('type')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Toggle::make('is_required')
+                Toggle::make('is_required')
                     ->required(),
             ]);
     }
@@ -36,40 +51,40 @@ class ClientDocumentTypeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_required')
+                IconColumn::make('is_required')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
+                TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                TrashedFilter::make(),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -84,10 +99,10 @@ class ClientDocumentTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientDocumentTypes::route('/'),
-            'create' => Pages\CreateClientDocumentType::route('/create'),
-            'view' => Pages\ViewClientDocumentType::route('/{record}'),
-            'edit' => Pages\EditClientDocumentType::route('/{record}/edit'),
+            'index' => ListClientDocumentTypes::route('/'),
+            'create' => CreateClientDocumentType::route('/create'),
+            'view' => ViewClientDocumentType::route('/{record}'),
+            'edit' => EditClientDocumentType::route('/{record}/edit'),
         ];
     }
 

@@ -2,6 +2,10 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use Filament\Schemas\Schema;
+use Throwable;
+use Filament\Facades\Filament;
+use Filament\Panel;
 use App\Enums\PointSubmissionStatus;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
@@ -10,7 +14,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Notifications\Notification;
@@ -27,14 +30,14 @@ use Illuminate\Support\Js;
 use function Filament\Support\is_app_url;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class ClientPointEdit extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
-    protected static string $view = 'filament.pages.client-point-edit';
+    protected string $view = 'filament.pages.client-point-edit';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -67,10 +70,10 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
         return $record;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 ClientPointCreate::getYearField(),
                 ClientPointCreate::getSubmissionTypeField(),
                 ClientPointCreate::getSKP2AKConversionForm(),
@@ -159,7 +162,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
             $this->getErrorNotification('error', 'Something went wrong')->send();
 
             return;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->rollBackDatabaseTransaction();
             Log::error($exception->getMessage(), ['user_id' => auth()->id(), 'submission_id' => $pointSubmission->id ?? null]);
 
@@ -215,7 +218,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
 
     protected function getRedirectUrl(): string
     {
-        return ClientPointList::getRoutePath();
+        return ClientPointList::getRoutePath(Filament::getCurrentOrDefaultPanel());
     }
 
     public function getBreadcrumbs(): array
@@ -223,7 +226,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
         return [
             '#' => 'Angka Kredit',
             '#' => 'Pelaporan',
-            self::getRoutePath() => 'Perbaikan',
+            self::getRoutePath(Filament::getCurrentOrDefaultPanel()) => 'Perbaikan',
         ];
     }
 
@@ -232,7 +235,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
         return __('labels.page.client_point_edit.title');
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return '/c/points/revise/{pointSubmission}';
     }

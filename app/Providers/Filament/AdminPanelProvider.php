@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\AvatarProviders\FungsionalProAvatarProvider;
 use App\Filament\Pages\Authx\EmailVerificationPrompt;
 use App\Filament\Pages\Authx\Register;
@@ -90,7 +91,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class
             ])->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make(),
                 BannerPlugin::make()->persistsBannersInDatabase()
                     ->navigationGroup(__("labels.nav.system"))
                     ->bannerManagerAccessPermission('banner-manager'),

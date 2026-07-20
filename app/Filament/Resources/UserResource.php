@@ -2,10 +2,23 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Resources\UserResource\Pages\CreateUser;
+use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,24 +29,24 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('labels.form.user.heading.general'))
+        return $schema
+            ->components([
+                Section::make(__('labels.form.user.heading.general'))
                     ->collapsible()
                     ->collapsed()
                     ->description(__('labels.form.user.heading.general_description'))
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->label(__('labels.form.user.fields.name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->email()
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('password')
+                        TextInput::make('password')
                             ->label(__('labels.form.user.fields.password'))
                             ->password()
                             ->required(fn (string $context): bool => $context == 'create')
@@ -42,21 +55,21 @@ class UserResource extends Resource
                             ->minLength(8)
                             ->autocomplete(false),
                     ]),
-                Forms\Components\Section::make(__('labels.form.user.heading.role'))
+                Section::make(__('labels.form.user.heading.role'))
                     ->description(__('labels.form.user.heading.role_description'))
                     ->collapsible()
                     ->schema([
-                        Forms\Components\Select::make('roles')
+                        Select::make('roles')
                             ->label(__('labels.form.user.fields.role'))
                             ->multiple()
                             ->relationship('roles', 'name')
                             ->preload(true),
                     ]),
-                Forms\Components\Section::make(__('labels.form.user.heading.verification'))
+                Section::make(__('labels.form.user.heading.verification'))
                     ->description(__('labels.form.user.heading.verification_description'))
                     ->collapsible()
                     ->schema([
-                        Forms\Components\DateTimePicker::make('email_verified_at')->label(__('labels.form.user.fields.verification')),
+                        DateTimePicker::make('email_verified_at')->label(__('labels.form.user.fields.verification')),
                     ]),
             ]);
     }
@@ -65,18 +78,18 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
+                TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -86,14 +99,14 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
                 InviteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -108,10 +121,10 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 

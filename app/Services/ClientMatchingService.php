@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ClientStatus;
 use App\Models\MasterJf;
 use App\Models\Client;
 use App\Models\CRole;
@@ -98,25 +99,25 @@ class ClientMatchingService
             $rawStatus = strtolower($master->status ?? '');
             $client->status = match (true) {
                 str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active')
-                => \App\Enums\ClientStatus::Active,
+                => ClientStatus::Active,
 
                 str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign')
-                => \App\Enums\ClientStatus::NonActive_Resign,
+                => ClientStatus::NonActive_Resign,
 
                 str_contains($rawStatus, 'sementara') || str_contains($rawStatus, 'suspend') || str_contains($rawStatus, 'skors')
-                => \App\Enums\ClientStatus::NonActive_Suspended,
+                => ClientStatus::NonActive_Suspended,
 
                 str_contains($rawStatus, 'ctln')
-                => \App\Enums\ClientStatus::NonActive_CTLN,
+                => ClientStatus::NonActive_CTLN,
 
                 str_contains($rawStatus, 'belajar') || str_contains($rawStatus, 'study')
-                => \App\Enums\ClientStatus::NonActive_StudyLeave,
+                => ClientStatus::NonActive_StudyLeave,
 
                 str_contains($rawStatus, 'luar jabatan') || str_contains($rawStatus, 'external')
-                => \App\Enums\ClientStatus::NonActive_ExternalAssignment,
+                => ClientStatus::NonActive_ExternalAssignment,
 
                 str_contains($rawStatus, 'tidak memenuhi') || str_contains($rawStatus, 'requirement')
-                => \App\Enums\ClientStatus::NonActive_DoesntMeetRoleRequirement,
+                => ClientStatus::NonActive_DoesntMeetRoleRequirement,
 
                 default => null,
             };

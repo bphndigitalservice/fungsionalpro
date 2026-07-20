@@ -2,6 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\MorphToSelect\Type;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\VerifierAccessResource\Pages\ListVerifierAccesses;
+use App\Filament\Resources\VerifierAccessResource\Pages\CreateVerifierAccess;
+use App\Filament\Resources\VerifierAccessResource\Pages\ViewVerifierAccess;
+use App\Filament\Resources\VerifierAccessResource\Pages\EditVerifierAccess;
 use App\Enums\SystemRole;
 use App\Filament\Resources\VerifierAccessResource\Pages;
 use App\Models\RegDepartment;
@@ -10,7 +25,6 @@ use App\Models\RegRegency;
 use App\Models\User;
 use App\Models\VerifierAccess;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -41,34 +55,34 @@ class VerifierAccessResource extends Resource
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\Select::make('c_role_id')
+                                Select::make('c_role_id')
                                     ->searchable()
                                     ->relationship('role', 'role_name')
                                     ->preload()
                                     ->required(),
-                                Forms\Components\Select::make('user_id')
+                                Select::make('user_id')
                                     ->searchable()
                                     ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Verifier->value, SystemRole::AdminRegional->value]))
                                     ->preload()
                                     ->required(),
                             ])->columns(2),
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\MorphToSelect::make('accessible')
+                                MorphToSelect::make('accessible')
                                     ->types([
-                                        Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
+                                        Type::make(RegDepartment::class)
                                             ->titleAttribute('name'),
-                                        Forms\Components\MorphToSelect\Type::make(RegProvince::class)
+                                        Type::make(RegProvince::class)
                                             ->titleAttribute('name'),
-                                        Forms\Components\MorphToSelect\Type::make(RegRegency::class)
+                                        Type::make(RegRegency::class)
                                             ->titleAttribute('name'),
                                     ]),
                             ])->columns(2),
@@ -80,20 +94,20 @@ class VerifierAccessResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('role.role_name')
+                TextColumn::make('role.role_name')
                     ->badge()
                     ->label(__('Ruang Jabatan')),
-                Tables\Columns\TextColumn::make('accessible.name')
+                TextColumn::make('accessible.name')
                     ->label(__('Ruang Regional'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -101,13 +115,13 @@ class VerifierAccessResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -122,10 +136,10 @@ class VerifierAccessResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListVerifierAccesses::route('/'),
-            'create' => Pages\CreateVerifierAccess::route('/create'),
-            'view' => Pages\ViewVerifierAccess::route('/{record}'),
-            'edit' => Pages\EditVerifierAccess::route('/{record}/edit'),
+            'index' => ListVerifierAccesses::route('/'),
+            'create' => CreateVerifierAccess::route('/create'),
+            'view' => ViewVerifierAccess::route('/{record}'),
+            'edit' => EditVerifierAccess::route('/{record}/edit'),
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientGradeResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\ClientGradeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -13,7 +14,7 @@ class ViewClientGrade extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

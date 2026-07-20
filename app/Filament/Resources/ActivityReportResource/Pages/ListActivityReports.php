@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ActivityReportResource\Pages;
 
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Resources\ActivityReportResource;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListActivityReports extends ListRecords

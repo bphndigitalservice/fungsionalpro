@@ -2,11 +2,24 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\CRoleResource\RelationManagers\LevelRelationManager;
+use App\Filament\Resources\CRoleResource\Pages\ListCRoles;
+use App\Filament\Resources\CRoleResource\Pages\CreateCRole;
+use App\Filament\Resources\CRoleResource\Pages\ViewCRole;
+use App\Filament\Resources\CRoleResource\Pages\EditCRole;
 use App\Filament\Resources\CRoleResource\Pages;
 use App\Filament\Resources\CRoleResource\RelationManagers;
 use App\Models\CRole;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,16 +28,16 @@ class CRoleResource extends Resource
 {
     protected static ?string $model = CRole::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('role_name')
+        return $schema
+            ->components([
+                TextInput::make('role_name')
                     ->label(__('labels.form.crole.fields.role_name'))
                     ->required()
                     ->maxLength(255)
                     ->default('Analis Hukum'),
-                Forms\Components\Toggle::make('active')
+                Toggle::make('active')
                     ->label(__('labels.form.crole.fields.active'))
                     ->required(),
             ]);
@@ -34,17 +47,17 @@ class CRoleResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('role_name')
+                TextColumn::make('role_name')
                     ->label(__('labels.table.crole.name'))
                     ->searchable(),
-                Tables\Columns\IconColumn::make('active')
+                IconColumn::make('active')
                     ->label(__('labels.table.crole.active'))
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -52,13 +65,13 @@ class CRoleResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -66,17 +79,17 @@ class CRoleResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\LevelRelationManager::class,
+            LevelRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCRoles::route('/'),
-            'create' => Pages\CreateCRole::route('/create'),
-            'view' => Pages\ViewCRole::route('/{record}'),
-            'edit' => Pages\EditCRole::route('/{record}/edit'),
+            'index' => ListCRoles::route('/'),
+            'create' => CreateCRole::route('/create'),
+            'view' => ViewCRole::route('/{record}'),
+            'edit' => EditCRole::route('/{record}/edit'),
         ];
     }
 

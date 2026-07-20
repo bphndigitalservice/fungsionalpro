@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Services\ClientMatchingService;
 use App\Models\MasterJf;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -19,7 +20,7 @@ class MasterJfImport implements ToModel, WithHeadingRow
 
         $instansi = $row['instansi'] ?? null;
         $unitKerja = $row['unit_kerjakanwil'] ?? null;
-        [$type, $model] = \App\Services\ClientMatchingService::determineAgencyInfo($instansi ?? '', $unitKerja ?? '');
+        [$type, $model] = ClientMatchingService::determineAgencyInfo($instansi ?? '', $unitKerja ?? '');
 
         return MasterJf::updateOrCreate(
             [

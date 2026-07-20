@@ -2,10 +2,10 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use Filament\Actions\Action;
 use App\Events\ClientProfileAccepted;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Support\Colors\Color;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 

@@ -2,12 +2,23 @@
 
 namespace App\Filament\Clusters\Reference\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\RelationManagers\Echelon1sRelationManager;
+use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\Pages\ListRegDepartments;
+use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\Pages\CreateRegDepartment;
+use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\Pages\ViewRegDepartment;
+use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\Pages\EditRegDepartment;
 use App\Filament\Clusters\Reference;
 use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\Pages;
 use App\Filament\Clusters\Reference\Resources\RegDepartmentResource\RelationManagers;
 use App\Models\RegDepartment;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,15 +27,15 @@ class RegDepartmentResource extends Resource
 {
     protected static ?string $model = RegDepartment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $cluster = Reference::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -34,19 +45,19 @@ class RegDepartmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -54,17 +65,17 @@ class RegDepartmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\Echelon1sRelationManager::class,
+            Echelon1sRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRegDepartments::route('/'),
-            'create' => Pages\CreateRegDepartment::route('/create'),
-            'view' => Pages\ViewRegDepartment::route('/{record}'),
-            'edit' => Pages\EditRegDepartment::route('/{record}/edit'),
+            'index' => ListRegDepartments::route('/'),
+            'create' => CreateRegDepartment::route('/create'),
+            'view' => ViewRegDepartment::route('/{record}'),
+            'edit' => EditRegDepartment::route('/{record}/edit'),
         ];
     }
 

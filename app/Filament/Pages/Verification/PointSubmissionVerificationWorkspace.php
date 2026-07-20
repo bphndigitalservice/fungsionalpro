@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Verification;
 
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Concerns\Components\HasCustomPageTab;
 use App\Enums\PointSubmissionStatus;
 use App\Enums\SystemRole;
@@ -14,7 +15,6 @@ use Filament\Facades\Filament;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
-use Filament\Resources\Components\Tab;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -29,7 +29,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
     use HasCustomPageTab;
     use HasPageShield, InteractsWithInfolists;
 
-    protected static string $view = 'filament.pages.verifier-workspace';
+    protected string $view = 'filament.pages.verifier-workspace';
 
     protected User $verifier;
 
@@ -63,7 +63,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->recordActions([
                 VerifyPointSubmissionAction::make()
                     ->hidden(fn (Model $record) =>
                         ! static::canVerifying() ||

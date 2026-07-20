@@ -2,6 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Resources\ClientCompetenceResource\Pages\ListClientCompetences;
+use App\Filament\Resources\ClientCompetenceResource\Pages\CreateClientCompetence;
+use App\Filament\Resources\ClientCompetenceResource\Pages\ViewClientCompetence;
+use App\Filament\Resources\ClientCompetenceResource\Pages\EditClientCompetence;
 use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Enums\TrainingCompletionStatus;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
@@ -12,7 +27,6 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -29,11 +43,11 @@ class ClientCompetenceResource extends Resource
     protected static ?string $navigationLabel = 'Diklat/Pelatihan';
     protected static ?string $modelLabel = 'Diklat/Pelatihan';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
                         TextInput::make('title')
                             ->label('Nama Pelatihan')
@@ -46,11 +60,11 @@ class ClientCompetenceResource extends Resource
                                 'PROMOTION_TRAINING' => 'Diklat Fungsional',
                                 'TECHNICAL_TRAINING' => 'Diklat/Pelatihan Teknis',
                             ])->inline()->required(),
-                        Forms\Components\Select::make('promotion_training_level_id')
+                        Select::make('promotion_training_level_id')
                             ->relationship('promotionLevel', 'level', function (Builder $query) {
                                 $query->where("c_role_id", Client::current()->c_role_id)->orderBy('id');
-                            })->hidden(fn(Forms\Get $get) => $get('category') !== "PROMOTION_TRAINING")
-                            ->required(fn(Forms\Get $get) => $get('category') === "PROMOTION_TRAINING")
+                            })->hidden(fn(Get $get) => $get('category') !== "PROMOTION_TRAINING")
+                            ->required(fn(Get $get) => $get('category') === "PROMOTION_TRAINING")
                             ->label('Jenjang Diklat Fungsional'),
                         TextInput::make('certificate_number')
                             ->label('Nomor Sertifikat')
@@ -67,7 +81,7 @@ class ClientCompetenceResource extends Resource
                             ->minValue(0)
                             ->placeholder('Masukkan total JP')
                             ->suffix('JP'),
-                        Forms\Components\Fieldset::make()
+                        Fieldset::make()
                             ->label('Waktu Pelaksanaan Pelatihan/Diklat')
                             ->schema([
                                 DatePicker::make('start_period')
@@ -99,60 +113,60 @@ class ClientCompetenceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label('Nama Pelatihan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category')
+                TextColumn::make('category')
                     ->label('Jenis Diklat/Pelatihan')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('promotionLevel.level')
+                TextColumn::make('promotionLevel.level')
                     ->label('Jenjang Diklat Fungsional')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('jam_pelajaran')
+                TextColumn::make('jam_pelajaran')
                     ->label('Jam Pelajaran')
                     ->formatStateUsing(fn ($state) => ($state && $state > 0) ? $state . ' JP' : ''),
-                Tables\Columns\TextColumn::make('certificate_number')
+                TextColumn::make('certificate_number')
                     ->label('Nomor Sertifikat')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('completion_status')
+                TextColumn::make('completion_status')
                     ->label('Status')
                     ->badge()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('start_period')
+                TextColumn::make('start_period')
                     ->label('Awal Pelatihan')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('end_period')
+                TextColumn::make('end_period')
                     ->label('Selesai Pelatihan')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('institution')
+                TextColumn::make('institution')
                     ->label('Lembaga Pelatihan')
                     ->searchable()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category')
+                SelectFilter::make('category')
                     ->label('Jenis Diklat/Pelatihan')
                     ->options([
                         'PROMOTION_TRAINING' => 'Diklat Fungsional',
                         'TECHNICAL_TRAINING' => 'Diklat/Pelatihan Teknis',
                     ]),
-                Tables\Filters\SelectFilter::make('completion_status')
+                SelectFilter::make('completion_status')
                     ->label('Status')
                     ->options(collect(TrainingCompletionStatus::cases())->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])->toArray()),
             ])
-            ->actions([
+            ->recordActions([
                 MediaAction::make()
                     ->media(fn(Model $record) => Storage::temporaryUrl($record->competence_file, now()->addMinutes(10)))
                     ->label('Sertifikat'),
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\ExportBulkAction::make(),
+            ->toolbarActions([
+                DeleteBulkAction::make(),
+                ExportBulkAction::make(),
             ]);
     }
 
@@ -164,10 +178,10 @@ class ClientCompetenceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientCompetences::route('/'),
-            'create' => Pages\CreateClientCompetence::route('/create'),
-            'view' => Pages\ViewClientCompetence::route('/{record}'),
-            'edit' => Pages\EditClientCompetence::route('/{record}/edit'),
+            'index' => ListClientCompetences::route('/'),
+            'create' => CreateClientCompetence::route('/create'),
+            'view' => ViewClientCompetence::route('/{record}'),
+            'edit' => EditClientCompetence::route('/{record}/edit'),
         ];
     }
 

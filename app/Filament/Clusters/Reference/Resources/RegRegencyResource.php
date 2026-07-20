@@ -2,12 +2,24 @@
 
 namespace App\Filament\Clusters\Reference\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Clusters\Reference\Resources\RegRegencyResource\RelationManagers\Echelon1sRelationManager;
+use App\Filament\Clusters\Reference\Resources\RegRegencyResource\Pages\ListRegRegencies;
+use App\Filament\Clusters\Reference\Resources\RegRegencyResource\Pages\CreateRegRegency;
+use App\Filament\Clusters\Reference\Resources\RegRegencyResource\Pages\ViewRegRegency;
+use App\Filament\Clusters\Reference\Resources\RegRegencyResource\Pages\EditRegRegency;
 use App\Filament\Clusters\Reference;
 use App\Filament\Clusters\Reference\Resources\RegRegencyResource\Pages;
 use App\Filament\Clusters\Reference\Resources\RegRegencyResource\RelationManagers;
 use App\Models\RegRegency;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,18 +28,18 @@ class RegRegencyResource extends Resource
 {
     protected static ?string $model = RegRegency::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $cluster = Reference::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('province_id')
+        return $schema
+            ->components([
+                Select::make('province_id')
                     ->relationship('province', 'name')
                     ->required(),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -37,26 +49,26 @@ class RegRegencyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('province.name')
+                TextColumn::make('province.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -64,17 +76,17 @@ class RegRegencyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\Echelon1sRelationManager::class,
+            Echelon1sRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRegRegencies::route('/'),
-            'create' => Pages\CreateRegRegency::route('/create'),
-            'view' => Pages\ViewRegRegency::route('/{record}'),
-            'edit' => Pages\EditRegRegency::route('/{record}/edit'),
+            'index' => ListRegRegencies::route('/'),
+            'create' => CreateRegRegency::route('/create'),
+            'view' => ViewRegRegency::route('/{record}'),
+            'edit' => EditRegRegency::route('/{record}/edit'),
         ];
     }
 

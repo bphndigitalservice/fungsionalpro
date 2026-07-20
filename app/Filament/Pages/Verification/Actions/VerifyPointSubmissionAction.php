@@ -2,17 +2,16 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\Acceptance;
 use App\Events\PointSubmissionAccepted;
 use App\Events\PointSubmissionRejected;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
-use Filament\Actions\StaticAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Get;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,8 +35,8 @@ class VerifyPointSubmissionAction extends Action
 
         $this->modalHeading(__('labels.table.verification.point.modal_heading'));
 
-        $this->modalSubmitAction(fn (StaticAction $action) => $action->label(__('Save')));
-        $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
+        $this->modalSubmitAction(fn (Action $action) => $action->label(__('Save')));
+        $this->modalCancelAction(fn (Action $action) => $action->label(__('Close')));
 
         $this->form([
             ...ViewPointSubmission::getFormSubmissionView(true),

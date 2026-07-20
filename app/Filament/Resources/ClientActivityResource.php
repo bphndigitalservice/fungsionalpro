@@ -2,6 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Actions\ExportAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ClientActivityResource\Pages\ListClientActivities;
+use App\Filament\Resources\ClientActivityResource\Pages\CreateClientActivity;
+use App\Filament\Resources\ClientActivityResource\Pages\EditClientActivity;
 use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Filament\Exports\ClientActivityExporter;
 use App\Filament\Resources\ClientActivityResource\Pages;
@@ -14,19 +26,15 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
 use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\TimePicker;
-use Filament\Tables\Actions\ExportAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
@@ -61,9 +69,9 @@ class ClientActivityResource extends Resource
         ];
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(
+        return $schema->components(
             static::getFormSchema()
         );
     }
@@ -71,7 +79,7 @@ class ClientActivityResource extends Resource
     public static function getFormSchema(): array
     {
         return [
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
                     Grid::make(2)
                         ->schema([
@@ -95,7 +103,7 @@ class ClientActivityResource extends Resource
                         ->columnSpanFull()
                         ->required(),
 
-                    Forms\Components\Fieldset::make()
+                    Fieldset::make()
                         ->label('Waktu Pelaksanaan Kegiatan')
                         ->schema([
                             DatePicker::make('start_period')
@@ -113,7 +121,7 @@ class ClientActivityResource extends Resource
                                 ->visible(fn () => Client::current()?->c_role_id == 1)
                                 ->required(fn () => Client::current()?->c_role_id == 1),
 
-                            Forms\Components\Grid::make(2)
+                            Grid::make(2)
                                 ->visible(fn () => Client::current()?->c_role_id == 2)
                                 ->schema([
                                     TimePicker::make('start_time')
@@ -129,7 +137,7 @@ class ClientActivityResource extends Resource
                         ])
                         ->columns(2),
 
-                    Forms\Components\Section::make('Detail Kegiatan')
+                    Section::make('Detail Kegiatan')
                         ->schema([
                             TextInput::make('activity_details.lokasi')
                                 ->label('Lokasi / Tempat Kegiatan')
@@ -162,7 +170,7 @@ class ClientActivityResource extends Resource
                             return null;
                         }),
 
-                    Forms\Components\FileUpload::make('activity_file')
+                    FileUpload::make('activity_file')
                         ->disk('s3')
                         ->label('Lampiran Laporan Kegiatan')
                         ->helperText(function () {
@@ -304,7 +312,7 @@ class ClientActivityResource extends Resource
                     ->visible(fn () => Client::current()?->c_role_id == 2),
 
                 Filter::make('tahun_kegiatan')
-                    ->form([
+                    ->schema([
                         Select::make('tahun')
                             ->label('Tahun')
                             ->options(
@@ -330,15 +338,15 @@ class ClientActivityResource extends Resource
                     ->button()
                     ->icon('heroicon-m-arrow-down-tray'),
             ])
-            ->actions([
+            ->recordActions([
                 MediaAction::make()
                     ->media(fn(Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
                     ->label('Lampiran Laporan Kegiatan'),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -363,9 +371,9 @@ class ClientActivityResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientActivities::route('/'),
-            'create' => Pages\CreateClientActivity::route('/create'),
-            'edit' => Pages\EditClientActivity::route('/{record}/edit'),
+            'index' => ListClientActivities::route('/'),
+            'create' => CreateClientActivity::route('/create'),
+            'edit' => EditClientActivity::route('/{record}/edit'),
         ];
     }
 }

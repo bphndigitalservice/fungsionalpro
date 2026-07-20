@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Enums\TrainingType;
 use App\Enums\TrainingCompletionStatus;
 use App\Models\Concern\BelongsToClient;
@@ -22,7 +23,7 @@ class ClientCompetence extends Model
         'completion_status' => TrainingCompletionStatus::class
     ];
 
-    public function promotionLevel(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function promotionLevel(): HasOne
     {
         return $this->hasOne(CRoleLevel::class, 'id', 'promotion_training_level_id');
     }

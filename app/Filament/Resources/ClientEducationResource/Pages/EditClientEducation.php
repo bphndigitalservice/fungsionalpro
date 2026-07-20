@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientEducationResource\Pages;
 
+use Filament\Actions\DeleteAction;
 use App\Concerns\Filament\AuthorizesOwnClientRecord;
 use App\Filament\Resources\ClientEducationResource;
 use Filament\Actions;
@@ -16,7 +17,7 @@ class EditClientEducation extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 

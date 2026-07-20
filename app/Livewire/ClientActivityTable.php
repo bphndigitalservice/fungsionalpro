@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Action;
 use App\Models\Client;
 use Filament\Widgets\TableWidget;
 use Filament\Tables\Table;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -95,7 +95,7 @@ class ClientActivityTable extends TableWidget
                     })
 
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('bukti')
                     ->label('Lampiran Laporan Kegiatan')
                     ->color('primary')

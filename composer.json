@@ -9,10 +9,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "bezhansalleh/filament-shield": "^3.2",
-        "filament/filament": "^v3.2.123",
-        "hugomyb/filament-media-action": "^3.1",
-        "kenepa/banner": "^0.1.0",
+        "bezhansalleh/filament-shield": "^4.0",
+        "filament/filament": "^4.0",
+        "hugomyb/filament-media-action": "^4.0",
+        "kenepa/banner": "^1.0",
         "laravel/framework": "^13.0",
         "laravel/octane": "^2.3",
         "laravel/tinker": "^3.0",
@@ -21,8 +21,8 @@
         "predis/predis": "^3.0",
         "spiral/roadrunner-cli": "^2.6.0",
         "spiral/roadrunner-http": "^4.0.0",
-        "tapp/filament-invite": "^1.0",
-        "valentin-morice/filament-json-column": "^2.0"
+        "tapp/filament-invite": "^2.0",
+        "valentin-morice/filament-json-column": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

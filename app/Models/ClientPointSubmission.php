@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\PointSubmissionRejected;
 use App\Enums\Acceptance;
 use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
@@ -96,6 +97,6 @@ class ClientPointSubmission extends Model
 
         $this->update($data);
         
-        event(new \App\Events\PointSubmissionRejected($this, $data['verifier_note']));
+        event(new PointSubmissionRejected($this, $data['verifier_note']));
     }
 }

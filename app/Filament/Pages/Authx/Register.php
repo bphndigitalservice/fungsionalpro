@@ -2,6 +2,13 @@
 
 namespace App\Filament\Pages\Authx;
 
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use App\Services\ClientMatchingService;
+use Illuminate\Support\HtmlString;
+use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
+use Exception;
+use App\Enums\SystemRole;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\MasterJf;
@@ -11,37 +18,32 @@ use App\Models\RegRegency;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Http\Responses\Auth\Contracts\RegistrationResponse;
 use Filament\Notifications\Notification;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
-use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
-class Register extends BaseRegister
+class Register extends \Filament\Auth\Pages\Register
 {
     protected function getForms(): array
     {
         return [
             'form' => $this->form(
                 $this->makeForm()
-                    ->schema([
+                    ->components([
                         TextInput::make('nip')
                             ->label('NIP')
                             ->required()
                             ->unique('clients', 'nip')
                             ->suffixAction(
-                                FormAction::make('Cari')
+                                Action::make('Cari')
                                     ->button()
                                     ->color('primary')
                                     ->icon('heroicon-m-magnifying-glass')
@@ -88,12 +90,12 @@ class Register extends BaseRegister
                                                 $set('c_role_id', 2);
                                             }
 
-                                            [$type, $model] = \App\Services\ClientMatchingService::determineAgencyInfo($masterJf->instansi ?? '', $masterJf->unit_kerja ?? '');
+                                            [$type, $model] = ClientMatchingService::determineAgencyInfo($masterJf->instansi ?? '', $masterJf->unit_kerja ?? '');
                                             $set('agency_type', $type);
 
                                             // Need to lookup agency_id
-                                            $cleanUnitKerja = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->unit_kerja ?? '');
-                                            $cleanInstansi = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->instansi ?? '');
+                                            $cleanUnitKerja = ClientMatchingService::cleanAgencyName($masterJf->unit_kerja ?? '');
+                                            $cleanInstansi = ClientMatchingService::cleanAgencyName($masterJf->instansi ?? '');
 
                                             $agency = $model::where('name', '=', $cleanUnitKerja)->first();
                                             if (!$agency && $cleanInstansi) {
@@ -124,7 +126,7 @@ class Register extends BaseRegister
                         Hidden::make('client_found')->default(false),
                         Placeholder::make('search_message_display')
                             ->label(false)
-                            ->content(fn(Get $get) => new \Illuminate\Support\HtmlString(
+                            ->content(fn(Get $get) => new HtmlString(
                                 '<span style="' . match($get('search_message_type')) {
                                     'danger' => 'color: #dc2626; font-weight: 500;',  // Red
                                     'success' => 'color: #16a34a; font-weight: 500;', // Green
@@ -234,7 +236,7 @@ class Register extends BaseRegister
             return app(RegistrationResponse::class);
         } catch (ValidationException $exception) {
             throw $exception;
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error('Registration failed', [
                 'exception' => $exception,
             ]);
@@ -258,7 +260,7 @@ class Register extends BaseRegister
         ]);
 
         // Using your SystemRole enum dynamically to assign the 'client' role
-        $user->assignRole(\App\Enums\SystemRole::Client->value);
+        $user->assignRole(SystemRole::Client->value);
 
         Client::create([
             'user_id' => $user->id,

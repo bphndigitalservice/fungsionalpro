@@ -2,12 +2,27 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use App\Filament\Resources\ClientDossierResource\Pages\ListClientDossiers;
+use App\Filament\Resources\ClientDossierResource\Pages\CreateClientDossier;
+use App\Filament\Resources\ClientDossierResource\Pages\ViewClientDossier;
+use App\Filament\Resources\ClientDossierResource\Pages\EditClientDossier;
 use App\Filament\Resources\ClientDossierResource\Pages;
 use App\Filament\Resources\ClientDossierResource\RelationManagers;
 use App\Models\Client;
 use App\Models\ClientDossier;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,27 +33,27 @@ class ClientDossierResource extends Resource
 {
     protected static ?string $model = ClientDossier::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('client_document_type_id')
+        return $schema
+            ->components([
+                Select::make('client_document_type_id')
                     ->label('Jenis Dokumen')
                     ->relationship('documentType', 'type')
                     ->searchable()
                     ->preload()
                     ->required(),
 
-                Forms\Components\TextInput::make('doc_number')
+                TextInput::make('doc_number')
                     ->label('Nomor Dokumen')
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\DatePicker::make('doc_date')
+                DatePicker::make('doc_date')
                     ->label('Tanggal Dokumen')
                     ->required(),
 
-                Forms\Components\Textarea::make('note')
+                Textarea::make('note')
                     ->label('Catatan')
                     ->columnSpanFull(),
             ]);
@@ -49,22 +64,22 @@ class ClientDossierResource extends Resource
     {
         return $table
             ->columns([
-            Tables\Columns\TextColumn::make('documentType.type')
+            TextColumn::make('documentType.type')
                 ->label('Jenis Dokumen')
                 ->searchable()
                 ->sortable(),
 
-            Tables\Columns\TextColumn::make('doc_number')
+            TextColumn::make('doc_number')
                 ->label('Nomor Dokumen')
                 ->searchable()
                 ->wrap(),
 
-            Tables\Columns\TextColumn::make('doc_date')
+            TextColumn::make('doc_date')
                 ->label('Tanggal')
                 ->date()
                 ->sortable(),
 
-            Tables\Columns\TextColumn::make('note')
+            TextColumn::make('note')
                 ->label('Catatan')
                 ->limit(50)
                 ->wrap(),
@@ -72,15 +87,15 @@ class ClientDossierResource extends Resource
             ->filters([
                 
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -95,10 +110,10 @@ class ClientDossierResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientDossiers::route('/'),
-            'create' => Pages\CreateClientDossier::route('/create'),
-            'view' => Pages\ViewClientDossier::route('/{record}'),
-            'edit' => Pages\EditClientDossier::route('/{record}/edit'),
+            'index' => ListClientDossiers::route('/'),
+            'create' => CreateClientDossier::route('/create'),
+            'view' => ViewClientDossier::route('/{record}'),
+            'edit' => EditClientDossier::route('/{record}/edit'),
         ];
     }
 

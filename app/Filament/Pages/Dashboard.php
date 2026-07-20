@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Panel;
 use App\Enums\SystemRole;
 use App\Filament\Widgets\PointOverview;
 use App\Filament\Widgets\ClientsByRoleChart;
@@ -36,7 +37,7 @@ class Dashboard extends BaseDashboard
 
     protected static ?int $navigationSort = -2;
 
-    protected static string $view = 'filament.pages.dashboard';
+    protected string $view = 'filament.pages.dashboard';
 
     public static function getNavigationLabel(): string
     {
@@ -52,7 +53,7 @@ class Dashboard extends BaseDashboard
             ?? (Filament::hasTopNavigation() ? 'heroicon-m-home' : 'heroicon-o-home');
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return static::$routePath;
     }
@@ -94,7 +95,7 @@ class Dashboard extends BaseDashboard
         return $this->filterVisibleWidgets($this->getWidgets());
     }
 
-    public function getColumns(): int|string|array
+    public function getColumns(): int|array
     {
         return 4;
     }

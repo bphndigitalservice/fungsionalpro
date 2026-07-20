@@ -2,11 +2,23 @@
 
 namespace App\Filament\Clusters\Reference\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Clusters\Reference\Resources\RegGradeResource\Pages\ListRegGrades;
+use App\Filament\Clusters\Reference\Resources\RegGradeResource\Pages\CreateRegGrade;
+use App\Filament\Clusters\Reference\Resources\RegGradeResource\Pages\ViewRegGrade;
+use App\Filament\Clusters\Reference\Resources\RegGradeResource\Pages\EditRegGrade;
 use App\Filament\Clusters\Reference;
 use App\Filament\Clusters\Reference\Resources\RegGradeResource\Pages;
 use App\Models\RegGrade;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,23 +27,23 @@ class RegGradeResource extends Resource
 {
     protected static ?string $model = RegGrade::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $cluster = Reference::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\TextInput::make('grade_name')
+                                TextInput::make('grade_name')
                                     ->label(__('labels.form.grade.fields.grade_name'))
                                     ->required()
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('grade_code')
+                                TextInput::make('grade_code')
                                     ->label(__('labels.form.grade.fields.grade_code'))
                                     ->required()
                                     ->maxLength(255),
@@ -44,15 +56,15 @@ class RegGradeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('grade_name')
+                TextColumn::make('grade_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('grade_code')
+                TextColumn::make('grade_code')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -60,13 +72,13 @@ class RegGradeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -81,10 +93,10 @@ class RegGradeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRegGrades::route('/'),
-            'create' => Pages\CreateRegGrade::route('/create'),
-            'view' => Pages\ViewRegGrade::route('/{record}'),
-            'edit' => Pages\EditRegGrade::route('/{record}/edit'),
+            'index' => ListRegGrades::route('/'),
+            'create' => CreateRegGrade::route('/create'),
+            'view' => ViewRegGrade::route('/{record}'),
+            'edit' => EditRegGrade::route('/{record}/edit'),
         ];
     }
 

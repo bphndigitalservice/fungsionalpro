@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
+use Filament\Auth\Http\Responses\RegistrationResponse;
 use App\Subscribers\ClientEventSubscriber;
 use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
 use BezhanSalleh\FilamentShield\FilamentShield;
 use Filament\Facades\Filament;
-use Filament\Http\Responses\Auth\RegistrationResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Database\Eloquent\Model;

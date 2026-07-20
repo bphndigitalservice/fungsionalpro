@@ -2,6 +2,13 @@
 
 namespace App\Filament\Pages\Client;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Section;
+use Filament\Panel;
 use App\Concerns\Client\CanUseProfileNote;
 use App\Enums\ClientCluster;
 use App\Enums\Verified;
@@ -20,13 +27,9 @@ use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -38,7 +41,7 @@ use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class ClientProfilePage extends Page implements HasForms, HasInfolists
 {
@@ -46,7 +49,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     use CanUseProfileNote;
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
-    protected static string $view = 'filament.pages.client-profile-page';
+    protected string $view = 'filament.pages.client-profile-page';
 
     public static ?Client $record;
 
@@ -61,9 +64,9 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         $this->previousUrl = url()->previous();
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist->schema([
+        return $schema->components([
             Group::make()
                 ->schema([
                     Grid::make()
@@ -76,48 +79,48 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema(static::getClientIdentityForm());
+        return $schema->components(static::getClientIdentityForm());
     }
 
     public static function getClientIdentityForm(): array
     {
         return [
-            Forms\Components\Tabs::make()
+            Tabs::make()
                 ->schema([
-                    Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_info'))
+                    Tab::make(__('labels.form.client.tab_info'))
                         ->schema([
-                            Forms\Components\Section::make()
+                            Section::make()
                                 ->heading(__('labels.form.client.heading.client_identity'))
                                 ->description(__('labels.form.client.heading.client_identity_description'))
                                 ->collapsible()
                                 ->schema([
-                                    Forms\Components\Group::make()
+                                    Group::make()
                                         ->schema(ClientResource::getClientIdentityForm())
                                         ->columnSpan(5),
                                 ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
-                            Forms\Components\Section::make()
+                            Section::make()
                                 ->heading(__('labels.form.client.heading.client_education'))
                                 ->description(__('labels.form.client.heading.client_education_description'))
                                 ->collapsible()
                                 ->schema([
-                                    Forms\Components\Group::make()
+                                    Group::make()
                                         ->schema(ClientResource::getClientEducationForm())
                                         ->columnSpan(5),
                                 ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
-                            Forms\Components\Section::make()
+                            Section::make()
                                 ->heading(__('labels.form.client.heading.client_employee_information'))
                                 ->description(__('labels.form.client.heading.client_employee_information_description'))
                                 ->collapsible()
                                 ->schema([
-                                    Forms\Components\Group::make()
+                                    Group::make()
                                         ->schema(ClientResource::getClientBasicInformationForm(fn () => static::getRecord()))
                                         ->columnSpan(5),
                                 ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
 
                         ]),
-                    Forms\Components\Tabs\Tab::make(__('labels.form.client.tab_file'))
+                    Tab::make(__('labels.form.client.tab_file'))
                         ->schema(ClientResource::getDetailedClientForm()),
                 ])->columnSpan(5),
         ];
@@ -339,7 +342,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         return __('labels.nav.client_menu');
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return '/c/profile';
     }

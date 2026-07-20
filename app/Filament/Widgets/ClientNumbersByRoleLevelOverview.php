@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\CRoleLevel;
 use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
 use Illuminate\Support\Facades\DB;
 
 class ClientNumbersByRoleLevelOverview extends StatsOverviewWidget
@@ -30,7 +30,7 @@ class ClientNumbersByRoleLevelOverview extends StatsOverviewWidget
         $cards = [];
         foreach ($rows as $row) {
             $label = $row->c_role_level_id ? ($levelNames[$row->c_role_level_id] ?? ('Level #' . $row->c_role_level_id)) : 'Tidak diketahui';
-            $cards[] = Card::make($label, number_format((int) $row->total))
+            $cards[] = Stat::make($label, number_format((int) $row->total))
                 ->icon('heroicon-o-briefcase');
         }
 

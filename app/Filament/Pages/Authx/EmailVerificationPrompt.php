@@ -5,11 +5,10 @@ namespace App\Filament\Pages\Authx;
 
 use Exception;
 use Filament\Facades\Filament;
-use Filament\Pages\Auth\EmailVerification\EmailVerificationPrompt as BaseEmailVerification;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class EmailVerificationPrompt extends BaseEmailVerification
+class EmailVerificationPrompt extends \Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt
 {
     protected function getVerifiable(): MustVerifyEmail
     {

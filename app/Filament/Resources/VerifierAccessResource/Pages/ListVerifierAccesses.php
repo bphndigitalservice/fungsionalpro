@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VerifierAccessResource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\VerifierAccessResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -14,7 +15,7 @@ class ListVerifierAccesses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 

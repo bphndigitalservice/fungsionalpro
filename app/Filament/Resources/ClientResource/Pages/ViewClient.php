@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\CRoleResource\Concern\CanAccessClientData;
 use App\Models\Client;
@@ -26,7 +27,7 @@ class ViewClient extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 

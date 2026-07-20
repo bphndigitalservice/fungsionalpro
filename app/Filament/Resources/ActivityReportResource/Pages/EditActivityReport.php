@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ActivityReportResource\Pages;
 
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\ActivityReportResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -13,7 +14,7 @@ class EditActivityReport extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -2,12 +2,24 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\MorphToSelect\Type;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\AdminAccessResource\Pages\ListAdminAccesses;
+use App\Filament\Resources\AdminAccessResource\Pages\CreateAdminAccess;
+use App\Filament\Resources\AdminAccessResource\Pages\EditAdminAccess;
 use App\Enums\SystemRole;
 use App\Filament\Resources\AdminAccessResource\Pages;
 use App\Models\AdminAccess;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -41,22 +53,22 @@ class AdminAccessResource extends Resource
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
                         // Existing User & Role Group
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\Select::make('c_role_id')
+                                Select::make('c_role_id')
                                     ->label(__('labels.form.crole.fields.role_name'))
                                     ->searchable()
                                     ->relationship('role', 'role_name')
                                     ->preload()
                                     ->required(),
-                                Forms\Components\Select::make('user_id')
+                                Select::make('user_id')
                                     ->label(__('labels.form.user.fields.name'))
                                     ->searchable()
                                     ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Admin->value]))
@@ -64,15 +76,15 @@ class AdminAccessResource extends Resource
                                     ->required(),
                             ])->columns(2),
 
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\MorphToSelect::make('accessible')
+                                MorphToSelect::make('accessible')
                                     ->types([
-                                        Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
+                                        Type::make(RegDepartment::class)
                                             ->titleAttribute('name'),
-                                        Forms\Components\MorphToSelect\Type::make(RegProvince::class)
+                                        Type::make(RegProvince::class)
                                             ->titleAttribute('name'),
-                                        Forms\Components\MorphToSelect\Type::make(RegRegency::class)
+                                        Type::make(RegRegency::class)
                                             ->titleAttribute('name'),
                                     ]),
                             ])->columns(2),
@@ -84,36 +96,36 @@ class AdminAccessResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->label(__('labels.form.user.fields.name'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('role.role_name')
+                TextColumn::make('role.role_name')
                     ->label(__('labels.table.crole.name'))
                     ->badge()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('accessible.name')
+                TextColumn::make('accessible.name')
                     ->label(__('Ruang Regional'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -128,9 +140,9 @@ class AdminAccessResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAdminAccesses::route('/'),
-            'create' => Pages\CreateAdminAccess::route('/create'),
-            'edit' => Pages\EditAdminAccess::route('/{record}/edit'),
+            'index' => ListAdminAccesses::route('/'),
+            'create' => CreateAdminAccess::route('/create'),
+            'edit' => EditAdminAccess::route('/{record}/edit'),
         ];
     }
 

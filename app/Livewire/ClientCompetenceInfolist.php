@@ -2,6 +2,10 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use App\Infolists\Components\MinioFileEntry;
 use App\Enums\TrainingType;
 use App\Enums\TrainingCompletionStatus;
@@ -11,13 +15,12 @@ use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
-use Filament\Infolists\Components\Section;
 
-class ClientCompetenceInfolist extends Component implements HasForms, HasInfolists
+class ClientCompetenceInfolist extends Component implements HasForms, HasInfolists, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithInfolists;
     use InteractsWithForms;
 
@@ -28,11 +31,11 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
         $this->record = $record;
     }
 
-    public function competenceInfolist(Infolist $infolist): Infolist
+    public function competenceInfolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->record($this->record)
-            ->schema([
+            ->components([
                 Section::make('Daftar Diklat / Pelatihan')
                     ->schema([
                         RepeatableEntry::make('competences')

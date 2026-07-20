@@ -2,6 +2,9 @@
 
 namespace App\Filament\Pages\Verification;
 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Concerns\Components\HasCustomPageTab;
 use App\Models\ClientActivity;
 use App\Models\User;
@@ -11,7 +14,6 @@ use Filament\Facades\Filament;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Pages\Page;
-use Filament\Resources\Components\Tab;
 use Filament\Tables;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -35,7 +37,7 @@ implements HasTable, HasInfolists
         HasPageShield,
         InteractsWithInfolists;
 
-    protected static string $view =
+    protected string $view =
         'filament.pages.client-activity-verification-workspace';
 
 
@@ -75,19 +77,19 @@ implements HasTable, HasInfolists
 
             ->columns([
 
-                Tables\Columns\TextColumn::make('client.identity.name')
+                TextColumn::make('client.identity.name')
                     ->label('Nama'),
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label('Nama Kegiatan')
                     ->wrap()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('start_period')
+                TextColumn::make('start_period')
                     ->date()
                     ->label('Tanggal'),
 
-                Tables\Columns\IconColumn::make('is_verified')
+                IconColumn::make('is_verified')
                     ->boolean()
                     ->label('Verified')
                     ->tooltip(function ($record) {
@@ -102,7 +104,7 @@ implements HasTable, HasInfolists
 
             ])
 
-            ->actions([
+            ->recordActions([
 
                 ViewClientActivityAction::make(),
 

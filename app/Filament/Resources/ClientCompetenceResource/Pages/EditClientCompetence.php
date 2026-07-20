@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ClientCompetenceResource\Pages;
 
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use App\Concerns\Filament\AuthorizesOwnClientRecord;
 use App\Filament\Resources\ClientCompetenceResource;
 use Filament\Actions;
@@ -16,8 +18,8 @@ class EditClientCompetence extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Pages\Client\Point\Actions;
 
+use Filament\Actions\ViewAction;
 use App\Enums\PointSubmissionPeriod;
 use App\Filament\Pages\Client\Point\ClientPointCreate;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\ViewAction;
 
 class ViewPointSubmission extends ViewAction
 {

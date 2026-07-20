@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientGradeResource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\ClientGradeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -13,7 +14,7 @@ class ListClientGrades extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 

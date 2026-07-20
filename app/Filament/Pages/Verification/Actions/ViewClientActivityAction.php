@@ -2,9 +2,8 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use Filament\Actions\Action;
 use App\Filament\Resources\ClientActivityResource;
-use Filament\Actions\StaticAction;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Closure;
@@ -30,7 +29,7 @@ class ViewClientActivityAction extends Action
         $this->modalHeading(__('Verifikasi Pelaporan Kegiatan'));
         $this->modalSubmitAction(false);
 
-        $this->modalCancelAction(fn (StaticAction $action)=> $action->label(__('close')));
+        $this->modalCancelAction(fn (Action $action)=> $action->label(__('close')));
 
         $this->form(ClientActivityResource::getFormSchema());
 

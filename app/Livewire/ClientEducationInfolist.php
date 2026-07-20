@@ -2,6 +2,10 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use App\Infolists\Components\MinioFileEntry;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -9,15 +13,14 @@ use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\Section;
 use Hugomyb\FilamentMediaAction\Infolists\Components\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
-class ClientEducationInfolist extends Component implements HasForms, HasInfolists
+class ClientEducationInfolist extends Component implements HasForms, HasInfolists, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithInfolists;
     use InteractsWithForms;
 
@@ -28,11 +31,11 @@ class ClientEducationInfolist extends Component implements HasForms, HasInfolist
         $this->record = $record;
     }
 
-    public function educationInfolist(Infolist $infolist): Infolist
+    public function educationInfolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->record($this->record)
-            ->schema([
+            ->components([
                 Section::make('Riwayat Pendidikan')
                     ->schema([
                         RepeatableEntry::make('educations')

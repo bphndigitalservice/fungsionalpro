@@ -2,9 +2,8 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use Filament\Actions\Action;
 use App\Filament\Pages\Client\ClientProfilePage;
-use Filament\Actions\StaticAction;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Closure;
@@ -31,7 +30,7 @@ class ViewClientIdentityAction extends Action
 
         $this->modalSubmitAction(false);
 
-        $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('close')));
+        $this->modalCancelAction(fn (Action $action) => $action->label(__('close')));
 
         $this->form(ClientProfilePage::getClientIdentityForm());
 

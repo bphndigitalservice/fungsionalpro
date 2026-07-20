@@ -2,14 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use App\Models\RegGrade;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Action;
+use Exception;
+use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
+use App\Filament\Resources\MasterJfResource\Pages\EditMasterJf;
 use App\Filament\Resources\MasterJfResource\Pages;
 use App\Models\MasterJf;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,20 +28,20 @@ class MasterJfResource extends Resource
     protected static ?string $model = MasterJf::class;
     protected static ?int $navigationSort = 3;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('nama')
+        return $schema
+            ->components([
+                TextInput::make('nama')
                     ->required(),
-                Forms\Components\TextInput::make('nip')
+                TextInput::make('nip')
                     ->label('NIP')
                     ->required()
                     ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('gol_ruang')
+                Select::make('gol_ruang')
                     ->label('Golongan/Ruang')
                     ->options(
-                        \App\Models\RegGrade::query()
+                        RegGrade::query()
                             ->get()
                             ->mapWithKeys(fn ($grade) => [
                                 "{$grade->grade_name} ({$grade->grade_code})"
@@ -43,13 +50,13 @@ class MasterJfResource extends Resource
                             ->toArray()
                     )
                     ->searchable(),
-                Forms\Components\TextInput::make('jabatan'),
-                Forms\Components\TextInput::make('instansi'),
-                Forms\Components\TextInput::make('type')
+                TextInput::make('jabatan'),
+                TextInput::make('instansi'),
+                TextInput::make('type')
                     ->label('Tipe'),
-                Forms\Components\TextInput::make('unit_kerja')
+                TextInput::make('unit_kerja')
                     ->label('Unit Kerja'),
-                Forms\Components\Select::make('pengangkatan')
+                Select::make('pengangkatan')
                     ->label('Pengangkatan')
                     ->options([
                         'CPNS/PPPK' => 'CPNS/PPPK',
@@ -59,7 +66,7 @@ class MasterJfResource extends Resource
                     ])
                     ->searchable()
                     ->preload(),
-                Forms\Components\Select::make('status')
+                Select::make('status')
                     ->label('Status')
                     ->options([
                         'Aktif' => 'Aktif',
@@ -76,7 +83,7 @@ class MasterJfResource extends Resource
                     ])
                     ->searchable()
                     ->preload(),
-                Forms\Components\Select::make('status_kepegawaian')
+                Select::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
                     ->options([
                         'PNS' => 'PNS',
@@ -91,39 +98,39 @@ class MasterJfResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama')
+                TextColumn::make('nama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nip')
+                TextColumn::make('nip')
                     ->label('NIP')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('gol_ruang')
+                TextColumn::make('gol_ruang')
                     ->label('Golongan/Ruang')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('jabatan')
+                TextColumn::make('jabatan')
                     ->label('Jabatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('unit_kerja')
+                TextColumn::make('unit_kerja')
                     ->label('Unit Kerja')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('instansi')
+                TextColumn::make('instansi')
                     ->label('Instansi')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label('Tipe')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('pengangkatan')
+                TextColumn::make('pengangkatan')
                     ->label('Pengangkatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status'),
-                Tables\Columns\TextColumn::make('status_kepegawaian')
+                TextColumn::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
                     ->searchable(),
             ])
             ->headerActions([
                 Action::make('import')
                     ->label('Import Data')
-                    ->form([
+                    ->schema([
                         FileUpload::make('file')
                             ->label('File Excel')
                             ->disk('local')
@@ -190,7 +197,7 @@ class MasterJfResource extends Resource
                                 ->title('Import berhasil')
                                 ->success()
                                 ->send();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             report($e);
 
                             Notification::make()
@@ -204,7 +211,7 @@ class MasterJfResource extends Resource
                         }
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ]);
     }
@@ -212,8 +219,8 @@ class MasterJfResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMasterJfs::route('/'),
-            'edit' => Pages\EditMasterJf::route('/{record}/edit'),
+            'index' => ListMasterJfs::route('/'),
+            'edit' => EditMasterJf::route('/{record}/edit'),
         ];
     }
 

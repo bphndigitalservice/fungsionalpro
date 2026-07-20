@@ -2,6 +2,23 @@
 
 namespace App\Filament\Resources\Shield;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Tabs;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Shield\RoleResource\Pages\ListRoles;
+use App\Filament\Resources\Shield\RoleResource\Pages\CreateRole;
+use App\Filament\Resources\Shield\RoleResource\Pages\ViewRole;
+use App\Filament\Resources\Shield\RoleResource\Pages\EditRole;
+use Filament\Panel;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Forms\Components\CheckboxList;
 use App\Filament\Resources\Shield\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
@@ -9,8 +26,6 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Forms;
-use Filament\Forms\Components\Component;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,21 +50,21 @@ class RoleResource extends Resource implements HasShieldPermissions
         ];
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Grid::make()
+        return $schema
+            ->components([
+                Grid::make()
                     ->schema([
-                        Forms\Components\Section::make()
+                        Section::make()
                             ->schema([
-                                Forms\Components\TextInput::make('name')
+                                TextInput::make('name')
                                     ->label(__('filament-shield::filament-shield.field.name'))
                                     ->unique(ignoreRecord: true)
                                     ->required()
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('guard_name')
+                                TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))
                                     ->default(Utils::getFilamentAuthGuard())
                                     ->nullable()
@@ -68,7 +83,7 @@ class RoleResource extends Resource implements HasShieldPermissions
                                 'lg' => 3,
                             ]),
                     ]),
-                Forms\Components\Tabs::make('Permissions')
+                Tabs::make('Permissions')
                     ->contained()
                     ->tabs([
                         static::getTabFormComponentForResources(),
@@ -84,33 +99,33 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->badge()
                     ->label(__('filament-shield::filament-shield.column.name'))
                     ->formatStateUsing(fn ($state): string => Str::headline($state))
                     ->colors(['primary'])
                     ->searchable(),
-                Tables\Columns\TextColumn::make('guard_name')
+                TextColumn::make('guard_name')
                     ->badge()
                     ->label(__('filament-shield::filament-shield.column.guard_name')),
-                Tables\Columns\TextColumn::make('permissions_count')
+                TextColumn::make('permissions_count')
                     ->badge()
                     ->label(__('filament-shield::filament-shield.column.permissions'))
                     ->counts('permissions')
                     ->colors(['success']),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('filament-shield::filament-shield.column.updated_at'))
                     ->dateTime(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                DeleteBulkAction::make(),
             ]);
     }
 
@@ -124,10 +139,10 @@ class RoleResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRoles::route('/'),
-            'create' => Pages\CreateRole::route('/create'),
-            'view' => Pages\ViewRole::route('/{record}'),
-            'edit' => Pages\EditRole::route('/{record}/edit'),
+            'index' => ListRoles::route('/'),
+            'create' => CreateRole::route('/create'),
+            'view' => ViewRole::route('/{record}'),
+            'edit' => EditRole::route('/{record}/edit'),
         ];
     }
 
@@ -178,7 +193,7 @@ class RoleResource extends Resource implements HasShieldPermissions
         return Utils::getResourceNavigationSort();
     }
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return Utils::getResourceSlug();
     }
@@ -211,7 +226,7 @@ class RoleResource extends Resource implements HasShieldPermissions
                     : $entity['model']
                 );
 
-                return Forms\Components\Section::make($sectionLabel)
+                return Section::make($sectionLabel)
                     ->description(fn () => new HtmlString('<span style="word-break: break-word;">'.Utils::showModelPath($entity['fqcn']).'</span>'))
                     ->compact()
                     ->schema([
@@ -301,11 +316,11 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         return static::shield()->hasSimpleResourcePermissionView()
             ? static::getTabFormComponentForSimpleResourcePermissionsView()
-            : Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.resources'))
+            : Tab::make(__('filament-shield::filament-shield.resources'))
                 ->visible(fn (): bool => (bool) Utils::isResourceEntityEnabled())
                 ->badge(static::getResourceTabBadgeCount())
                 ->schema([
-                    Forms\Components\Grid::make()
+                    Grid::make()
                         ->schema(static::getResourceEntitiesSchema())
                         ->columns(static::shield()->getGridColumns()),
                 ]);
@@ -323,7 +338,7 @@ class RoleResource extends Resource implements HasShieldPermissions
         $options = static::getPageOptions();
         $count = count($options);
 
-        return Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.pages'))
+        return Tab::make(__('filament-shield::filament-shield.pages'))
             ->visible(fn (): bool => (bool) Utils::isPageEntityEnabled() && $count > 0)
             ->badge($count)
             ->schema([
@@ -336,7 +351,7 @@ class RoleResource extends Resource implements HasShieldPermissions
         $options = static::getWidgetOptions();
         $count = count($options);
 
-        return Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.widgets'))
+        return Tab::make(__('filament-shield::filament-shield.widgets'))
             ->visible(fn (): bool => (bool) Utils::isWidgetEntityEnabled() && $count > 0)
             ->badge($count)
             ->schema([
@@ -349,7 +364,7 @@ class RoleResource extends Resource implements HasShieldPermissions
         $options = static::getCustomPermissionOptions();
         $count = count($options);
 
-        return Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.custom'))
+        return Tab::make(__('filament-shield::filament-shield.custom'))
             ->visible(fn (): bool => (bool) Utils::isCustomPermissionEntityEnabled() && $count > 0)
             ->badge($count)
             ->schema([
@@ -362,7 +377,7 @@ class RoleResource extends Resource implements HasShieldPermissions
         $options = FilamentShield::getAllResourcePermissions();
         $count = count($options);
 
-        return Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.resources'))
+        return Tab::make(__('filament-shield::filament-shield.resources'))
             ->visible(fn (): bool => (bool) Utils::isResourceEntityEnabled() && $count > 0)
             ->badge($count)
             ->schema([
@@ -372,7 +387,7 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function getCheckboxListFormComponent(string $name, array $options, bool $searchable = true): Component
     {
-        return Forms\Components\CheckboxList::make($name)
+        return CheckboxList::make($name)
             ->label('')
             ->options(fn (): array => $options)
             ->searchable($searchable)

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientCompetenceResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Concerns\Filament\AuthorizesOwnClientRecord;
 use App\Filament\Resources\ClientCompetenceResource;
 use Filament\Actions;
@@ -16,7 +17,7 @@ class ViewClientCompetence extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

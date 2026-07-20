@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Panel;
 use App\Concerns\Verifier\InteractWithClientData;
 use App\Enums\SystemRole;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
@@ -71,7 +72,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasSystemRole(SystemRole::SuperAdmin);
     }
 
-    public function canAccessPanel(\Filament\Panel $panel): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         return $this->hasAnySystemRole(
             SystemRole::SuperAdmin,

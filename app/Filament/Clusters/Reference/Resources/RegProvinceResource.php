@@ -2,10 +2,22 @@
 
 namespace App\Filament\Clusters\Reference\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Clusters\Reference\Resources\RegProvinceResource\RelationManagers\RegenciesRelationManager;
+use App\Filament\Clusters\Reference\Resources\RegProvinceResource\RelationManagers\Echelon1sRelationManager;
+use App\Filament\Clusters\Reference\Resources\RegProvinceResource\Pages\ListRegProvinces;
+use App\Filament\Clusters\Reference\Resources\RegProvinceResource\Pages\CreateRegProvince;
+use App\Filament\Clusters\Reference\Resources\RegProvinceResource\Pages\ViewRegProvince;
+use App\Filament\Clusters\Reference\Resources\RegProvinceResource\Pages\EditRegProvince;
 use App\Filament\Clusters\Reference;
 use App\Models\RegProvince;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,13 +28,13 @@ class RegProvinceResource extends Resource
 
     protected static ?string $cluster = Reference::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -32,22 +44,22 @@ class RegProvinceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -55,18 +67,18 @@ class RegProvinceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            Reference\Resources\RegProvinceResource\RelationManagers\RegenciesRelationManager::class,
-            Reference\Resources\RegProvinceResource\RelationManagers\Echelon1sRelationManager::class,
+            RegenciesRelationManager::class,
+            Echelon1sRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Reference\Resources\RegProvinceResource\Pages\ListRegProvinces::route('/'),
-            'create' => Reference\Resources\RegProvinceResource\Pages\CreateRegProvince::route('/create'),
-            'view' => Reference\Resources\RegProvinceResource\Pages\ViewRegProvince::route('/{record}'),
-            'edit' => Reference\Resources\RegProvinceResource\Pages\EditRegProvince::route('/{record}/edit'),
+            'index' => ListRegProvinces::route('/'),
+            'create' => CreateRegProvince::route('/create'),
+            'view' => ViewRegProvince::route('/{record}'),
+            'edit' => EditRegProvince::route('/{record}/edit'),
         ];
     }
 

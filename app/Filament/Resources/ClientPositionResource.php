@@ -2,11 +2,24 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ClientPositionResource\Pages\ListClientPositions;
+use App\Filament\Resources\ClientPositionResource\Pages\CreateClientPosition;
+use App\Filament\Resources\ClientPositionResource\Pages\ViewClientPosition;
+use App\Filament\Resources\ClientPositionResource\Pages\EditClientPosition;
 use App\Filament\Resources\ClientPositionResource\Pages;
 use App\Filament\Resources\ClientPositionResource\RelationManagers;
 use App\Models\ClientPosition;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -37,11 +50,11 @@ class ClientPositionResource extends Resource
             ]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('c_role_id')
+        return $schema
+            ->components([
+                Select::make('c_role_id')
                     ->label(__('labels.form.client.fields.crole_name'))
                     ->options(
                         CRole::query()
@@ -58,28 +71,28 @@ class ClientPositionResource extends Resource
                     ->afterStateUpdated(fn (callable $set) => $set('c_role_level_id', null))
                     ->required(),
 
-                Forms\Components\Select::make('c_role_level_id')
+                Select::make('c_role_level_id')
                     ->label(__('labels.form.client.fields.crole_grade'))
-                    ->options(fn (Forms\Get $get) =>
+                    ->options(fn (Get $get) =>
                         CRoleLevel::query()
                             ->where('c_role_id', $get('c_role_id'))
                             ->pluck('level', 'id')
                     )
-                    ->disabled(fn (Forms\Get $get) => blank($get('c_role_id')))
+                    ->disabled(fn (Get $get) => blank($get('c_role_id')))
                     ->required(),
 
-                Forms\Components\Select::make('type')
+                Select::make('type')
                     ->options(CRoleAssignation::class)
                     ->label(__('labels.form.client.fields.assignation_type'))
                     ->required(),
-                Forms\Components\DatePicker::make('effective_date')
+                DatePicker::make('effective_date')
                      ->label('TMT Jabatan')
                     ->required(),
-                Forms\Components\TextInput::make('decree_number')
+                TextInput::make('decree_number')
                     ->label('Nomor SK Jabatan')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('decree_file')
+                FileUpload::make('decree_file')
                             ->disk('s3')
                             ->label('File SK Jabatan')
                             ->required()
@@ -97,16 +110,16 @@ class ClientPositionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('croleLevel.role.role_name')
+                TextColumn::make('croleLevel.role.role_name')
                     ->label('Jabatan')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('croleLevel.level')
+                TextColumn::make('croleLevel.level')
                     ->label('Jenjang')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label('Jenis Pengangkatan')
                     ->badge()
                     ->formatStateUsing(fn (string $state) => match ($state) {
@@ -120,27 +133,27 @@ class ClientPositionResource extends Resource
                         default => 'secondary',
                     }),
 
-                Tables\Columns\TextColumn::make('effective_date')
+                TextColumn::make('effective_date')
                     ->label('TMT Jabatan')
                     ->date('d M Y')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('decree_number')
+                TextColumn::make('decree_number')
                     ->label('Nomor SK')
                     ->searchable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 MediaAction::make()
                     ->media(fn(Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
                     ->label('SK Jabatan'),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -155,10 +168,10 @@ class ClientPositionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientPositions::route('/'),
-            'create' => Pages\CreateClientPosition::route('/create'),
-            'view' => Pages\ViewClientPosition::route('/{record}'),
-            'edit' => Pages\EditClientPosition::route('/{record}/edit'),
+            'index' => ListClientPositions::route('/'),
+            'create' => CreateClientPosition::route('/create'),
+            'view' => ViewClientPosition::route('/{record}'),
+            'edit' => EditClientPosition::route('/{record}/edit'),
         ];
     }
 

@@ -2,13 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ClientGradeResource\Pages\ListClientGrades;
+use App\Filament\Resources\ClientGradeResource\Pages\CreateClientGrade;
+use App\Filament\Resources\ClientGradeResource\Pages\ViewClientGrade;
+use App\Filament\Resources\ClientGradeResource\Pages\EditClientGrade;
 use App\Filament\Resources\ClientGradeResource\Pages;
 use App\Filament\Resources\ClientGradeResource\RelationManagers;
 use App\Models\Client;
 use App\Models\ClientGrade;
 use App\Enums\CRoleAssignation;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -26,22 +38,22 @@ class ClientGradeResource extends Resource
 
     protected static ?string $modelLabel = 'Riwayat Pangkat/Golongan';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('reg_grade_id')
+        return $schema
+            ->components([
+                Select::make('reg_grade_id')
                         ->label('Pangkat/Golongan')
                         ->relationship('grade', 'grade_code')
                         ->required(),
-                Forms\Components\DatePicker::make('effective_date')
+                DatePicker::make('effective_date')
                     ->label('TMT Pangkat/Golongan')
                     ->required(),
-                Forms\Components\TextInput::make('decree_number')
+                TextInput::make('decree_number')
                     ->label('Nomor SK Pangkat/Golongan')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('decree_file')
+                FileUpload::make('decree_file')
                             ->disk('s3')
                             ->label('File SK Pangkat/Golongan')
                             ->required()
@@ -58,15 +70,15 @@ class ClientGradeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('grade.grade_code')
+                TextColumn::make('grade.grade_code')
                     ->label('Pangkat/Golongan')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('effective_date')
+                TextColumn::make('effective_date')
                     ->label('TMT')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('decree_number')
+                TextColumn::make('decree_number')
                     ->label('Nomor SK')
                     ->sortable()
                     ->searchable(),
@@ -74,15 +86,15 @@ class ClientGradeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 MediaAction::make()
                     ->media(fn(Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
                     ->label('SK Pangkat/Golongan'),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -97,10 +109,10 @@ class ClientGradeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientGrades::route('/'),
-            'create' => Pages\CreateClientGrade::route('/create'),
-            'view' => Pages\ViewClientGrade::route('/{record}'),
-            'edit' => Pages\EditClientGrade::route('/{record}/edit'),
+            'index' => ListClientGrades::route('/'),
+            'create' => CreateClientGrade::route('/create'),
+            'view' => ViewClientGrade::route('/{record}'),
+            'edit' => EditClientGrade::route('/{record}/edit'),
         ];
     }
 

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ClientCompetenceResource\Pages;
 
+use Filament\Actions\CreateAction;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ClientCompetenceResource;
 use App\Models\Client;
 use Filament\Actions;
@@ -15,13 +17,13 @@ class ListClientCompetences extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 
 
 
-    protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
+    protected function getTableQuery(): ?Builder
     {
         return parent::getTableQuery()->where('client_id', Client::current()?->id ?? 0);
     }

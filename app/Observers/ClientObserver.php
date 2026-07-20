@@ -3,6 +3,7 @@
 
 namespace App\Observers;
 
+use App\Enums\Verified;
 use App\Models\Client;
 use App\Services\ClientMatchingService;
 use App\Models\User;
@@ -22,10 +23,10 @@ class ClientObserver
 
         if ($master) {
             $this->service->applyMasterData($client, $master);
-            $client->is_verified = \App\Enums\Verified::Unverified;
+            $client->is_verified = Verified::Unverified;
         } else {
             // Normal fallbacks if NIP is not present in master excel records
-            $client->is_verified = \App\Enums\Verified::Unverified;
+            $client->is_verified = Verified::Unverified;
             $client->status = $client->status ?? null;
             $client->assignation_type = $client->assignation_type ?? null;
         }

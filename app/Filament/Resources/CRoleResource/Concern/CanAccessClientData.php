@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CRoleResource\Concern;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use App\Models\User;
 use App\Services\ClientAccessService;
 
@@ -16,7 +17,7 @@ trait CanAccessClientData
         }
     }
 
-    public function getPrincipal(): \Illuminate\Contracts\Auth\Authenticatable|User
+    public function getPrincipal(): Authenticatable|User
     {
         return auth()->user();
     }

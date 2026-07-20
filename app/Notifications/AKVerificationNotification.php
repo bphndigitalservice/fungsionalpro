@@ -2,10 +2,10 @@
 
 namespace App\Notifications;
 
+use Filament\Actions\Action;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Filament\Notifications\Notification as FilamentNotification;
-use Filament\Notifications\Actions\Action;
 
 class AKVerificationNotification extends Notification
 {

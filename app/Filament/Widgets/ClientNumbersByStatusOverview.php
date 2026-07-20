@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Enums\ClientStatus;
 use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
 use Illuminate\Support\Facades\DB;
 
 class ClientNumbersByStatusOverview extends StatsOverviewWidget
@@ -23,7 +23,7 @@ class ClientNumbersByStatusOverview extends StatsOverviewWidget
         $cards = [];
         foreach (ClientStatus::cases() as $status) {
             $count = (int) ($counts[$status->value] ?? 0);
-            $cards[] = Card::make($status->getLabel(), number_format($count))
+            $cards[] = Stat::make($status->getLabel(), number_format($count))
                 ->icon(match ($status) {
                     ClientStatus::Active => 'heroicon-o-check-circle',
                     default => 'heroicon-o-x-circle',

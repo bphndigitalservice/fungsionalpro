@@ -2,6 +2,9 @@
 
 namespace App\Filament\Pages\Verification;
 
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Concerns\Components\HasCustomPageTab;
 use App\Filament\Pages\Verification\Actions\AcceptClientIdentityAction;
 use App\Filament\Pages\Verification\Actions\RejectClientIdentityAction;
@@ -14,7 +17,6 @@ use Filament\Facades\Filament;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
-use Filament\Resources\Components\Tab;
 use Filament\Tables;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -27,7 +29,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
 {
     use HasCustomPageTab, HasPageShield, InteractsWithInfolists;
 
-    protected static string $view = 'filament.pages.client-identity-verification-workspace';
+    protected string $view = 'filament.pages.client-identity-verification-workspace';
 
     public function mount(): void
     {
@@ -39,60 +41,60 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
         return
             $table
                 ->columns([
-                    Tables\Columns\TextColumn::make('id')
+                    TextColumn::make('id')
                         ->toggleable(isToggledHiddenByDefault: true)
                         ->label(__('labels.table.client.id')),
-                    Tables\Columns\TextColumn::make('nip')
+                    TextColumn::make('nip')
                         ->label(__('labels.table.client.nip'))
                         ->searchable(),
-                    Tables\Columns\TextColumn::make('identity.name')
+                    TextColumn::make('identity.name')
                         ->label(__('labels.table.client.name'))
                         ->searchable(),
-                    Tables\Columns\TextColumn::make('crole.role_name')
+                    TextColumn::make('crole.role_name')
                         ->label(__('labels.table.client.role'))
                         ->numeric()
                         ->sortable(),
-                    Tables\Columns\TextColumn::make('croleLevel.level')
+                    TextColumn::make('croleLevel.level')
                         ->label(__('labels.table.client.grade'))
                         ->numeric()
                         ->sortable(),
-                    Tables\Columns\TextColumn::make('type')
+                    TextColumn::make('type')
                         ->label(__('labels.table.client.cluster'))
                         ->searchable(),
-                    Tables\Columns\TextColumn::make('agenciable.name')
+                    TextColumn::make('agenciable.name')
                         ->label(__('labels.table.client.agency'))
                         ->searchable()->sortable(),
-                    Tables\Columns\TextColumn::make('echelonable.name')
+                    TextColumn::make('echelonable.name')
                         ->label(__('labels.table.client.echelon'))
                         ->searchable()->sortable(),
-                    Tables\Columns\TextColumn::make('echelon_x_text')
+                    TextColumn::make('echelon_x_text')
                         ->label(__('labels.table.client.echelon_text'))
                         ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('status')
+                    TextColumn::make('status')
                         ->label(__('labels.table.client.status'))
                         ->searchable()->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('assignation_type')
+                    TextColumn::make('assignation_type')
                         ->label(__('labels.table.client.assignation_type'))
                         ->searchable()
                         ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('is_verified')
+                    TextColumn::make('is_verified')
                         ->label(__('labels.table.client.is_verified'))
                         ->searchable()
                         ->toggleable(isToggledHiddenByDefault: false),
-                    Tables\Columns\TextColumn::make('created_at')
+                    TextColumn::make('created_at')
                         ->dateTime()
                         ->sortable()
                         ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('updated_at')
+                    TextColumn::make('updated_at')
                         ->dateTime()
                         ->sortable()
                         ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('deleted_at')
+                    TextColumn::make('deleted_at')
                         ->dateTime()
                         ->sortable()
                         ->toggleable(isToggledHiddenByDefault: true),
                 ])
-                ->actions([
+                ->recordActions([
                     ViewClientIdentityAction::make(),
                     AcceptClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
                     RejectClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
@@ -141,7 +143,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
             })->select('clients.*');
     }
 
-    protected function getUser(): \Illuminate\Contracts\Auth\Authenticatable|User
+    protected function getUser(): Authenticatable|User
     {
         return auth()->user();
     }

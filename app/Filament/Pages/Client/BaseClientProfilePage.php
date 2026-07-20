@@ -32,7 +32,7 @@ abstract class BaseClientProfilePage extends Page implements HasForms, HasInfoli
     use HasUnsavedDataChangesAlert;
     use CanUseDatabaseTransactions;
 
-    protected static string $view = 'filament.pages.client-profile-page';
+    protected string $view = 'filament.pages.client-profile-page';
 
     public static ?Client $record;
     public ?array $data = [];

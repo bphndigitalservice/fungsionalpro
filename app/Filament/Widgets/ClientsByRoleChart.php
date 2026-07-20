@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ClientsByRoleChart extends ChartWidget
 {
-    protected static ?string $heading = 'Jabatan Fungsional';
+    protected ?string $heading = 'Jabatan Fungsional';
     protected static ?int $height = 320;
 
     protected function getData(): array

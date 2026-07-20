@@ -2,6 +2,7 @@
 
 namespace App\Subscribers;
 
+use Exception;
 use App\Enums\Verified;
 use App\Events\ClientProfileAccepted;
 use App\Events\ClientProfileCompleted;
@@ -84,7 +85,7 @@ class ClientEventSubscriber
                 $client->crole->role_name,
                 $event->getVerifierNotes());
 
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error($exception->getMessage(), ['client_id' => $client->id]);
             DB::rollBack();
         }
@@ -111,7 +112,7 @@ class ClientEventSubscriber
 
             DB::commit();
 
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error($exception->getMessage(), ['client_id' => $event->getClient()->id]);
             DB::rollBack();
         }

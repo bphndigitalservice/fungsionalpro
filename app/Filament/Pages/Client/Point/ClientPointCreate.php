@@ -2,6 +2,14 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use Filament\Schemas\Schema;
+use Throwable;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Actions;
+use Filament\Panel;
 use App\Concerns\Components\EnsureClientHasCompleteProfile;
 use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
@@ -12,24 +20,17 @@ use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Field;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -44,7 +45,7 @@ use Illuminate\Support\Js;
 use function Filament\Support\is_app_url;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class ClientPointCreate extends Page implements HasForms, HasInfolists
 {
@@ -52,7 +53,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     use EnsureClientHasCompleteProfile;
     use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
-    protected static string $view = 'filament.pages.client-client-point-create';
+    protected string $view = 'filament.pages.client-client-point-create';
 
     protected ClientPointSubmission $record;
 
@@ -82,10 +83,10 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return true;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 static::getYearField(),
                 static::getSubmissionTypeField(),
                 static::getSKP2AKConversionForm(),
@@ -182,7 +183,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             $this->getErrorNotification('error', $exception->getMessage())->send();
 
             return;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->rollBackDatabaseTransaction();
 
             Log::error($exception->getMessage(), ['user_id' => auth()->id()]);
@@ -241,14 +242,14 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 
     protected function getRedirectUrl(): string
     {
-        return ClientPointList::getRoutePath();
+        return ClientPointList::getRoutePath(Filament::getCurrentOrDefaultPanel());
     }
 
     public function getBreadcrumbs(): array
     {
         return [
             '#' => 'Angka Kredit',
-            self::getRoutePath() => 'Pelaporan',
+            self::getRoutePath(Filament::getCurrentOrDefaultPanel()) => 'Pelaporan',
         ];
     }
 
@@ -422,13 +423,13 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return $dateOfPak->year >= 2023;
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist->schema([
+        return $schema->components([
             TextEntry::make('Perhatian')
                 ->state('Data anda belum lengkap.'),
             Actions::make([
-                Actions\Action::make('complete_profile')
+                Action::make('complete_profile')
                     ->url(fn (): string => ClientProfilePage::getUrl()),
             ])->fullWidth(),
         ]);
@@ -454,7 +455,7 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
         return __('labels.page.client_point_create.title');
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return '/c/points/create';
     }

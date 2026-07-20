@@ -2,6 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ClientEducationResource\Pages\ListClientEducation;
+use App\Filament\Resources\ClientEducationResource\Pages\CreateClientEducation;
+use App\Filament\Resources\ClientEducationResource\Pages\EditClientEducation;
 use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Enums\EducationLevel;
 use App\Filament\Resources\ClientEducationResource\Pages;
@@ -25,45 +41,45 @@ class ClientEducationResource extends Resource
 
     protected static ?string $modelLabel = 'Riwayat Pendidikan';
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->heading(__('labels.form.client.heading.client_education'))
                     ->description(__('labels.form.client.heading.client_education_description'))
                     ->schema([
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\Select::make('level')
+                                Select::make('level')
                                     ->label(__('labels.form.client.fields.education_level'))
                                     ->options(EducationLevel::class)
                                     ->required(),
 
-                                Forms\Components\TextInput::make('university_name')
+                                TextInput::make('university_name')
                                     ->label(__('Universitas'))
                                     ->required(),
 
-                                Forms\Components\TextInput::make('program_name')
+                                TextInput::make('program_name')
                                     ->label(__('labels.form.client.fields.program_name'))
                                     ->required(),
 
-                                Forms\Components\TextInput::make('gpa')
+                                TextInput::make('gpa')
                                     ->label(__('labels.form.client.fields.gpa'))
                                     ->numeric()
                                     ->maxValue(4)
                                     ->required(),
 
-                                Forms\Components\DatePicker::make('certificate_date')
+                                DatePicker::make('certificate_date')
                                     ->label('Tanggal Ijazah')
                                     ->native(false)
                                     ->required(),
                             ])
                             ->columns(3),
 
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                Forms\Components\FileUpload::make('certificate')
+                                FileUpload::make('certificate')
                                     ->disk('s3')
                                     ->label(__('labels.form.client.fields.certificate'))
                                     ->required()
@@ -75,7 +91,7 @@ class ClientEducationResource extends Resource
                                     ->downloadable()
                                     ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
 
-                                Forms\Components\FileUpload::make('title_inclusion_file')
+                                FileUpload::make('title_inclusion_file')
                                     ->disk('s3')
                                     ->label('Lembar Pencantuman Gelar')
                                     ->maxFiles(1)
@@ -94,7 +110,7 @@ class ClientEducationResource extends Resource
             ]);
     }
 
-    public static function table(Tables\Table $table): Tables\Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
@@ -121,20 +137,20 @@ class ClientEducationResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('level')
+                SelectFilter::make('level')
                     ->label(__('labels.form.client.fields.education_level'))
                     ->options(EducationLevel::class),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                     ->label('Lihat Detail')
                     ->modalHeading('Detail Riwayat Pendidikan'),
 
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -152,9 +168,9 @@ class ClientEducationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClientEducation::route('/'),
-            'create' => Pages\CreateClientEducation::route('/create'),
-            'edit' => Pages\EditClientEducation::route('/{record}/edit'),
+            'index' => ListClientEducation::route('/'),
+            'create' => CreateClientEducation::route('/create'),
+            'edit' => EditClientEducation::route('/{record}/edit'),
         ];
     }
 

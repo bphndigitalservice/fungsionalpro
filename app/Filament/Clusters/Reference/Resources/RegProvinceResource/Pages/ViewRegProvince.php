@@ -2,6 +2,7 @@
 
 namespace App\Filament\Clusters\Reference\Resources\RegProvinceResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Clusters\Reference\Resources\RegProvinceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -13,7 +14,7 @@ class ViewRegProvince extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }
