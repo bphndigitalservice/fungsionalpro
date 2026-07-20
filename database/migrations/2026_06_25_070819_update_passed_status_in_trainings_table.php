@@ -20,6 +20,10 @@ return new class extends Migration
             ->where('completion_status', 'EXCELLENT')
             ->update(['completion_status' => 'VERY_SATISFACTORY']);
 
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
         // 3. Drop the old check constraint
         DB::statement('ALTER TABLE client_competences DROP CONSTRAINT IF EXISTS client_competences_completion_status_check');
 
@@ -32,6 +36,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
         DB::statement('ALTER TABLE client_competences DROP CONSTRAINT IF EXISTS client_competences_completion_status_check');
 
         // Restore the previous configuration just in case
