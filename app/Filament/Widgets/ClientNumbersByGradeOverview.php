@@ -21,6 +21,7 @@ class ClientNumbersByGradeOverview extends StatsOverviewWidget
         $query = $this->baseClientQuery();
 
         $rows = $query
+            ->toBase()
             ->select('clients.reg_grade_id', DB::raw('COUNT(*) as total'))
             ->groupBy('clients.reg_grade_id')
             ->orderByDesc('total')
@@ -51,21 +52,21 @@ class ClientNumbersByGradeOverview extends StatsOverviewWidget
         }
 
         if ($principal->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
-            $adminAccess = AdminAccess::query()->where('user_id', $principal->id)->limit(1);
+            $adminAccess = AdminAccess::query()->where('user_id', $principal->id);
 
             return $query->joinSub($adminAccess, 'aa', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'aa.c_role_id');
-            })->select('clients.*');
+            });
         }
 
         if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
-            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
+            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
 
             return $query->joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');
                 $join->on('va.entity_id', '=', 'clients.agency_id');
-            })->select('clients.*');
+            });
         }
 
         return $query->whereRaw('1 = 0');

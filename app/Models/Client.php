@@ -132,13 +132,15 @@ class Client extends Model
 
     public static function current(): ?Client
     {
-        $user = auth()->user();
-        if (is_null($user)) {
-            return null;
-        }
+        return once(function (): ?Client {
+            $user = auth()->user();
 
-        return Client::where('user_id', $user->id)->first() ?? null;
+            if (is_null($user)) {
+                return null;
+            }
 
+            return static::query()->where('user_id', $user->id)->first();
+        });
     }
 
     public function note(): HasOne

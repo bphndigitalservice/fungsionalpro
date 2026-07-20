@@ -12,7 +12,6 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\Log;
 
 class ListClients extends ListRecords
 {
@@ -57,14 +56,12 @@ class ListClients extends ListRecords
 
         $principal = $this->getPrincipal();
 
-        Log::info("ListClients getTableQuery for user id: ".$principal->id);
-
         if ($principal->isSuperAdmin()) {
             return parent::getTableQuery();
         }
 
         if($principal->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
-            $adminAccess = \App\Models\AdminAccess::query()->where('user_id', $principal->id)->limit(1);
+            $adminAccess = \App\Models\AdminAccess::query()->where('user_id', $principal->id);
 
             return Client::joinSub($adminAccess, 'aa', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'aa.c_role_id');
@@ -72,7 +69,7 @@ class ListClients extends ListRecords
         }
 
         if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
-            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
+            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
 
             return Client::joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');

@@ -35,7 +35,8 @@ class ClientMatchingService
     {
         $rawJabatan = $master->jabatan ?? '';
 
-        $role = CRole::get()->first(function ($cRole) use ($rawJabatan) {
+        $roles = once(fn () => CRole::query()->get());
+        $role = $roles->first(function ($cRole) use ($rawJabatan) {
             return stripos($rawJabatan, $cRole->role_name) !== false;
         });
 
@@ -50,13 +51,14 @@ class ClientMatchingService
 
             $client->c_role_level_id = $level ? $level->id : 1;
 
-            if (!empty($master->gol_ruang)) {
+            if (! empty($master->gol_ruang)) {
                 $rawGolongan = $master->gol_ruang;
 
-                $grade = RegGrade::get()->first(function ($g) use ($rawGolongan) {
-                    $matchCode = !empty($g->grade_code) && stripos($rawGolongan, $g->grade_code) !== false;
+                $grades = once(fn () => RegGrade::query()->get());
+                $grade = $grades->first(function ($g) use ($rawGolongan) {
+                    $matchCode = ! empty($g->grade_code) && stripos($rawGolongan, $g->grade_code) !== false;
 
-                    $matchName = !empty($g->grade_name) && stripos($rawGolongan, $g->grade_name) !== false;
+                    $matchName = ! empty($g->grade_name) && stripos($rawGolongan, $g->grade_name) !== false;
 
                     return $matchCode || $matchName;
                 });
@@ -79,14 +81,14 @@ class ClientMatchingService
             $cleanInstansi = self::cleanAgencyName($rawInstansi);
 
             $agency = $agencyModel::where('name', '=', $cleanUnitKerja)->first();
-            if (!$agency && $cleanInstansi) {
+            if (! $agency && $cleanInstansi) {
                 $agency = $agencyModel::where('name', '=', $cleanInstansi)->first();
             }
-            if (!$agency && $cleanUnitKerja) {
-                $agency = $agencyModel::where('name', 'LIKE', "%" . $cleanUnitKerja . "%")->first();
+            if (! $agency && $cleanUnitKerja) {
+                $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanUnitKerja . '%')->first();
             }
-            if (!$agency && $cleanInstansi) {
-                $agency = $agencyModel::where('name', 'LIKE', "%" . $cleanInstansi . "%")->first();
+            if (! $agency && $cleanInstansi) {
+                $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanInstansi . '%')->first();
             }
 
             if ($agency) {
@@ -119,7 +121,7 @@ class ClientMatchingService
                 default => null,
             };
 
-            if (!empty($master->pengangkatan)) {
+            if (! empty($master->pengangkatan)) {
                 $rawPengangkatan = strtolower($master->pengangkatan);
 
                 $client->assignation_type = match (true) {
@@ -168,8 +170,9 @@ class ClientMatchingService
         }
 
         // 3. RegProvince check
-        if (!str_contains($rawInstansi, 'kementerian') && !str_contains($rawInstansi, 'badan')) {
-            $province = RegProvince::all()->first(fn($p) => str_contains($rawInstansi, strtolower($p->name)));
+        if (! str_contains($rawInstansi, 'kementerian') && ! str_contains($rawInstansi, 'badan')) {
+            $provinces = once(fn () => RegProvince::query()->get(['id', 'name']));
+            $province = $provinces->first(fn ($p) => str_contains($rawInstansi, strtolower($p->name)));
             if ($province) {
                 return ['local_province', RegProvince::class];
             }

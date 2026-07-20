@@ -123,8 +123,7 @@ implements HasTable, HasInfolists
 
         $verifierAccess =
             VerifierAccess::query()
-            ->where('user_id', auth()->id())
-            ->limit(1);
+            ->where('user_id', auth()->id());
 
         return ClientActivity::query()
 

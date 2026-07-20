@@ -27,12 +27,12 @@ class ClientsByRoleChart extends ChartWidget
         if (method_exists($principal, 'isSuperAdmin') && $principal->isSuperAdmin()) {
             // no additional constraints
         } elseif ($principal->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
-            $adminAccess = AdminAccess::query()->where('user_id', $principal->id)->limit(1);
+            $adminAccess = AdminAccess::query()->where('user_id', $principal->id);
             $query->joinSub($adminAccess, 'aa', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'aa.c_role_id');
             });
         } elseif ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
-            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id)->limit(1);
+            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
             $query->joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');

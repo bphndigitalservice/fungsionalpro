@@ -50,7 +50,19 @@ class AppServiceProvider extends ServiceProvider
 
 
         Model::unguard();
+        Model::preventLazyLoading(! $this->app->isProduction());
+        Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation): void {
+            if ($this->app->isProduction()) {
+                return;
+            }
 
+            logger()->warning(sprintf(
+                'Lazy loading [%s] on [%s:%s]',
+                $relation,
+                $model::class,
+                $model->getKey(),
+            ));
+        });
 
         Event::subscribe(UserEventSubscriber::class);
         Event::subscribe(ClientEventSubscriber::class);

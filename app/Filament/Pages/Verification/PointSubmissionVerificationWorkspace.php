@@ -22,6 +22,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\JoinClause;
 
 class PointSubmissionVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
@@ -42,7 +43,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
                 TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
-                
+
                 TextColumn::make('is_approved')
                     ->label('Status Persetujuan')
                     ->tooltip(fn (Model $record): ?string => $record->verifier_note)
@@ -53,10 +54,10 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
                         return $record->is_approved;
                     })
-                    ->color(fn (Model $record) => 
+                    ->color(fn (Model $record) =>
                         $record->status === PointSubmissionStatus::Submitted ? 'gray' : null
                     )
-                    ->icon(fn (Model $record) => 
+                    ->icon(fn (Model $record) =>
                         $record->status === PointSubmissionStatus::Submitted ? 'heroicon-o-clock' : null
                     ),
 
@@ -64,12 +65,11 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
             ])
             ->actions([
                 VerifyPointSubmissionAction::make()
-                    ->hidden(fn(Model $record) => 
-                        !static::canVerifying() || 
-                        // Hide "Periksa" once it leaves the Submitted state
+                    ->hidden(fn (Model $record) =>
+                        ! static::canVerifying() ||
                         in_array($record->status, [
-                            PointSubmissionStatus::Verified, 
-                            PointSubmissionStatus::ShouldRevise
+                            PointSubmissionStatus::Verified,
+                            PointSubmissionStatus::ShouldRevise,
                         ])
                     ),
             ]);
@@ -87,16 +87,22 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
 
     protected function getTableQuery(): Builder|Relation|null
     {
-        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
+        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->id());
 
         return ClientPointSubmission::query()
-            ->whereHas('client', function (Builder $query) use ($verifierAccess) {
-                $query->whereHas('crole', function (Builder $roleQuery) use ($verifierAccess) {
-                    $roleQuery->whereIn('id', $verifierAccess->pluck('c_role_id'));
-                })
-                    ->whereIn('agency_type', $verifierAccess->pluck('entity_type'))
-                    ->whereIn('agency_id', $verifierAccess->pluck('entity_id'));
-            });
+            ->with([
+                'client.identity',
+                'client.agenciable',
+                'client.echelonable',
+            ])
+            ->join('clients', 'client_point_submissions.client_id', '=', 'clients.id')
+            ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
+                $join->on('clients.c_role_id', '=', 'va.c_role_id')
+                    ->on('va.entity_type', '=', 'clients.agency_type')
+                    ->on('va.entity_id', '=', 'clients.agency_id');
+            })
+            ->select('client_point_submissions.*')
+            ->distinct();
     }
 
     public static function getNavigationGroup(): ?string
@@ -119,23 +125,21 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return [
             'all' => Tab::make(__('All')),
 
-            // Only items currently awaiting a decision
             'new' => Tab::make(__('New'))
                 ->badge(
                     $this->getTableQuery()
                         ->where('client_point_submissions.status', PointSubmissionStatus::Submitted)
                         ->count()
                 )
-                ->modifyQueryUsing(fn(Builder $query) => 
+                ->modifyQueryUsing(fn (Builder $query) =>
                     $query->where('client_point_submissions.status', PointSubmissionStatus::Submitted)
                 ),
 
-            // Items already handled (Accepted or Rejected)
             'processed' => Tab::make(__('Processed'))
-                ->modifyQueryUsing(fn(Builder $query) => 
+                ->modifyQueryUsing(fn (Builder $query) =>
                     $query->whereIn('client_point_submissions.status', [
                         PointSubmissionStatus::Verified,
-                        PointSubmissionStatus::ShouldRevise
+                        PointSubmissionStatus::ShouldRevise,
                     ])
                 ),
         ];
