@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\ClientDocumentType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ClientDocumentType>
+ * @extends Factory<ClientDocumentType>
  */
 class ClientDocumentTypeFactory extends Factory
 {
@@ -17,7 +18,9 @@ class ClientDocumentTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'type' => fake()->unique()->lexify('DOC-???'),
+            'description' => fake()->sentence(3),
+            'is_required' => fake()->boolean(),
         ];
     }
 }
