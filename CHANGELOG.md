@@ -1,3 +1,10 @@
+## [0.2.3](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.2...v0.2.3) (2026-07-20)
+
+
+### Bug Fixes
+
+* **Dockerfile:** consolidate ARG declarations for Bun, Supercronic, and Golang versions ([9152acc](https://github.com/bphndigitalservice/fungsionalpro/commit/9152accf71d09cd4a40b1c5d1cef06549812de52))
+
 ## [0.2.2](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.1...v0.2.2) (2026-07-20)
 
 
