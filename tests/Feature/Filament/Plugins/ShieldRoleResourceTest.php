@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Filament\Plugins;
 
-use App\Filament\Resources\Shield\RoleResource\Pages\ListRoles;
+use App\Filament\Resources\Shield\Roles\Pages\ListRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Concerns\InteractsWithFilament;

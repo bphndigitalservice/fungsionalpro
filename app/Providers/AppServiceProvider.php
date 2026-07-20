@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
-use Filament\Auth\Http\Responses\RegistrationResponse;
+use App\Models\Client;
+use App\Observers\ClientObserver;
 use App\Subscribers\ClientEventSubscriber;
 use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
-use BezhanSalleh\FilamentShield\FilamentShield;
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use Filament\Auth\Http\Responses\RegistrationResponse;
 use Filament\Facades\Filament;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -15,8 +17,6 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Client;
-use App\Observers\ClientObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,14 +40,13 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(RegistrationResponse::class, \App\Filament\Pages\Authx\RegistrationResponse::class);
 
-        Authenticate::redirectUsing(fn(): string => Filament::getLoginUrl());
+        Authenticate::redirectUsing(fn (): string => Filament::getLoginUrl());
         AuthenticateSession::redirectUsing(
-            fn(): string => Filament::getLoginUrl()
+            fn (): string => Filament::getLoginUrl()
         );
         AuthenticationException::redirectUsing(
-            fn(): string => Filament::getLoginUrl()
+            fn (): string => Filament::getLoginUrl()
         );
-
 
         // Filament resource forms mass-assign many attributes. Until every model
         // has an explicit $fillable whitelist, keep unguard enabled so saves don't

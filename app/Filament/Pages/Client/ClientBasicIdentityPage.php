@@ -2,27 +2,23 @@
 
 namespace App\Filament\Pages\Client;
 
-
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
 use App\Enums\ClientCluster;
-use App\Filament\Resources\ClientResource;
+use App\Filament\Resources\Clients\ClientResource;
 use App\Models\Client;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
-use Filament\Forms;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 
-
 /**
- * @property \Filament\Schemas\Schema $form
+ * @property Schema $form
  */
 class ClientBasicIdentityPage extends BaseClientProfilePage
 {
-
     public function getTitle(): string|Htmlable
     {
         return __('Informasi Dasar');
@@ -43,7 +39,7 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
         return '/c/profile/basic-information';
     }
 
-    function initializePage(): void
+    public function initializePage(): void
     {
         $this->fillForm();
         $this->previousUrl = url()->previous();
@@ -61,21 +57,21 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
                         Group::make()
                             ->schema(ClientResource::getClientIdentityForm())
                             ->columnSpan(5),
-                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                 Section::make()
                     ->heading(__('labels.form.client.heading.client_employee_information'))
                     ->description(__('labels.form.client.heading.client_employee_information_description'))
                     ->collapsible()
                     ->schema([
                         Group::make()
-                            ->schema(ClientResource::getClientBasicInformationForm(fn() => static::getRecord()))
+                            ->schema(ClientResource::getClientBasicInformationForm(fn () => static::getRecord()))
                             ->columnSpan(5),
-                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
             ]);
 
     }
 
-    function save(array $data): Client
+    public function save(array $data): Client
     {
         $record = new Client($data);
         $record->save();
@@ -84,7 +80,6 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
 
         return $record;
     }
-
 
     public function mutateFormDataBeforeSave(array $data): array
     {
@@ -111,7 +106,7 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
         return $data;
     }
 
-    function mutateDataBeforeFill(array $data): array
+    public function mutateDataBeforeFill(array $data): array
     {
         if (is_null(static::$record)) {
             $data['name'] = auth('web')->user()->name;

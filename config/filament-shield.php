@@ -12,9 +12,8 @@ return [
         'is_scoped_to_tenant' => true,
     ],
 
-    'auth_provider_model' => [
-        'fqcn' => 'App\\Models\\User',
-    ],
+    // Temporary v4 shape: string FQCN (Task 8 will republish full Shield 4.x config).
+    'auth_provider_model' => 'App\\Models\\User',
 
     'super_admin' => [
         'enabled' => true,

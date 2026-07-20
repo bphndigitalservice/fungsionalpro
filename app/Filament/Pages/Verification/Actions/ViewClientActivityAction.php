@@ -2,11 +2,11 @@
 
 namespace App\Filament\Pages\Verification\Actions;
 
+use App\Filament\Resources\ClientActivities\ClientActivityResource;
+use Closure;
 use Filament\Actions\Action;
-use App\Filament\Resources\ClientActivityResource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Closure;
 
 class ViewClientActivityAction extends Action
 {
@@ -29,7 +29,7 @@ class ViewClientActivityAction extends Action
         $this->modalHeading(__('Verifikasi Pelaporan Kegiatan'));
         $this->modalSubmitAction(false);
 
-        $this->modalCancelAction(fn (Action $action)=> $action->label(__('close')));
+        $this->modalCancelAction(fn (Action $action) => $action->label(__('close')));
 
         $this->form(ClientActivityResource::getFormSchema());
 
@@ -49,13 +49,13 @@ class ViewClientActivityAction extends Action
                 $data =
                     $this->evaluate(
                         $this->mutateRecordDataUsing,
-                        ['data'=>$data]
+                        ['data' => $data]
                     );
             }
+
             return $data;
         });
 
-        $this->action(static function (): void {
-        });
+        $this->action(static function (): void {});
     }
 }

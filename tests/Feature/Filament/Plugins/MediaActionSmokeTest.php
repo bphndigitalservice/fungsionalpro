@@ -6,7 +6,7 @@ use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
 use App\Enums\SystemRole;
-use App\Filament\Resources\ClientActivityResource\Pages\ListClientActivities;
+use App\Filament\Resources\ClientActivities\Pages\ListClientActivities;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\CRoleLevel;

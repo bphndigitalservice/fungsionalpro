@@ -2,21 +2,11 @@
 
 namespace App\Filament\Pages\Client;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Section;
-use Filament\Panel;
 use App\Concerns\Client\CanUseProfileNote;
 use App\Enums\ClientCluster;
-use App\Enums\Verified;
 use App\Events\ClientProfileUpdated;
-use App\Filament\Resources\ClientResource;
+use App\Filament\Resources\Clients\ClientResource;
 use App\Models\Client;
-use App\Models\ClientGrade;
-use App\Models\ClientPosition;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
@@ -24,7 +14,6 @@ use App\Models\RegRegency;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\TextEntry;
@@ -35,13 +24,20 @@ use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
+use Filament\Panel;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
 /**
- * @property \Filament\Schemas\Schema $form
+ * @property Schema $form
  */
 class ClientProfilePage extends Page implements HasForms, HasInfolists
 {

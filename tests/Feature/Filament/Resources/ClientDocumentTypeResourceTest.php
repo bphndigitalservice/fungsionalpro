@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Filament\Resources;
 
-use App\Filament\Resources\ClientDocumentTypeResource\Pages\CreateClientDocumentType;
-use App\Filament\Resources\ClientDocumentTypeResource\Pages\ListClientDocumentTypes;
+use App\Filament\Resources\ClientDocumentTypes\Pages\CreateClientDocumentType;
+use App\Filament\Resources\ClientDocumentTypes\Pages\ListClientDocumentTypes;
 use App\Models\ClientDocumentType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
