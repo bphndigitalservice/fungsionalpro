@@ -11,12 +11,8 @@ use App\Models\RegProvince;
 use App\Models\RegRegency;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 
-/**
- * @property Schema $form
- */
 class ClientBasicIdentityPage extends BaseClientProfilePage
 {
     public function getTitle(): string|Htmlable
@@ -45,30 +41,28 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
         $this->previousUrl = url()->previous();
     }
 
-    public function form(Schema $schema): Schema
+    protected function getClientProfileFormSchema(): array
     {
-        return $schema
-            ->components([
-                Section::make()
-                    ->heading(__('labels.form.client.heading.client_identity'))
-                    ->description(__('labels.form.client.heading.client_identity_description'))
-                    ->collapsible()
-                    ->schema([
-                        Group::make()
-                            ->schema(ClientResource::getClientIdentityForm())
-                            ->columnSpan(5),
-                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
-                Section::make()
-                    ->heading(__('labels.form.client.heading.client_employee_information'))
-                    ->description(__('labels.form.client.heading.client_employee_information_description'))
-                    ->collapsible()
-                    ->schema([
-                        Group::make()
-                            ->schema(ClientResource::getClientBasicInformationForm(fn () => static::getRecord()))
-                            ->columnSpan(5),
-                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
-            ]);
-
+        return [
+            Section::make()
+                ->heading(__('labels.form.client.heading.client_identity'))
+                ->description(__('labels.form.client.heading.client_identity_description'))
+                ->collapsible()
+                ->schema([
+                    Group::make()
+                        ->schema(ClientResource::getClientIdentityForm())
+                        ->columnSpan(5),
+                ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
+            Section::make()
+                ->heading(__('labels.form.client.heading.client_employee_information'))
+                ->description(__('labels.form.client.heading.client_employee_information_description'))
+                ->collapsible()
+                ->schema([
+                    Group::make()
+                        ->schema(ClientResource::getClientBasicInformationForm(fn () => static::getRecord()))
+                        ->columnSpan(5),
+                ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
+        ];
     }
 
     public function save(array $data): Client

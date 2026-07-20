@@ -25,6 +25,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Kenepa\Banner\BannerPlugin;
+use Spatie\Permission\Models\Role;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -66,8 +67,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label(__('labels.nav.reference'))
                     ->icon('heroicon-o-arrow-up-right'),
                 NavigationGroup::make()
-                    ->label(__('labels.nav.system'))
-                    ->icon('heroicon-o-cog'),
+                    ->label(__('labels.nav.system')),
 
             ])
             ->breadcrumbs()
@@ -92,7 +92,13 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])->plugins([
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->navigationIcon(null)
+                    ->activeNavigationIcon(null)
+                    ->navigationSort(-1)
+                    ->navigationBadge(fn (): string => (string) Role::query()->count())
+                    ->globallySearchable(false)
+                    ->scopeToTenant(false),
                 BannerPlugin::make()->persistsBannersInDatabase()
                     ->navigationGroup(__('labels.nav.system'))
                     ->bannerManagerAccessPermission('banner-manager'),

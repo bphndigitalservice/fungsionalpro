@@ -25,6 +25,9 @@ use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Panel;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -43,9 +46,11 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
     use CanUseProfileNote;
-    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
-
-    protected string $view = 'filament.pages.client-profile-page';
+    use HasPageShield;
+    use HasUnsavedDataChangesAlert;
+    use InteractsWithFormActions;
+    use InteractsWithForms;
+    use InteractsWithInfolists;
 
     public static ?Client $record;
 
@@ -58,6 +63,28 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         $this->getRecord();
         $this->fillForm();
         $this->previousUrl = url()->previous();
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                EmbeddedSchema::make('infolist'),
+                $this->getFormContentComponent(),
+            ]);
+    }
+
+    public function getFormContentComponent(): Form
+    {
+        return Form::make([EmbeddedSchema::make('form')])
+            ->id('form')
+            ->livewireSubmitHandler('submit')
+            ->footer([
+                Actions::make($this->getFormActions())
+                    ->alignment($this->getFormActionsAlignment())
+                    ->fullWidth($this->hasFullWidthFormActions())
+                    ->key('form-actions'),
+            ]);
     }
 
     public function infolist(Schema $schema): Schema
@@ -77,7 +104,11 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components(static::getClientIdentityForm());
+        return $schema
+            ->components(static::getClientIdentityForm())
+            ->model(Client::class)
+            ->statePath($this->getFormStatePath())
+            ->operation('submit');
     }
 
     public static function getClientIdentityForm(): array
@@ -145,17 +176,6 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
             'identity' => static::$record->identity->attributesToArray() ?? [],
             'education' => static::$record->education?->attributesToArray() ?? [],
             'detail' => static::$record->detail?->attributesToArray() ?? [],
-        ];
-    }
-
-    protected function getForms(): array
-    {
-        return [
-            'form' => $this->form($this->makeForm()
-                ->operation('submit')
-                ->model(Client::class)
-                ->statePath($this->getFormStatePath())
-            ),
         ];
     }
 

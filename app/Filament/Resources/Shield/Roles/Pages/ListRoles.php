@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Shield\Roles\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\Shield\Roles\RoleResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListRoles extends ListRecords

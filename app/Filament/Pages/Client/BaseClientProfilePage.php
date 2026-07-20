@@ -2,13 +2,8 @@
 
 namespace App\Filament\Pages\Client;
 
-use App\Enums\ClientCluster;
 use App\Events\ClientProfileUpdated;
 use App\Models\Client;
-use App\Models\RegDepartment;
-use App\Models\RegDepartmentEchelon1;
-use App\Models\RegProvince;
-use App\Models\RegRegency;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -20,22 +15,25 @@ use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseClientProfilePage extends Page implements HasForms, HasInfolists
 {
-    use HasPageShield;
-    use InteractsWithInfolists;
-    use InteractsWithForms;
-    use InteractsWithFormActions;
-    use HasUnsavedDataChangesAlert;
     use CanUseDatabaseTransactions;
+    use HasPageShield;
+    use HasUnsavedDataChangesAlert;
+    use InteractsWithFormActions;
+    use InteractsWithForms;
+    use InteractsWithInfolists;
 
     protected string $view = 'filament.pages.client-profile-page';
 
     public static ?Client $record;
+
     public ?array $data = [];
+
     public string $previousUrl;
 
     public function mount(): void
@@ -44,7 +42,7 @@ abstract class BaseClientProfilePage extends Page implements HasForms, HasInfoli
         $this->initializePage();
     }
 
-    abstract function initializePage(): void;
+    abstract public function initializePage(): void;
 
     public static function getRecord(): ?Client
     {
@@ -83,16 +81,16 @@ abstract class BaseClientProfilePage extends Page implements HasForms, HasInfoli
         $this->form->fill($data);
     }
 
-    protected function getForms(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            'form' => $this->form($this->makeForm()
-                ->operation('submit')
-                ->model(Client::class)
-                ->statePath($this->getFormStatePath())
-            ),
-        ];
+        return $schema
+            ->components($this->getClientProfileFormSchema())
+            ->model(Client::class)
+            ->statePath($this->getFormStatePath())
+            ->operation('submit');
     }
+
+    abstract protected function getClientProfileFormSchema(): array;
 
     public function getFormActions(): array
     {
@@ -132,11 +130,9 @@ abstract class BaseClientProfilePage extends Page implements HasForms, HasInfoli
         $this->getClientProfileSavedNotification()?->send();
     }
 
-    abstract function mutateFormDataBeforeSave(array $data):array;
+    abstract public function mutateFormDataBeforeSave(array $data): array;
 
-
-
-    abstract function mutateDataBeforeFill(array $data):array;
+    abstract public function mutateDataBeforeFill(array $data): array;
 
     protected function handleSave(array $data): Client
     {
@@ -149,7 +145,7 @@ abstract class BaseClientProfilePage extends Page implements HasForms, HasInfoli
         return $this->update($data);
     }
 
-    abstract function save(array $data): Client;
+    abstract public function save(array $data): Client;
 
     protected function update(array $data): Client
     {
@@ -173,8 +169,6 @@ abstract class BaseClientProfilePage extends Page implements HasForms, HasInfoli
             ->success()
             ->title($title);
     }
-
-
 
     public function saveClientProfileAction(): Action
     {

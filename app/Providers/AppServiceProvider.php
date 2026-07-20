@@ -10,6 +10,9 @@ use App\Subscribers\UserEventSubscriber;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Auth\Http\Responses\RegistrationResponse;
 use Filament\Facades\Filament;
+use Filament\Pages\BasePage as Page;
+use Filament\Resources\Resource;
+use Filament\Widgets\Widget;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +20,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -72,6 +76,36 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(PointEventSubscriber::class);
 
         Client::observe(ClientObserver::class);
+
+        FilamentShield::buildPermissionKeyUsing(
+            function (string $entity, string $affix, string $subject, string $case, string $separator) {
+                return match (true) {
+                    is_subclass_of($entity, Resource::class) => Str::of($affix)
+                        ->snake()
+                        ->append('_')
+                        ->append(
+                            Str::of($entity)
+                                ->afterLast('\\')
+                                ->beforeLast('Resource')
+                                ->replace('\\', '')
+                                ->snake()
+                                ->replace('_', '::')
+                        )
+                        ->toString(),
+                    is_subclass_of($entity, Page::class) => Str::of('page_')
+                        ->append(class_basename($entity))
+                        ->toString(),
+                    is_subclass_of($entity, Widget::class) => Str::of('widget_')
+                        ->append(class_basename($entity))
+                        ->toString(),
+                    default => Str::of($affix)
+                        ->snake()
+                        ->append($separator)
+                        ->append(Str::of($subject)->snake())
+                        ->toString(),
+                };
+            }
+        );
 
         FilamentShield::prohibitDestructiveCommands($this->app->isProduction());
     }

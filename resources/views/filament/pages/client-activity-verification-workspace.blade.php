@@ -8,7 +8,7 @@
 <div class="flex flex-col gap-y-6">
 
     {{-- Tabs --}}
-    <x-filament-panels::resources.tabs/>
+    {{ $this->getTabsContentComponent() }}
 
     {{ \Filament\Support\Facades\FilamentView::renderHook(
         \Filament\View\PanelsRenderHook::RESOURCE_PAGES_LIST_RECORDS_TABLE_BEFORE,

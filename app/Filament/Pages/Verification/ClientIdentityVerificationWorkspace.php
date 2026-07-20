@@ -2,9 +2,6 @@
 
 namespace App\Filament\Pages\Verification;
 
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Filament\Schemas\Components\Tabs\Tab;
 use App\Concerns\Components\HasCustomPageTab;
 use App\Filament\Pages\Verification\Actions\AcceptClientIdentityAction;
 use App\Filament\Pages\Verification\Actions\RejectClientIdentityAction;
@@ -17,9 +14,15 @@ use Filament\Facades\Filament;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
-use Filament\Tables;
+use Filament\Schemas\Components\EmbeddedTable;
+use Filament\Schemas\Components\RenderHook;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -27,9 +30,9 @@ use Illuminate\Database\Query\JoinClause;
 
 class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, HasTable
 {
-    use HasCustomPageTab, HasPageShield, InteractsWithInfolists;
-
-    protected string $view = 'filament.pages.client-identity-verification-workspace';
+    use HasCustomPageTab;
+    use HasPageShield;
+    use InteractsWithInfolists;
 
     public function mount(): void
     {
@@ -96,8 +99,8 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                 ])
                 ->recordActions([
                     ViewClientIdentityAction::make(),
-                    AcceptClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
-                    RejectClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
+                    AcceptClientIdentityAction::make()->hidden(fn (Model $record) => $record->is_verified),
+                    RejectClientIdentityAction::make()->hidden(fn (Model $record) => $record->is_verified),
                 ]);
     }
 
@@ -148,14 +151,25 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
         return auth()->user();
     }
 
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getTabsContentComponent(),
+                RenderHook::make(PanelsRenderHook::RESOURCE_PAGES_LIST_RECORDS_TABLE_BEFORE),
+                EmbeddedTable::make(),
+                RenderHook::make(PanelsRenderHook::RESOURCE_PAGES_LIST_RECORDS_TABLE_AFTER),
+            ]);
+    }
+
     public function getTabs(): array
     {
         return [
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
                 ->badge($this->getTableQuery()->whereNull('is_verified')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('is_verified')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('is_verified')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('is_verified')),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('is_verified')),
         ];
     }
 

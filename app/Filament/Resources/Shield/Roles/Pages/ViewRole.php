@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Shield\Roles\Pages;
 
-use Filament\Actions\EditAction;
 use App\Filament\Resources\Shield\Roles\RoleResource;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewRole extends ViewRecord
