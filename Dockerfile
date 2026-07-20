@@ -5,11 +5,16 @@ ARG COMPOSER_VERSION=2.8.9
 
 ARG ALPINE_VERSION=3.21
 
+ARG BUN_VERSION=1.2.9
+
+ARG SUPERCRONIC_VERSION=0.2.47
+
+# Must be declared before first FROM so BuildKit can expand it in FROM lines.
+ARG GOLANG_VERSION=1.26.5
+
 ###########################################
 # Build frontend assets with Bun
 ###########################################
-
-ARG BUN_VERSION=1.2.9
 
 FROM oven/bun:${BUN_VERSION} AS build
 
@@ -36,13 +41,9 @@ FROM composer:${COMPOSER_VERSION} AS vendor
 # Upstream v0.2.47 ships Go 1.26.4; rebuild with 1.26.5 for CVE-2026-39822.
 ###########################################
 
-ARG SUPERCRONIC_VERSION=0.2.47
-ARG GOLANG_VERSION=1.26.5
-
 FROM golang:${GOLANG_VERSION}-alpine AS supercronic
 
 ARG SUPERCRONIC_VERSION
-ARG GOLANG_VERSION
 
 ENV CGO_ENABLED=0 \
     GOTOOLCHAIN=local
