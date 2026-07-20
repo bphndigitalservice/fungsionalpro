@@ -1,4 +1,5 @@
-@import '/vendor/filament/filament/resources/css/theme.css';
-@import '../../../../vendor/kenepa/banner/resources/css/index.css';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
 
-@config 'tailwind.config.js';
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../vendor/kenepa/banner/resources/**/*.blade.php';

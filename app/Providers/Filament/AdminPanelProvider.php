@@ -2,12 +2,12 @@
 
 namespace App\Providers\Filament;
 
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\AvatarProviders\FungsionalProAvatarProvider;
 use App\Filament\Pages\Authx\EmailVerificationPrompt;
-use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Authx\Login;
+use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Dashboard;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'warning' => Color::Orange,
             ])
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label(__('labels.nav.client_menu'))
@@ -89,11 +90,11 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class
+                Authenticate::class,
             ])->plugins([
                 FilamentShieldPlugin::make(),
                 BannerPlugin::make()->persistsBannersInDatabase()
-                    ->navigationGroup(__("labels.nav.system"))
+                    ->navigationGroup(__('labels.nav.system'))
                     ->bannerManagerAccessPermission('banner-manager'),
             ])
             ->defaultThemeMode(ThemeMode::Light)
@@ -102,7 +103,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->defaultAvatarProvider(FungsionalProAvatarProvider::class)
             ->globalSearch(false)
-            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'));
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn () => view('filament.components.footer'));
 
     }
 }
