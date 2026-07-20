@@ -2,27 +2,25 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
 use App\Infolists\Components\MinioFileEntry;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Hugomyb\FilamentMediaAction\Infolists\Components\Actions\MediaAction;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
-class ClientEducationInfolist extends Component implements HasForms, HasInfolists, HasActions
+class ClientEducationInfolist extends Component implements HasActions, HasForms, HasInfolists
 {
     use InteractsWithActions;
-    use InteractsWithInfolists;
     use InteractsWithForms;
+    use InteractsWithInfolists;
 
     protected ?Model $record;
 
@@ -54,7 +52,7 @@ class ClientEducationInfolist extends Component implements HasForms, HasInfolist
                                 MinioFileEntry::make('title_inclusion_file')
                                     ->label('Lembar Pencantuman Gelar')
                                     ->placeholder('Tidak ada file pencantuman gelar')
-                                    ->hidden(fn ($record) => empty($record?->title_inclusion_file)), 
+                                    ->hidden(fn ($record) => empty($record?->title_inclusion_file)),
                             ])
                             ->columns(2),
                     ]),

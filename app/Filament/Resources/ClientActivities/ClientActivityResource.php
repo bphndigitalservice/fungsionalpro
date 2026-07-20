@@ -2,41 +2,36 @@
 
 namespace App\Filament\Resources\ClientActivities;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Actions\ExportAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\ClientActivities\Pages\ListClientActivities;
-use App\Filament\Resources\ClientActivities\Pages\CreateClientActivity;
-use App\Filament\Resources\ClientActivities\Pages\EditClientActivity;
 use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Filament\Exports\ClientActivityExporter;
-use App\Filament\Resources\ClientActivities\Pages;
-use App\Filament\Resources\ClientActivities\RelationManagers;
+use App\Filament\Resources\ClientActivities\Pages\CreateClientActivity;
+use App\Filament\Resources\ClientActivities\Pages\EditClientActivity;
+use App\Filament\Resources\ClientActivities\Pages\ListClientActivities;
 use App\Models\Client;
 use App\Models\ClientActivity;
 use App\Models\RegProvince;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\TimePicker;
+use Filament\Tables\Table;
+use Hugomyb\FilamentMediaAction\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -108,8 +103,7 @@ class ClientActivityResource extends Resource
                         ->schema([
                             DatePicker::make('start_period')
                                 ->minDate('2020-01-01')
-                                ->label(fn () =>
-                                    Client::current()?->c_role_id == 1
+                                ->label(fn () => Client::current()?->c_role_id == 1
                                         ? 'Tanggal Mulai'
                                         : 'Tanggal'
                                 )
@@ -153,7 +147,7 @@ class ClientActivityResource extends Resource
                                 ->required(),
 
                             Textarea::make('activity_details.materi')
-                                ->label(fn (Get $get) => in_array((int)$get('jenis_kegiatan'), [3, 4]) ? 'Jenis Kasus' : 'Materi')
+                                ->label(fn (Get $get) => in_array((int) $get('jenis_kegiatan'), [3, 4]) ? 'Jenis Kasus' : 'Materi')
                                 ->required(),
                         ])
                         ->visible(fn () => Client::current()?->c_role_id == 2),
@@ -167,6 +161,7 @@ class ClientActivityResource extends Resource
                             if (in_array($jenisKegiatan, [6, 8, 10])) {
                                 return 'Catatan: Untuk jenis kegiatan ini, mohon cantumkan atau lampirkan tautan (link) media pada kolom deskripsi.';
                             }
+
                             return null;
                         }),
 
@@ -178,7 +173,7 @@ class ClientActivityResource extends Resource
                             $baseText = "Format file: PDF | Maksimal ukuran: {$size} KB.";
 
                             if (Client::current()?->c_role_id == 2) {
-                                return $baseText . " Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).";
+                                return $baseText.' Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).';
                             }
 
                             return $baseText;
@@ -190,7 +185,7 @@ class ClientActivityResource extends Resource
                         ->directory('activity_file')
                         ->visibility('private')
                         ->downloadable(),
-                ])
+                ]),
         ];
     }
 
@@ -209,7 +204,7 @@ class ClientActivityResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->visible(fn () => Client::current()?->c_role_id == 2)
-                    ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int)$state] ?? '-'),
+                    ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int) $state] ?? '-'),
 
                 TextColumn::make('regProvince.name')
                     ->label('Provinsi')
@@ -219,8 +214,7 @@ class ClientActivityResource extends Resource
                     ->placeholder('-'),
 
                 TextColumn::make('start_period')
-                    ->label(fn () =>
-                        Client::current()?->c_role_id == 1
+                    ->label(fn () => Client::current()?->c_role_id == 1
                             ? 'Tanggal Mulai'
                             : 'Tanggal')
                     ->date()
@@ -233,8 +227,7 @@ class ClientActivityResource extends Resource
 
                 TextColumn::make('jam')
                     ->label('Jam')
-                    ->getStateUsing(fn ($record) =>
-                        $record->start_time . ' - ' . $record->end_time
+                    ->getStateUsing(fn ($record) => $record->start_time.' - '.$record->end_time
                     )
                     ->visible(fn () => Client::current()?->c_role_id == 2),
 
@@ -298,10 +291,11 @@ class ClientActivityResource extends Resource
                         if ($record?->is_verified === false) {
                             return "Alasan Penolakan: {$record->verification_note}";
                         } if ($record?->is_verified === true) {
-                            return "Kegiatan telah diverifikasi";
+                            return 'Kegiatan telah diverifikasi';
                         } if (is_null($record?->is_verified)) {
-                            return "Menunggu verifikasi";
+                            return 'Menunggu verifikasi';
                         }
+
                         return null;
                     }),
             ])
@@ -329,7 +323,7 @@ class ClientActivityResource extends Resource
                                 ["{$year}-01-01", "{$year}-12-31"]
                             )
                         );
-                    })
+                    }),
             ])
             ->headerActions([
                 ExportAction::make()
@@ -340,7 +334,7 @@ class ClientActivityResource extends Resource
             ])
             ->recordActions([
                 MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
+                    ->media(fn (Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
                     ->label('Lampiran Laporan Kegiatan'),
                 EditAction::make(),
             ])

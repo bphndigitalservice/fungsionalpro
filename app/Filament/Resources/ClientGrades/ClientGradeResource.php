@@ -2,33 +2,26 @@
 
 namespace App\Filament\Resources\ClientGrades;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\ClientGrades\Pages\ListClientGrades;
 use App\Filament\Resources\ClientGrades\Pages\CreateClientGrade;
-use App\Filament\Resources\ClientGrades\Pages\ViewClientGrade;
 use App\Filament\Resources\ClientGrades\Pages\EditClientGrade;
-use App\Filament\Resources\ClientGrades\Pages;
-use App\Filament\Resources\ClientGrades\RelationManagers;
+use App\Filament\Resources\ClientGrades\Pages\ListClientGrades;
+use App\Filament\Resources\ClientGrades\Pages\ViewClientGrade;
 use App\Models\Client;
 use App\Models\ClientGrade;
-use App\Enums\CRoleAssignation;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Hugomyb\FilamentMediaAction\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 
 class ClientGradeResource extends Resource
 {
@@ -43,9 +36,9 @@ class ClientGradeResource extends Resource
         return $schema
             ->components([
                 Select::make('reg_grade_id')
-                        ->label('Pangkat/Golongan')
-                        ->relationship('grade', 'grade_code')
-                        ->required(),
+                    ->label('Pangkat/Golongan')
+                    ->relationship('grade', 'grade_code')
+                    ->required(),
                 DatePicker::make('effective_date')
                     ->label('TMT Pangkat/Golongan')
                     ->required(),
@@ -54,15 +47,15 @@ class ClientGradeResource extends Resource
                     ->required()
                     ->maxLength(255),
                 FileUpload::make('decree_file')
-                            ->disk('s3')
-                            ->label('File SK Pangkat/Golongan')
-                            ->required()
-                            ->maxFiles(1)
-                            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-                            ->maxSize(config('fungsional-pro.max_upload_file_size'))
-                            ->directory('decree_file')
-                            ->visibility('private')
-                            ->downloadable(),
+                    ->disk('s3')
+                    ->label('File SK Pangkat/Golongan')
+                    ->required()
+                    ->maxFiles(1)
+                    ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                    ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                    ->directory('decree_file')
+                    ->visibility('private')
+                    ->downloadable(),
             ]);
     }
 
@@ -88,7 +81,7 @@ class ClientGradeResource extends Resource
             ])
             ->recordActions([
                 MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
+                    ->media(fn (Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
                     ->label('SK Pangkat/Golongan'),
                 EditAction::make(),
             ])
@@ -120,7 +113,6 @@ class ClientGradeResource extends Resource
     {
         return __('labels.nav.client_menu');
     }
-
 
     public static function getRoutePath(): string
     {

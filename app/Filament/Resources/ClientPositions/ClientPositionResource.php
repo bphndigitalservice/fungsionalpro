@@ -2,41 +2,34 @@
 
 namespace App\Filament\Resources\ClientPositions;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
+use App\Enums\CRoleAssignation;
+use App\Filament\Resources\ClientPositions\Pages\CreateClientPosition;
+use App\Filament\Resources\ClientPositions\Pages\EditClientPosition;
+use App\Filament\Resources\ClientPositions\Pages\ListClientPositions;
+use App\Filament\Resources\ClientPositions\Pages\ViewClientPosition;
+use App\Models\ClientPosition;
+use App\Models\CRole;
+use App\Models\CRoleLevel;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\ClientPositions\Pages\ListClientPositions;
-use App\Filament\Resources\ClientPositions\Pages\CreateClientPosition;
-use App\Filament\Resources\ClientPositions\Pages\ViewClientPosition;
-use App\Filament\Resources\ClientPositions\Pages\EditClientPosition;
-use App\Filament\Resources\ClientPositions\Pages;
-use App\Filament\Resources\ClientPositions\RelationManagers;
-use App\Models\ClientPosition;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Hugomyb\FilamentMediaAction\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Enums\CRoleAssignation;
-use App\Models\CRoleLevel;
-use App\Models\CRole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
-
 
 class ClientPositionResource extends Resource
 {
     protected static ?string $model = ClientPosition::class;
-
 
     protected static ?string $navigationLabel = 'Riwayat Jabatan';
 
@@ -73,10 +66,9 @@ class ClientPositionResource extends Resource
 
                 Select::make('c_role_level_id')
                     ->label(__('labels.form.client.fields.crole_grade'))
-                    ->options(fn (Get $get) =>
-                        CRoleLevel::query()
-                            ->where('c_role_id', $get('c_role_id'))
-                            ->pluck('level', 'id')
+                    ->options(fn (Get $get) => CRoleLevel::query()
+                        ->where('c_role_id', $get('c_role_id'))
+                        ->pluck('level', 'id')
                     )
                     ->disabled(fn (Get $get) => blank($get('c_role_id')))
                     ->required(),
@@ -86,25 +78,24 @@ class ClientPositionResource extends Resource
                     ->label(__('labels.form.client.fields.assignation_type'))
                     ->required(),
                 DatePicker::make('effective_date')
-                     ->label('TMT Jabatan')
+                    ->label('TMT Jabatan')
                     ->required(),
                 TextInput::make('decree_number')
                     ->label('Nomor SK Jabatan')
                     ->required()
                     ->maxLength(255),
                 FileUpload::make('decree_file')
-                            ->disk('s3')
-                            ->label('File SK Jabatan')
-                            ->required()
-                            ->maxFiles(1)
-                            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-                            ->maxSize(config('fungsional-pro.max_upload_file_size'))
-                            ->directory('decree_file')
-                            ->visibility('private')
-                            ->downloadable(),
+                    ->disk('s3')
+                    ->label('File SK Jabatan')
+                    ->required()
+                    ->maxFiles(1)
+                    ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                    ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                    ->directory('decree_file')
+                    ->visibility('private')
+                    ->downloadable(),
             ]);
     }
-
 
     public static function table(Table $table): Table
     {
@@ -147,7 +138,7 @@ class ClientPositionResource extends Resource
             ])
             ->recordActions([
                 MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
+                    ->media(fn (Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
                     ->label('SK Jabatan'),
                 EditAction::make(),
             ])
@@ -179,5 +170,4 @@ class ClientPositionResource extends Resource
     {
         return __('labels.nav.client_menu');
     }
-
 }

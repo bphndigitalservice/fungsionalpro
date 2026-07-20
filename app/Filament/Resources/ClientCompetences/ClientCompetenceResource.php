@@ -2,35 +2,32 @@
 
 namespace App\Filament\Resources\ClientCompetences;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ExportBulkAction;
-use App\Filament\Resources\ClientCompetences\Pages\ListClientCompetences;
-use App\Filament\Resources\ClientCompetences\Pages\CreateClientCompetence;
-use App\Filament\Resources\ClientCompetences\Pages\ViewClientCompetence;
-use App\Filament\Resources\ClientCompetences\Pages\EditClientCompetence;
 use App\Concerns\Filament\ChecksPhotoUpload;
 use App\Enums\TrainingCompletionStatus;
-use App\Filament\Resources\ClientCompetences\Pages;
+use App\Filament\Resources\ClientCompetences\Pages\CreateClientCompetence;
+use App\Filament\Resources\ClientCompetences\Pages\EditClientCompetence;
+use App\Filament\Resources\ClientCompetences\Pages\ListClientCompetences;
+use App\Filament\Resources\ClientCompetences\Pages\ViewClientCompetence;
 use App\Models\Client;
 use App\Models\ClientCompetence;
-use Filament\Forms;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ExportBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
+use Hugomyb\FilamentMediaAction\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +37,9 @@ class ClientCompetenceResource extends Resource
     use ChecksPhotoUpload;
 
     protected static ?string $model = ClientCompetence::class;
+
     protected static ?string $navigationLabel = 'Diklat/Pelatihan';
+
     protected static ?string $modelLabel = 'Diklat/Pelatihan';
 
     public static function form(Schema $schema): Schema
@@ -62,9 +61,9 @@ class ClientCompetenceResource extends Resource
                             ])->inline()->required(),
                         Select::make('promotion_training_level_id')
                             ->relationship('promotionLevel', 'level', function (Builder $query) {
-                                $query->where("c_role_id", Client::current()->c_role_id)->orderBy('id');
-                            })->hidden(fn(Get $get) => $get('category') !== "PROMOTION_TRAINING")
-                            ->required(fn(Get $get) => $get('category') === "PROMOTION_TRAINING")
+                                $query->where('c_role_id', Client::current()->c_role_id)->orderBy('id');
+                            })->hidden(fn (Get $get) => $get('category') !== 'PROMOTION_TRAINING')
+                            ->required(fn (Get $get) => $get('category') === 'PROMOTION_TRAINING')
                             ->label('Jenjang Diklat Fungsional'),
                         TextInput::make('certificate_number')
                             ->label('Nomor Sertifikat')
@@ -105,7 +104,7 @@ class ClientCompetenceResource extends Resource
                             ->downloadable()
                             ->required()
                             ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
-                    ])
+                    ]),
             ]);
     }
 
@@ -124,7 +123,7 @@ class ClientCompetenceResource extends Resource
                     ->sortable(),
                 TextColumn::make('jam_pelajaran')
                     ->label('Jam Pelajaran')
-                    ->formatStateUsing(fn ($state) => ($state && $state > 0) ? $state . ' JP' : ''),
+                    ->formatStateUsing(fn ($state) => ($state && $state > 0) ? $state.' JP' : ''),
                 TextColumn::make('certificate_number')
                     ->label('Nomor Sertifikat')
                     ->searchable()
@@ -159,7 +158,7 @@ class ClientCompetenceResource extends Resource
             ])
             ->recordActions([
                 MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->competence_file, now()->addMinutes(10)))
+                    ->media(fn (Model $record) => Storage::temporaryUrl($record->competence_file, now()->addMinutes(10)))
                     ->label('Sertifikat'),
                 ViewAction::make(),
                 EditAction::make(),

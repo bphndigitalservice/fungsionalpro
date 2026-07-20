@@ -3,47 +3,47 @@
 namespace App\Filament\Resources\ActivityReports;
 
 // 1. Import your newly created exporter class
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Actions\ExportAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\ExportBulkAction;
-use App\Filament\Resources\ActivityReports\Pages\ListActivityReports;
-use App\Services\ClientAccessService;
-use App\Filament\Exports\ActivityReportExporter;
 use App\Enums\SystemRole;
-use App\Filament\Resources\ActivityReports\Pages;
-use App\Models\ClientActivity;
+use App\Filament\Exports\ActivityReportExporter;
+use App\Filament\Resources\ActivityReports\Pages\ListActivityReports;
 use App\Models\Client;
+use App\Models\ClientActivity;
 use App\Models\RegProvince;
-use Filament\Forms;
+use App\Services\ClientAccessService;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Hugomyb\FilamentMediaAction\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 
 class ActivityReportResource extends Resource
 {
     protected static ?string $model = ClientActivity::class;
+
     protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationLabel = 'Pelaporan Kegiatan';
+
     protected static ?string $modelLabel = 'Pelaporan Kegiatan';
 
     public static function getNavigationGroup(): string
@@ -68,6 +68,7 @@ class ActivityReportResource extends Resource
             10 => 'MedSos/Media Digital Lainnya',
         ];
     }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components(static::getFormSchema());
@@ -105,8 +106,7 @@ class ActivityReportResource extends Resource
                         ->schema([
                             DatePicker::make('start_period')
                                 ->minDate('2020-01-01')
-                                ->label(fn () =>
-                                    Client::current()?->c_role_id == 1
+                                ->label(fn () => Client::current()?->c_role_id == 1
                                         ? 'Tanggal Mulai'
                                         : 'Tanggal'
                                 )
@@ -150,7 +150,7 @@ class ActivityReportResource extends Resource
                                 ->required(),
 
                             Textarea::make('activity_details.materi')
-                                ->label(fn (Get $get) => in_array((int)$get('jenis_kegiatan'), [3, 4]) ? 'Jenis Kasus' : 'Materi')
+                                ->label(fn (Get $get) => in_array((int) $get('jenis_kegiatan'), [3, 4]) ? 'Jenis Kasus' : 'Materi')
                                 ->required(),
                         ])
                         ->visible(fn () => Client::current()?->c_role_id == 2),
@@ -168,7 +168,7 @@ class ActivityReportResource extends Resource
                             $baseText = "Format file: PDF | Maksimal ukuran: {$size} KB.";
 
                             if (Client::current()?->c_role_id == 2) {
-                                return $baseText . " Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).";
+                                return $baseText.' Lampiran terdiri dari Laporan Kegiatan, Dokumentasi Kegiatan, Surat Perintah, dan Evaluasi (jika ada).';
                             }
 
                             return $baseText;
@@ -180,7 +180,7 @@ class ActivityReportResource extends Resource
                         ->directory('activity_file')
                         ->visibility('private')
                         ->downloadable(),
-                ])
+                ]),
         ];
     }
 
@@ -209,7 +209,7 @@ class ActivityReportResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->visible(fn () => Client::current()?->c_role_id == 2)
-                    ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int)$state] ?? '-'),
+                    ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int) $state] ?? '-'),
 
                 TextColumn::make('regProvince.name')
                     ->label('Provinsi')
@@ -219,8 +219,7 @@ class ActivityReportResource extends Resource
                     ->placeholder('-'),
 
                 TextColumn::make('start_period')
-                    ->label(fn () =>
-                        Client::current()?->c_role_id == 1
+                    ->label(fn () => Client::current()?->c_role_id == 1
                             ? 'Tanggal Mulai'
                             : 'Tanggal')
                     ->date()
@@ -233,8 +232,7 @@ class ActivityReportResource extends Resource
 
                 TextColumn::make('jam')
                     ->label('Jam')
-                    ->getStateUsing(fn ($record) =>
-                        $record->start_time . ' - ' . $record->end_time
+                    ->getStateUsing(fn ($record) => $record->start_time.' - '.$record->end_time
                     )
                     ->visible(fn () => Client::current()?->c_role_id == 2),
 
@@ -298,10 +296,11 @@ class ActivityReportResource extends Resource
                         if ($record?->is_verified === false) {
                             return "Alasan Penolakan: {$record->verification_note}";
                         } if ($record?->is_verified === true) {
-                            return "Kegiatan telah diverifikasi";
+                            return 'Kegiatan telah diverifikasi';
                         } if (is_null($record?->is_verified)) {
-                            return "Menunggu verifikasi";
+                            return 'Menunggu verifikasi';
                         }
+
                         return null;
                     }),
             ])
@@ -329,7 +328,7 @@ class ActivityReportResource extends Resource
                                 ["{$year}-01-01", "{$year}-12-31"]
                             )
                         );
-                    })
+                    }),
             ])
             ->headerActions([
                 ExportAction::make('export_all')
@@ -343,7 +342,7 @@ class ActivityReportResource extends Resource
             ->recordActions([
                 ViewAction::make()->label('Lihat Detail')->modalHeading('Detail Kegiatan'),
                 MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
+                    ->media(fn (Model $record) => Storage::temporaryUrl($record->activity_file, now()->addMinutes(10)))
                     ->label('Lampiran Laporan Kegiatan'),
             ])
             ->toolbarActions([
@@ -405,12 +404,14 @@ class ActivityReportResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         $user = Auth::user();
+
         return $user && ($user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi));
     }
 
     public static function canViewAny(): bool
     {
         $user = Auth::user();
+
         return $user && ($user->hasAnySystemRole(SystemRole::Admin, SystemRole::SuperAdmin, SystemRole::AdminInstansi));
     }
 }
