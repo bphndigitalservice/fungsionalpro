@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.0...v0.2.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **ci:** clear Trivy HIGH findings blocking image publish ([c856945](https://github.com/bphndigitalservice/fungsionalpro/commit/c85694560987713f9eae8c5072c2c8ff7a5dd7b7))
+
 # [0.2.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.1.0...v0.2.0) (2026-07-20)
 
 
