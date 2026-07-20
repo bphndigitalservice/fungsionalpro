@@ -2,69 +2,63 @@
 
 namespace App\Filament\Resources\Clients;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Livewire;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Actions\ExportAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\ExportBulkAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Clients\Pages\ListClients;
-use App\Filament\Resources\Clients\Pages\CreateClient;
-use App\Filament\Resources\Clients\Pages\ViewClient;
-use App\Filament\Resources\Clients\Pages\EditClient;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\DatePicker;
-use Exception;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\CRoleAssignation;
 use App\Enums\EducationLevel;
 use App\Enums\Gender;
 use App\Enums\SystemRole;
-use App\Filament\Resources\Clients\Pages;
-use App\Livewire\ClientEducationInfolist;
-use App\Livewire\ClientCompetenceInfolist;
-use App\Livewire\ClientActivityInfolist;
+use App\Filament\Exports\ClientExporter;
+use App\Filament\Resources\Clients\Pages\CreateClient;
+use App\Filament\Resources\Clients\Pages\EditClient;
+use App\Filament\Resources\Clients\Pages\ListClients;
+use App\Filament\Resources\Clients\Pages\ViewClient;
 use App\Livewire\ClientActivityTable;
+use App\Livewire\ClientCompetenceInfolist;
+use App\Livewire\ClientEducationInfolist;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
-use App\Models\RegProvinceEchelon1;
 use App\Models\RegProvince;
+use App\Models\RegProvinceEchelon1;
 use App\Models\RegRegency;
-use Filament\Forms;
-use Filament\Forms\Components\InfoList;
-use Filament\Forms\Components\InfoList\Item;
+use Exception;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use App\Filament\Exports\ClientExporter;
 
 class ClientResource extends Resource
 {
     protected static ?string $model = Client::class;
 
-    protected static ?string $modelLabel = "Pejabat Fungsional";
+    protected static ?string $modelLabel = 'Pejabat Fungsional';
 
     public static function form(Schema $schema): Schema
     {
@@ -82,7 +76,7 @@ class ClientResource extends Resource
                                         Group::make()
                                             ->schema(static::getClientIdentityForm())
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                                 Section::make()
                                     ->heading(__('labels.form.client.heading.client_education'))
                                     ->description(__('labels.form.client.heading.client_education_description'))
@@ -91,16 +85,16 @@ class ClientResource extends Resource
                                         Group::make()
                                             ->schema(static::getClientEducationForm())
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
                                 Section::make()
                                     ->heading(__('labels.form.client.heading.client_employee_information'))
                                     ->description(__('labels.form.client.heading.client_employee_information_description'))
                                     ->collapsible()
                                     ->schema([
                                         Group::make()
-                                            ->schema(static::getClientBasicInformationForm(fn(Model $record) => $record))
+                                            ->schema(static::getClientBasicInformationForm(fn (Model $record) => $record))
                                             ->columnSpan(5),
-                                    ])->columnSpan(['lg' => fn(?Client $record) => $record === null ? 3 : 2]),
+                                    ])->columnSpan(['lg' => fn (?Client $record) => $record === null ? 3 : 2]),
 
                             ]),
                         Tab::make(__('labels.form.client.tab_file'))
@@ -108,17 +102,17 @@ class ClientResource extends Resource
                         Tab::make('Riwayat Pendidikan')
                             ->visible(fn (?Client $record) => $record?->identity?->photo !== null)
                             ->schema([
-                                Livewire::make(ClientEducationInfolist::class)
+                                Livewire::make(ClientEducationInfolist::class),
                             ]),
                         Tab::make('Riwayat Diklat/Pelatihan')
                             ->visible(fn (?Client $record) => $record?->identity?->photo !== null)
                             ->schema([
-                                Livewire::make(ClientCompetenceInfolist::class)
+                                Livewire::make(ClientCompetenceInfolist::class),
                             ]),
                         Tab::make('Riwayat Kegiatan')
                             ->visible(fn (?Client $record) => $record?->identity?->photo !== null)
                             ->schema([
-                                Livewire::make(ClientActivityTable::class)
+                                Livewire::make(ClientActivityTable::class),
                             ]),
                         Tab::make(__('labels.form.client.tab_user'))
                             ->visible(fn () => auth()->user()->hasSystemRole(SystemRole::SuperAdmin))
@@ -196,7 +190,7 @@ class ClientResource extends Resource
             ])
             ->filters([
                 Filter::make('agency_filter')
-                    ->hidden(!static::canFilterRegional())
+                    ->hidden(! static::canFilterRegional())
                     ->schema([
                         Select::make('type')
                             ->label('Tingkat Instansi')
@@ -210,6 +204,7 @@ class ClientResource extends Resource
                             ->label('Instansi')
                             ->options(function (Get $get) {
                                 $type = $get('type');
+
                                 return match ($type) {
                                     'central' => RegDepartment::query()->pluck('name', 'id'),
                                     'local_province' => RegProvince::query()->pluck('name', 'id'),
@@ -227,7 +222,7 @@ class ClientResource extends Resource
                 SelectFilter::make('status')
                     ->options(ClientStatus::class),
                 SelectFilter::make('c_role_id')
-                    ->hidden(!static::canFilterClientRoles())
+                    ->hidden(! static::canFilterClientRoles())
                     ->label(__('labels.table.client.role'))
                     ->options(fn () => CRole::query()->pluck('role_name', 'id')->toArray())
                     ->searchable()
@@ -328,8 +323,7 @@ class ClientResource extends Resource
                         ->relationship(
                             'croleLevel',
                             'level',
-                            fn (Builder $query, Get $get) =>
-                                $query->where('c_role_id', $get('c_role_id') ?: 0)
+                            fn (Builder $query, Get $get) => $query->where('c_role_id', $get('c_role_id') ?: 0)
                         )
                         ->required(),
                 ])->columns(2),
@@ -411,19 +405,18 @@ class ClientResource extends Resource
                             $agencyId = $get('agency_id');
 
                             if ($type === 'local_province') {
-                                 $set('reg_province_id', $agencyId);
+                                $set('reg_province_id', $agencyId);
                             } elseif ($type === 'local_regency') {
-                                 $regency = RegRegency::find($agencyId);
-                                 $set('reg_province_id', $regency ? $regency->province_id : null);
+                                $regency = RegRegency::find($agencyId);
+                                $set('reg_province_id', $regency ? $regency->province_id : null);
                             }
                         }),
 
                     Select::make('echelon_id')
                         ->label(__('labels.form.client.fields.echelon'))
-                        ->options(fn (Get $get) =>
-                            RegDepartmentEchelon1::query()
-                                ->where('department_id', $get('agency_id'))
-                                ->pluck('name', 'id')
+                        ->options(fn (Get $get) => RegDepartmentEchelon1::query()
+                            ->where('department_id', $get('agency_id'))
+                            ->pluck('name', 'id')
                         )
                         ->required(fn (Get $get) => $get('type') === 'central')
                         ->hidden(fn (Get $get) => $get('type') !== 'central')
@@ -439,10 +432,9 @@ class ClientResource extends Resource
 
                     Select::make('echelon_x_text')
                         ->label(__('labels.form.client.fields.echelon'))
-                        ->options(fn (Get $get) =>
-                            RegProvinceEchelon1::query()
-                                ->where('reg_province_id', $get('agency_id'))
-                                ->pluck('name', 'id')
+                        ->options(fn (Get $get) => RegProvinceEchelon1::query()
+                            ->where('reg_province_id', $get('agency_id'))
+                            ->pluck('name', 'id')
                         )
                         ->required(fn (Get $get) => $get('type') === 'local_province')
                         ->hidden(fn (Get $get) => $get('type') !== 'local_province'),
@@ -463,7 +455,7 @@ class ClientResource extends Resource
                 ->schema([
                     TextInput::make('name')
                         ->label(__('labels.form.client.fields.name'))
-                        ->formatStateUsing(fn(?Model $record) => $record == null ? auth()->user()->name : $record->name)
+                        ->formatStateUsing(fn (?Model $record) => $record == null ? auth()->user()->name : $record->name)
                         ->required(),
 
                     Group::make()
@@ -658,10 +650,9 @@ class ClientResource extends Resource
     }
 
     public static function canCreate(): bool
-{
+    {
         return false;
     }
-
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {

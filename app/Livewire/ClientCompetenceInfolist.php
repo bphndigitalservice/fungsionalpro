@@ -2,34 +2,29 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use App\Infolists\Components\MinioFileEntry;
-use App\Enums\TrainingType;
 use App\Enums\TrainingCompletionStatus;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use App\Enums\TrainingType;
+use App\Infolists\Components\MinioFileEntry;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Concerns\InteractsWithInfolists;
-use Filament\Infolists\Contracts\HasInfolists;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-class ClientCompetenceInfolist extends Component implements HasForms, HasInfolists, HasActions
+class ClientCompetenceInfolist extends Component implements HasActions, HasSchemas
 {
     use InteractsWithActions;
-    use InteractsWithInfolists;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
-    protected ?Model $record;
-
-    public function mount(?Model $record = null): void
-    {
-        $this->record = $record;
-    }
+    #[Locked]
+    public ?Model $record = null;
 
     public function competenceInfolist(Schema $schema): Schema
     {
@@ -66,7 +61,6 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
                                     ->label('Tanggal Selesai')
                                     ->date('d F Y'),
 
-                                // FIXED HERE: Changed typehint to TrainingCompletionStatus and matched against ->value
                                 TextEntry::make('completion_status')
                                     ->label('Predikat Kelulusan/Kinerja')
                                     ->badge()
@@ -97,7 +91,7 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
             ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.view-client-competence');
     }

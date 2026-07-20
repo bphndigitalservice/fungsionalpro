@@ -5,29 +5,24 @@ namespace App\Livewire;
 use App\Infolists\Components\MinioFileEntry;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Concerns\InteractsWithInfolists;
-use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-class ClientEducationInfolist extends Component implements HasActions, HasForms, HasInfolists
+class ClientEducationInfolist extends Component implements HasActions, HasSchemas
 {
     use InteractsWithActions;
-    use InteractsWithForms;
-    use InteractsWithInfolists;
+    use InteractsWithSchemas;
 
-    protected ?Model $record;
-
-    public function mount(?Model $record = null): void
-    {
-        $this->record = $record;
-    }
+    #[Locked]
+    public ?Model $record = null;
 
     public function educationInfolist(Schema $schema): Schema
     {
@@ -59,7 +54,7 @@ class ClientEducationInfolist extends Component implements HasActions, HasForms,
             ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.client-education-infolist');
     }

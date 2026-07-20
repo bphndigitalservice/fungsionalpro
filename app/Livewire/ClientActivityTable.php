@@ -9,17 +9,14 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Locked;
 
 class ClientActivityTable extends TableWidget
 {
-    protected ?Model $record = null;
+    #[Locked]
+    public ?Model $record = null;
 
     protected static ?string $heading = 'Daftar Kegiatan';
-
-    public function mount(Model $record): void
-    {
-        $this->record = $record;
-    }
 
     public function table(Table $table): Table
     {
