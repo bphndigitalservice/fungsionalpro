@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ClientCivilServiceHistory extends Model
 {
     use BelongsToClient;
+
+    protected $guarded = ['id'];
+
 }

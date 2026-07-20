@@ -10,6 +10,9 @@ class ClientGrade extends Model
 {
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     public function grade(): BelongsTo
     {
         return $this->belongsTo(RegGrade::class, 'reg_grade_id', 'id')->orderBy('id', 'asc');

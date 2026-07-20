@@ -24,7 +24,7 @@ return new class extends Migration
                 $table->index(['client_id', 'is_verified'], 'client_activities_client_verified_index');
             }
         });
-    }/
+    }
 
     /**
      * Reverse the migrations.

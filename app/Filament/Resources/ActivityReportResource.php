@@ -7,7 +7,6 @@ use App\Filament\Exports\ActivityReportExporter;
 use App\Enums\SystemRole;
 use App\Filament\Resources\ActivityReportResource\Pages;
 use App\Models\ClientActivity;
-use App\Models\AdminAccess;
 use App\Models\Client;
 use App\Models\RegProvince;
 use Filament\Forms;
@@ -380,14 +379,22 @@ class ActivityReportResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $allowedRoleIds = once(fn () => AdminAccess::query()
-            ->where('user_id', Auth::id())
-            ->pluck('c_role_id'));
+        $user = Auth::user();
+
+        if (! $user) {
+            return parent::getEloquentQuery()->whereRaw('1 = 0');
+        }
+
+        if ($user->isSuperAdmin()) {
+            return parent::getEloquentQuery();
+        }
+
+        $scopedClientIds = app(\App\Services\ClientAccessService::class)
+            ->scopedQuery($user)
+            ->select('clients.id');
 
         return parent::getEloquentQuery()
-            ->whereIn('client_id', Client::query()
-                ->whereIn('c_role_id', $allowedRoleIds)
-                ->select('id'));
+            ->whereIn('client_id', $scopedClientIds);
     }
 
     public static function shouldRegisterNavigation(): bool

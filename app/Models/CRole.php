@@ -10,6 +10,9 @@ class CRole extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
+
     public function levels(): HasMany
     {
         return $this->hasMany(CRoleLevel::class);

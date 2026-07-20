@@ -10,6 +10,9 @@ class ClientPointSubmissionFile extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
+
     public function submission(): BelongsTo
     {
         return $this->belongsTo(ClientPointSubmission::class, 'requisite_spec_id', 'id');

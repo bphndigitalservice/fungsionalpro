@@ -49,6 +49,10 @@ class AppServiceProvider extends ServiceProvider
         );
 
 
+        // Filament resource forms mass-assign many attributes. Until every model
+        // has an explicit $fillable whitelist, keep unguard enabled so saves don't
+        // silently fail. Prefer adding $fillable per model, then remove this.
+        // Sensitive columns are still stripped in mutateFormData* / forceFill paths.
         Model::unguard();
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation): void {

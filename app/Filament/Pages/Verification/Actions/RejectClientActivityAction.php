@@ -46,12 +46,12 @@ class RejectClientActivityAction extends Action
             ) {
 
                 // 1. Update record
-                $record->update([
+                $record->forceFill([
                     'is_verified' => false,
                     'verification_note' => $data['verifier_notes'],
                     'verified_by' => auth()->id(),
                     'verified_at' => now(),
-                ]);
+                ])->save();
 
                 $user = $record->client->user;
 

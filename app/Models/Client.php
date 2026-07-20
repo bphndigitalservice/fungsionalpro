@@ -23,6 +23,13 @@ class Client extends Model
     use HasFactory, HasUlids;
     use ProfileMustComplete;
 
+    protected $guarded = [
+        'id',
+        'is_verified',
+        'verified_at',
+    ];
+
+
     protected $casts = [
         'type' => ClientCluster::class,
         'status' => ClientStatus::class,
@@ -117,17 +124,17 @@ class Client extends Model
 
     public function verified(): void
     {
-        $this->update([
+        $this->forceFill([
             'is_verified' => true,
             'verified_at' => now(),
-        ]);
+        ])->save();
     }
 
     public function reject(): void
     {
-        $this->update([
+        $this->forceFill([
             'is_verified' => false,
-        ]);
+        ])->save();
     }
 
     public static function current(): ?Client

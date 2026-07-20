@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources\ClientActivityResource\Pages;
 
+use App\Concerns\Filament\AuthorizesOwnClientRecord;
 use App\Filament\Resources\ClientActivityResource;
 use Filament\Actions;
-use App\Models\Client;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EditClientActivity extends EditRecord
 {
+    use AuthorizesOwnClientRecord;
+
     protected static string $resource = ClientActivityResource::class;
 
     protected function getHeaderActions(): array
@@ -19,26 +20,23 @@ class EditClientActivity extends EditRecord
         ];
     }
 
-    protected function authorizeAccess(): void
-    {
-        $client = Client::current();
-        if ($client && $this->record->client_id !== $client->id) {
-            throw new ModelNotFoundException('You are not authorized to access this record.');
-        }
-    }
-
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['is_verified'] = null;
-
-        $data['verification_note'] = null;
-
-        $data['verified_by'] = null;
-
-        $data['verified_at'] = null;
+        unset($data['client_id']);
 
         return $data;
     }
+
+    protected function afterSave(): void
+    {
+        $this->record->forceFill([
+            'is_verified' => null,
+            'verification_note' => null,
+            'verified_by' => null,
+            'verified_at' => null,
+        ])->save();
+    }
+
     protected function getFormActions(): array
     {
         return [

@@ -126,6 +126,9 @@ class MasterJfResource extends Resource
                     ->form([
                         FileUpload::make('file')
                             ->label('File Excel')
+                            ->disk('local')
+                            ->directory('imports/master-jf')
+                            ->visibility('private')
                             ->acceptedFileTypes([
                                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                                 'application/vnd.ms-excel',
@@ -135,37 +138,69 @@ class MasterJfResource extends Resource
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        $relativePath = $data['file'] ?? null;
+
+                        if (
+                            ! is_string($relativePath)
+                            || $relativePath === ''
+                            || str_contains($relativePath, '..')
+                            || str_starts_with($relativePath, '/')
+                            || ! str_starts_with($relativePath, 'imports/master-jf/')
+                        ) {
+                            Notification::make()
+                                ->title('Import gagal')
+                                ->body('File import tidak valid.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $disk = Storage::disk('local');
+
+                        if (! $disk->exists($relativePath)) {
+                            Notification::make()
+                                ->title('Import gagal')
+                                ->body('File import tidak ditemukan. Silakan upload ulang.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        $basePath = realpath($disk->path('imports/master-jf'));
+                        $filePath = realpath($disk->path($relativePath));
+
+                        if ($basePath === false || $filePath === false || ! str_starts_with($filePath, $basePath.DIRECTORY_SEPARATOR)) {
+                            Notification::make()
+                                ->title('Import gagal')
+                                ->body('File import tidak valid.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
                         try {
                             set_time_limit(300);
-                            $filePath = Storage::disk('public')->path($data['file']);
 
-                            Excel::import(
-                                new MasterJfImport,
-                                $filePath
-                            );
+                            Excel::import(new MasterJfImport, $filePath);
 
                             Notification::make()
                                 ->title('Import berhasil')
                                 ->success()
                                 ->send();
-
                         } catch (\Exception $e) {
-                            $message = $e->getMessage();
-
-                            if (
-                                str_contains($message, 'TemporaryUploadedFile') ||
-                                str_contains($message, 'ReaderType') ||
-                                str_contains($message, 'File does not exist')
-                            ) {
-                                $message = 'Terjadi kendala saat membaca file. Silakan upload ulang.';
-                            }
+                            report($e);
 
                             Notification::make()
                                 ->title('Import gagal')
-                                ->body($message)
+                                ->body('Terjadi kendala saat membaca file. Silakan upload ulang.')
                                 ->danger()
                                 ->persistent()
                                 ->send();
+                        } finally {
+                            $disk->delete($relativePath);
                         }
                     }),
             ])

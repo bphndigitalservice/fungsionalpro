@@ -18,6 +18,9 @@ class ClientPointSubmission extends Model
     use HasFactory, HasUlids;
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     protected $primaryKey = 'id';
 
     protected $casts = [

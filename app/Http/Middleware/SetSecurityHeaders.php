@@ -18,6 +18,13 @@ final class SetSecurityHeaders
             'Permissions-Policy' => 'camera=(), microphone=(), geolocation=()',
         ]);
 
+        if (app()->environment('production', 'staging') && $request->secure()) {
+            $response->headers->set(
+                'Strict-Transport-Security',
+                'max-age=31536000; includeSubDomains'
+            );
+        }
+
         return $response;
     }
 }

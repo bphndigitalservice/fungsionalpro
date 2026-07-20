@@ -12,6 +12,15 @@ class ClientActivity extends Model
     use BelongsToClient;
     use HasFactory;
 
+    protected $guarded = [
+        'id',
+        'is_verified',
+        'verified_at',
+        'verified_by',
+        'verification_note',
+    ];
+
+
     protected $casts = [
         'activity_details' => 'array',
     ];
@@ -28,9 +37,9 @@ class ClientActivity extends Model
 
     public function verified(): void
     {
-        $this->update([
+        $this->forceFill([
             'is_verified' => true,
             'verified_at' => now(),
-        ]);
+        ])->save();
     }
 }

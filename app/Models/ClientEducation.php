@@ -12,6 +12,9 @@ class ClientEducation extends Model
     use HasFactory;
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     protected $casts = [
         'level' => EducationLevel::class,
     ];

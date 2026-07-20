@@ -13,6 +13,15 @@ class ClientIdentity extends Model
     use HasFactory;
     use BelongsToClient;
 
+    protected $guarded = [
+        'id',
+        'is_verified',
+        'verified_at',
+        'verified_by',
+        'verification_note',
+    ];
+
+
 
     public function getPhotoUrlAttribute()
     {

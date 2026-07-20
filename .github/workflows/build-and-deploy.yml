@@ -48,14 +48,16 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name == 'push' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: |
             ${{ steps.meta.outputs.tags }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Run Trivy vulnerability scanner (threshold check)
-        uses: aquasecurity/trivy-action@master
+        if: github.event_name == 'push'
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           severity: CRITICAL,HIGH
@@ -63,13 +65,15 @@ jobs:
           format: table
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@latest
+        if: github.event_name == 'push'
+        uses: anchore/sbom-action@v0.17.9
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: spdx-json
           output-file: sbom.spdx.json
 
       - name: Upload SBOM artifact
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: sbom

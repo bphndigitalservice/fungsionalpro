@@ -14,6 +14,9 @@ class ClientDossier extends Model
 {
     use HasFactory, HasUlids, BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     public function documentType()
     {
         return $this->belongsTo(ClientDocumentType::class, 'document_type_id');

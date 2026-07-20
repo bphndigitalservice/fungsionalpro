@@ -3,13 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\ClientStatus;
-use App\Enums\SystemRole;
-use App\Models\AdminAccess;
-use App\Models\Client;
-use App\Models\VerifierAccess;
+use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Card;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 
 class ClientNumbersByStatusOverview extends StatsOverviewWidget
@@ -39,32 +35,6 @@ class ClientNumbersByStatusOverview extends StatsOverviewWidget
 
     protected function baseClientQuery()
     {
-        $principal = auth()->user();
-
-        $query = Client::query();
-
-        if (method_exists($principal, 'isSuperAdmin') && $principal->isSuperAdmin()) {
-            return $query;
-        }
-
-        if ($principal->hasAnySystemRole(SystemRole::Admin, SystemRole::AdminInstansi)) {
-            $adminAccess = AdminAccess::query()->where('user_id', $principal->id);
-
-            return $query->joinSub($adminAccess, 'aa', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'aa.c_role_id');
-            });
-        }
-
-        if ($principal->hasAnySystemRole(SystemRole::AdminRegional, SystemRole::Verifier, SystemRole::AdminPusat, SystemRole::AdminInstansi)) {
-            $verifierAccess = VerifierAccess::query()->where('user_id', $principal->id);
-
-            return $query->joinSub($verifierAccess, 'va', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'va.c_role_id');
-                $join->on('va.entity_type', '=', 'clients.agency_type');
-                $join->on('va.entity_id', '=', 'clients.agency_id');
-            });
-        }
-
-        return $query->whereRaw('1 = 0');
+        return app(ClientAccessService::class)->scopedQuery(auth()->user());
     }
 }

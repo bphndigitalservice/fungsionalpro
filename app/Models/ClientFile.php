@@ -12,6 +12,9 @@ class ClientFile extends Model
     use HasFactory;
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

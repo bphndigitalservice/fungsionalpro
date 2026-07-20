@@ -2,105 +2,84 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Enums\SystemRole;
 use App\Models\Client;
+use App\Models\User;
+use App\Services\ClientAccessService;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ClientPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function __construct(
+        private readonly ClientAccessService $clientAccess,
+    ) {}
+
     public function viewAny(User $user): bool
     {
         return $user->can('view_any_client');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Client $client): bool
     {
-        return $user->can('view_client');
+        return $user->can('view_client') && $this->clientAccess->canAccess($user, $client);
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
         return $user->can('create_client');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Client $client): bool
     {
-        return $user->can('update_client');
+        if (! $user->can('update_client')) {
+            return false;
+        }
+
+        // Clients may only update their own record.
+        if ($user->hasSystemRole(SystemRole::Client)) {
+            return $user->client?->is($client) ?? false;
+        }
+
+        return $this->clientAccess->canAccess($user, $client);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Client $client): bool
     {
-        return $user->can('delete_client');
+        return $user->can('delete_client') && $this->clientAccess->canAccess($user, $client);
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
     public function deleteAny(User $user): bool
     {
         return $user->can('delete_any_client');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
     public function forceDelete(User $user, Client $client): bool
     {
-        return $user->can('force_delete_client');
+        return $user->can('force_delete_client') && $this->clientAccess->canAccess($user, $client);
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
     public function forceDeleteAny(User $user): bool
     {
         return $user->can('force_delete_any_client');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
     public function restore(User $user, Client $client): bool
     {
-        return $user->can('restore_client');
+        return $user->can('restore_client') && $this->clientAccess->canAccess($user, $client);
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
     public function restoreAny(User $user): bool
     {
         return $user->can('restore_any_client');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
     public function replicate(User $user, Client $client): bool
     {
-        return $user->can('replicate_client');
+        return $user->can('replicate_client') && $this->clientAccess->canAccess($user, $client);
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
     public function reorder(User $user): bool
     {
         return $user->can('reorder_client');
