@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.1...v0.2.2) (2026-07-20)
+
+
+### Bug Fixes
+
+* **Dockerfile:** add GOLANG_VERSION argument for consistency in build process ([0a48b54](https://github.com/bphndigitalservice/fungsionalpro/commit/0a48b547e0f6af3fb2a514dd9df0e6da56883854))
+
 ## [0.2.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.0...v0.2.1) (2026-07-20)
 
 
