@@ -19,7 +19,7 @@ WORKDIR ${ROOT}
 
 COPY --link package.json bun.lock ./
 
-RUN bun install
+RUN HUSKY=0 bun install
 
 COPY --link . .
 
