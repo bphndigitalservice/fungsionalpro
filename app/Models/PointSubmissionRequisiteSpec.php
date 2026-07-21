@@ -9,4 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class PointSubmissionRequisiteSpec extends Model
 {
     use HasFactory, HasUlids;
+
+    protected $guarded = ['id'];
+
 }

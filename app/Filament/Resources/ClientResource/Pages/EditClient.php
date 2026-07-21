@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ClientResource\Pages;
 
 use App\Enums\ClientCluster;
 use App\Filament\Resources\ClientResource;
+use App\Filament\Resources\CRoleResource\Concern\CanAccessClientData;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
@@ -13,10 +14,25 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditClient extends EditRecord
 {
+    use CanAccessClientData;
+
     protected static string $resource = ClientResource::class;
+
+    protected function authorizeAccess(): void
+    {
+        $this->canAccessClientData();
+
+        abort_unless(static::getResource()::canEdit($this->getRecord()), 403);
+    }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        unset(
+            $data['is_verified'],
+            $data['verified_at'],
+            $data['user_id'],
+        );
+
         $data['agency_type'] = match ($data['type']) {
             ClientCluster::Central->value => RegDepartment::class,
             ClientCluster::LocalProvince->value => RegProvince::class,

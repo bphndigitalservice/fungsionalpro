@@ -59,9 +59,9 @@ class ClientEventSubscriber
 
         DB::beginTransaction();
         try {
-            $client->update([
+            $client->forceFill([
                 'is_verified' => Verified::Unverified,
-            ]);
+            ])->save();
 
             VClientNote::updateOrCreate([
                 'client_id' => $client->id,
@@ -97,10 +97,10 @@ class ClientEventSubscriber
 
         DB::beginTransaction();
         try {
-            $client->update([
+            $client->forceFill([
                 'is_verified' => null,
                 'verified_at' => null,
-            ]);
+            ])->save();
 
             VClientNote::updateOrCreate([
                 'client_id' => $client->id,

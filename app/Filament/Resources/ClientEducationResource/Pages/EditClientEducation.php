@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources\ClientEducationResource\Pages;
 
+use App\Concerns\Filament\AuthorizesOwnClientRecord;
 use App\Filament\Resources\ClientEducationResource;
-use App\Models\Client;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EditClientEducation extends EditRecord
 {
+    use AuthorizesOwnClientRecord;
+
     protected static string $resource = ClientEducationResource::class;
 
     protected function getHeaderActions(): array
@@ -17,14 +18,6 @@ class EditClientEducation extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
-    }
-
-    protected function authorizeAccess(): void
-    {
-        $client = Client::current();
-        if ($client && $this->record->client_id !== $client->id) {
-            throw new ModelNotFoundException('You are not authorized to access this record.');
-        }
     }
 
     protected function getFormActions(): array

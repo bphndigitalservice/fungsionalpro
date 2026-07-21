@@ -7,7 +7,6 @@ use App\Filament\Exports\ActivityReportExporter;
 use App\Enums\SystemRole;
 use App\Filament\Resources\ActivityReportResource\Pages;
 use App\Models\ClientActivity;
-use App\Models\AdminAccess;
 use App\Models\Client;
 use App\Models\RegProvince;
 use Filament\Forms;
@@ -85,7 +84,7 @@ class ActivityReportResource extends Resource
 
                             Select::make('reg_province_id')
                                 ->label('Provinsi Pelaksanaan Kegiatan')
-                                ->options(RegProvince::pluck('name', 'id'))
+                                ->options(fn () => once(fn () => RegProvince::query()->pluck('name', 'id')->all()))
                                 ->searchable()
                                 ->visible(fn () => Client::current()?->c_role_id == 2)
                                 ->required(fn () => Client::current()?->c_role_id == 2),
@@ -207,15 +206,12 @@ class ActivityReportResource extends Resource
                     ->visible(fn () => Client::current()?->c_role_id == 2)
                     ->formatStateUsing(fn ($state) => static::getJenisKegiatanOptions()[(int)$state] ?? '-'),
 
-                TextColumn::make('reg_province_id')
+                TextColumn::make('regProvince.name')
                     ->label('Provinsi')
                     ->searchable()
                     ->sortable()
                     ->visible(fn () => Client::current()?->c_role_id == 2)
-                    ->formatStateUsing(function ($state) {
-                        if (! $state) return '-';
-                        return RegProvince::find($state)?->name ?? '-';
-                    }),
+                    ->placeholder('-'),
 
                 TextColumn::make('start_period')
                     ->label(fn () =>
@@ -323,7 +319,10 @@ class ActivityReportResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['tahun'],
-                            fn (Builder $query, $year): Builder => $query->whereYear('start_period', $year)
+                            fn (Builder $query, $year): Builder => $query->whereBetween(
+                                'start_period',
+                                ["{$year}-01-01", "{$year}-12-31"]
+                            )
                         );
                     })
             ])
@@ -381,12 +380,21 @@ class ActivityReportResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $user = Auth::user();
-        $allowedRoleIds = AdminAccess::where('user_id', $user->id)->pluck('c_role_id')->toArray();
+
+        if (! $user) {
+            return parent::getEloquentQuery()->whereRaw('1 = 0');
+        }
+
+        if ($user->isSuperAdmin()) {
+            return parent::getEloquentQuery();
+        }
+
+        $scopedClientIds = app(\App\Services\ClientAccessService::class)
+            ->scopedQuery($user)
+            ->select('clients.id');
 
         return parent::getEloquentQuery()
-            ->whereHas('client', function (Builder $query) use ($allowedRoleIds) {
-                $query->whereIn('c_role_id', $allowedRoleIds);
-            });
+            ->whereIn('client_id', $scopedClientIds);
     }
 
     public static function shouldRegisterNavigation(): bool

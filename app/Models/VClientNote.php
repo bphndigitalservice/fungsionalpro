@@ -11,4 +11,7 @@ class VClientNote extends Model
 {
     use HasFactory;
     use BelongsToClient;
+
+    protected $guarded = ['id'];
+
 }

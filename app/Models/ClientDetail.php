@@ -11,4 +11,7 @@ class ClientDetail extends Model
 {
     use HasFactory;
     use BelongsToClient;
+
+    protected $guarded = ['id'];
+
 }

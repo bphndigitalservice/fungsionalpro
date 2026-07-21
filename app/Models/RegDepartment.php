@@ -11,6 +11,9 @@ class RegDepartment extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
+
     public $timestamps = false;
 
     public function echelon1s(): HasMany

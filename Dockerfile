@@ -5,11 +5,16 @@ ARG COMPOSER_VERSION=2.8.9
 
 ARG ALPINE_VERSION=3.21
 
+ARG BUN_VERSION=1.2.9
+
+ARG SUPERCRONIC_VERSION=0.2.47
+
+# Must be declared before first FROM so BuildKit can expand it in FROM lines.
+ARG GOLANG_VERSION=1.26.5
+
 ###########################################
 # Build frontend assets with Bun
 ###########################################
-
-ARG BUN_VERSION=1.2.9
 
 FROM oven/bun:${BUN_VERSION} AS build
 
@@ -19,17 +24,35 @@ WORKDIR ${ROOT}
 
 COPY --link package.json bun.lock ./
 
-RUN bun install
+RUN HUSKY=0 bun install
 
 COPY --link . .
 
 RUN bun run build
 
 ###########################################
-# Builder stage: compile PHP extensions, install deps
+# Composer binary stage
 ###########################################
 
 FROM composer:${COMPOSER_VERSION} AS vendor
+
+###########################################
+# Build supercronic with a patched Go toolchain
+# Upstream v0.2.47 ships Go 1.26.4; rebuild with 1.26.5 for CVE-2026-39822.
+###########################################
+
+FROM golang:${GOLANG_VERSION}-alpine AS supercronic
+
+ARG SUPERCRONIC_VERSION
+
+ENV CGO_ENABLED=0 \
+    GOTOOLCHAIN=local
+
+RUN go install github.com/aptible/supercronic@v${SUPERCRONIC_VERSION}
+
+###########################################
+# Builder stage: compile PHP extensions, install deps
+###########################################
 
 FROM php:${PHP_VERSION}-cli-alpine${ALPINE_VERSION} AS builder
 
@@ -98,21 +121,7 @@ RUN apk update; \
     && docker-php-source delete \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-ARG SUPERCRONIC_VERSION=0.2.45
-
-RUN arch="$(apk --print-arch)" \
-    && case "$arch" in \
-    armhf) _cronic_fname='supercronic-linux-arm' && _cronic_sha256='a44561f9897cb010d1a8fc8d91785552b7edbe1c6cee36f5d5beb0a928dcc827' ;; \
-    aarch64) _cronic_fname='supercronic-linux-arm64' && _cronic_sha256='c0f21174f7bb3c80a9b33567ba0cfbeb3e51e765fe9808267ba72a1ac88c3dba' ;; \
-    x86_64) _cronic_fname='supercronic-linux-amd64' && _cronic_sha256='bb6da5af8d5547c9a5cbb4cf58d9f5541f0433df2188bfe4f1a54b04ad253db6' ;; \
-    x86) _cronic_fname='supercronic-linux-386' && _cronic_sha256='7a527fd0ad6005286336a45edb8ea62752aa189858e49761a67d6ed0d07cb33f' ;; \
-    *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
-    esac \
-    && curl -sSfL "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/${_cronic_fname}" \
-    -o /usr/bin/supercronic \
-    && echo "${_cronic_sha256}  /usr/bin/supercronic" | sha256sum -c \
-    && chmod +x /usr/bin/supercronic \
-    && mkdir -p /etc/supercronic \
+RUN mkdir -p /etc/supercronic \
     && echo "*/1 * * * * php ${ROOT}/artisan schedule:run --no-interaction" > /etc/supercronic/laravel
 
 RUN addgroup -g ${WWWGROUP} ${USER} \
@@ -240,7 +249,7 @@ RUN apk update; \
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/lib/libfbclient.so* /usr/lib/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-COPY --from=builder /usr/bin/supercronic /usr/bin/supercronic
+COPY --from=supercronic /go/bin/supercronic /usr/bin/supercronic
 COPY --from=builder /etc/supercronic/laravel /etc/supercronic/laravel
 
 RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini \

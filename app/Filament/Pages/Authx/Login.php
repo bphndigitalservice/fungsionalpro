@@ -2,36 +2,54 @@
 
 namespace App\Filament\Pages\Authx;
 
-use App\Models\User;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Facades\Filament;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Pages\Auth\Login as BaseLogin;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
-    public function authenticate(): ?\Filament\Http\Responses\Auth\Contracts\LoginResponse
+    public function authenticate(): ?LoginResponse
     {
-        $data = $this->form->getState();
+        try {
+            $this->rateLimit(5);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedNotification($exception)?->send();
 
-        $user = User::where('email', $data['email'])->first();
-
-        if (! $user) {
-            throw ValidationException::withMessages([
-                'data.email' => 'Email tidak terdaftar.',
-            ]);
+            return null;
         }
 
-        if (! Auth::attempt([
+        $data = $this->form->getState();
+
+        if (! Filament::auth()->attempt([
             'email' => $data['email'],
             'password' => $data['password'],
         ], $data['remember'] ?? false)) {
-            throw ValidationException::withMessages([
-                'data.password' => 'Kata sandi salah.',
-            ]);
+            $this->throwFailureValidationException();
+        }
+
+        $user = Filament::auth()->user();
+
+        if (
+            ($user instanceof FilamentUser) &&
+            (! $user->canAccessPanel(Filament::getCurrentPanel()))
+        ) {
+            Filament::auth()->logout();
+
+            $this->throwFailureValidationException();
         }
 
         session()->regenerate();
 
-        return app(\Filament\Http\Responses\Auth\Contracts\LoginResponse::class);
+        return app(LoginResponse::class);
+    }
+
+    protected function throwFailureValidationException(): never
+    {
+        throw ValidationException::withMessages([
+            'data.email' => __('filament-panels::pages/auth/login.messages.failed'),
+        ]);
     }
 }

@@ -21,8 +21,12 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Http\Responses\Auth\Contracts\RegistrationResponse;
 use Filament\Notifications\Notification;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class Register extends BaseRegister
 {
@@ -42,6 +46,14 @@ class Register extends BaseRegister
                                     ->color('primary')
                                     ->icon('heroicon-m-magnifying-glass')
                                     ->action(function (Get $get, Set $set) {
+                                        try {
+                                            $this->rateLimit(5);
+                                        } catch (TooManyRequestsException $exception) {
+                                            $this->getRateLimitedNotification($exception)?->send();
+
+                                            return;
+                                        }
+
                                         $nip = $get('nip');
                                         if (!$nip) return;
 
@@ -176,12 +188,15 @@ class Register extends BaseRegister
                             ->label('Password')
                             ->password()
                             ->required()
+                            ->rule(Password::default())
+                            ->same('passwordConfirmation')
                             ->disabled(fn (Get $get) => $get('client_found')),
 
                         TextInput::make('passwordConfirmation')
                             ->label('Konfirmasi Password')
                             ->password()
                             ->required()
+                            ->dehydrated(false)
                             ->disabled(fn (Get $get) => $get('client_found')),
 
                     ])
@@ -192,6 +207,14 @@ class Register extends BaseRegister
 
     public function register(): ?RegistrationResponse
     {
+        try {
+            $this->rateLimit(2);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedNotification($exception)?->send();
+
+            return null;
+        }
+
         try {
             $this->callHook('beforeValidate');
             $data = $this->form->getState();
@@ -205,17 +228,23 @@ class Register extends BaseRegister
             $this->form->model($user)->saveRelationships();
             $this->callHook('afterRegister');
 
-            // Logs the user into the panel environment dynamically
             Filament::auth()->login($user);
             session()->regenerate();
 
             return app(RegistrationResponse::class);
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Exception $exception) {
+            Log::error('Registration failed', [
+                'exception' => $exception,
+            ]);
+
             Notification::make()
                 ->title('Pendaftaran gagal')
-                ->body($exception->getMessage())
+                ->body('Terjadi kesalahan saat mendaftar. Silakan coba lagi.')
                 ->danger()
                 ->send();
+
             return null;
         }
     }
@@ -225,7 +254,7 @@ class Register extends BaseRegister
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => $data['password'],
         ]);
 
         // Using your SystemRole enum dynamically to assign the 'client' role

@@ -14,6 +14,9 @@ class ClientCompetence extends Model
     use HasFactory;
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     protected $casts = [
         'category' => TrainingType::class,
         'completion_status' => TrainingCompletionStatus::class

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class RegProvince extends Model
 {
+    protected $guarded = ['id'];
+
 
     use HasFactory;
 

@@ -125,10 +125,16 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
     protected function getTableQuery(): Builder|Relation|null
     {
 
-        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id)->limit(1);
+        $verifierAccess = VerifierAccess::query()->where('user_id', auth()->user()->id);
 
-        return Client::with(['identity', 'education', 'detail'])
-            ->rightJoinSub($verifierAccess, 'va', function (JoinClause $join) {
+        return Client::with([
+            'identity',
+            'crole',
+            'croleLevel',
+            'agenciable',
+            'echelonable',
+        ])
+            ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
                 $join->on('clients.c_role_id', '=', 'va.c_role_id');
                 $join->on('va.entity_type', '=', 'clients.agency_type');
                 $join->on('va.entity_id', '=', 'clients.agency_id');

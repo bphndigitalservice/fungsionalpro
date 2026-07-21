@@ -13,6 +13,9 @@ class ClientPoint extends Model
     use HasFactory, HasUlids;
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     public static function getPoint(string $id): float
     {
         return static::query()->where('client_id', $id)->first()->point ?? 0;

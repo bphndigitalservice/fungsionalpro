@@ -148,7 +148,9 @@ class ClientResource extends Resource
                     ->state(function (Client $record) {
                         return match ($record->type) {
                             ClientCluster::LocalRegency => $record->echelon_x_text,
-                            ClientCluster::LocalProvince => is_numeric($record->echelon_x_text) ? RegProvinceEchelon1::find($record->echelon_x_text)?->name : null,
+                            ClientCluster::LocalProvince => is_numeric($record->echelon_x_text)
+                                ? (once(fn () => RegProvinceEchelon1::query()->pluck('name', 'id'))[$record->echelon_x_text] ?? null)
+                                : null,
                             default => $record->echelonable?->name,
                         };
                     })

@@ -12,6 +12,9 @@ class ClientPointSubmissionBag extends Model
 {
     use HasFactory, HasUlids;
 
+    protected $guarded = ['id'];
+
+
     public function submissions(): HasMany
     {
         return $this->hasMany(ClientPointSubmission::class);

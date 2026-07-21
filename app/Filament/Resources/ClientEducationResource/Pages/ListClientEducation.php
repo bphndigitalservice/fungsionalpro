@@ -28,6 +28,6 @@ class ListClientEducation extends ListRecords
 
     protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
     {
-        return parent::getTableQuery()->where('client_id', Client::current() ? Client::current()->id : 0);
+        return parent::getTableQuery()->where('client_id', Client::current()?->id ?? 0);
     }
 }

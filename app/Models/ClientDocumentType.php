@@ -11,4 +11,7 @@ class ClientDocumentType extends Model
 {
     use HasFactory, HasUlids;
     use SoftDeletes;
+
+    protected $guarded = ['id'];
+
 }

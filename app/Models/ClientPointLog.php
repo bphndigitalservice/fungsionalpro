@@ -12,6 +12,9 @@ class ClientPointLog extends Model
     use HasFactory;
     use BelongsToClient;
 
+    protected $guarded = ['id'];
+
+
     public function bag(): BelongsTo
     {
         return $this->belongsTo(ClientPointSubmissionBag::class);

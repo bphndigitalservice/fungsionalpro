@@ -4,7 +4,6 @@ namespace App\Filament\Exports;
 
 use App\Models\Client;
 use App\Models\ClientActivity;
-use App\Models\RegProvince;
 use App\Filament\Resources\ClientActivityResource;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -38,9 +37,9 @@ class ActivityReportExporter extends Exporter
             ->label('Kegiatan');
 
         if ($roleId == 2) {
-            $columns[] = ExportColumn::make('reg_province_id')
+            $columns[] = ExportColumn::make('regProvince.name')
                 ->label('Provinsi Pelaksanaan')
-                ->formatStateUsing(fn ($state) => $state ? RegProvince::find($state)?->name ?? '-' : '-');
+                ->default('-');
         }
 
         if ($roleId == 1) {
