@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.6.0...v0.7.0) (2026-07-28)
+
+
+### Features
+
+* **branding:** update brand component with new styles and logo format ([6939416](https://github.com/bphndigitalservice/fungsionalpro/commit/6939416fb2cc04ac7a27f6f65d2900e10e11b56c))
+
 # [0.6.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.5.1...v0.6.0) (2026-07-28)
 
 
