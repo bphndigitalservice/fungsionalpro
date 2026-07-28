@@ -1,3 +1,11 @@
+# [0.4.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.3.0...v0.4.0) (2026-07-28)
+
+
+### Features
+
+* **master-jf:** add CRole form field, column, and list filter ([1a758e2](https://github.com/bphndigitalservice/fungsionalpro/commit/1a758e28dfed398148f605e4459f351eef7c3002))
+* **master-jf:** add nullable c_role_id FK and relation ([0e22e3f](https://github.com/bphndigitalservice/fungsionalpro/commit/0e22e3f67b27efd1c0cedcb7052dd3c52eb880a2))
+
 # [0.3.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.4...v0.3.0) (2026-07-28)
 
 
