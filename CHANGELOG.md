@@ -1,3 +1,20 @@
+# [0.3.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.4...v0.3.0) (2026-07-28)
+
+
+### Bug Fixes
+
+* **master-jf:** clear table sort before stats groupBy ([70aa0a1](https://github.com/bphndigitalservice/fungsionalpro/commit/70aa0a1af511726bf7f7ee8e49cb942a9598a4e2))
+* **test:** set APP_KEY in phpunit for Filament feature tests ([02f7579](https://github.com/bphndigitalservice/fungsionalpro/commit/02f75795c2a9c6afe9105722e5951ab311aaae12))
+
+
+### Features
+
+* **deployment:** update docker compose and environment ([728a251](https://github.com/bphndigitalservice/fungsionalpro/commit/728a251cde678bee51fd4188f4b4b110530fdfe4))
+* **master-jf:** add filter-aware total stats widget and collapse toggle ([35a03d3](https://github.com/bphndigitalservice/fungsionalpro/commit/35a03d3746b7ecdb3b0264f79ef1d990de6e8fce))
+* **master-jf:** add list filters and status_kepegawaian column ([d649ece](https://github.com/bphndigitalservice/fungsionalpro/commit/d649ece82434a9a74666e8c5c4329cab2e8abe54))
+* **master-jf:** add status_kepegawaian fillable, options helpers, factory ([5e3b5af](https://github.com/bphndigitalservice/fungsionalpro/commit/5e3b5af1947eafc200fd727f7eb7a1182b3d9421))
+* **master-jf:** add status, kepegawaian, and gol_ruang stats widgets ([f40d32b](https://github.com/bphndigitalservice/fungsionalpro/commit/f40d32b90b3a1b55ae679c28de8dc2f23d320052))
+
 ## [0.2.4](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.3...v0.2.4) (2026-07-28)
 
 
