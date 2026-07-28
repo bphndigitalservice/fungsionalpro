@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\JenisKepegawaian;
 use App\Filament\Resources\MasterJfResource\Pages;
 use App\Models\CRole;
 use App\Models\MasterJf;
@@ -55,8 +58,11 @@ class MasterJfResource extends Resource
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextInput::make('instansi'),
-                Forms\Components\TextInput::make('type')
-                    ->label('Tipe'),
+                Forms\Components\Select::make('type')
+                    ->label('Kluster')
+                    ->options(ClientCluster::class)
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\TextInput::make('unit_kerja')
                     ->label('Unit Kerja'),
                 Forms\Components\Select::make('pengangkatan')
@@ -66,12 +72,12 @@ class MasterJfResource extends Resource
                     ->preload(),
                 Forms\Components\Select::make('status')
                     ->label('Status')
-                    ->options(MasterJf::statusOptions())
+                    ->options(ClientStatus::class)
                     ->searchable()
                     ->preload(),
                 Forms\Components\Select::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
-                    ->options(MasterJf::statusKepegawaianOptions())
+                    ->options(JenisKepegawaian::class)
                     ->searchable()
                     ->preload(),
             ]);
@@ -109,7 +115,7 @@ class MasterJfResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe')
+                    ->label('Kluster')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pengangkatan')
@@ -127,15 +133,15 @@ class MasterJfResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options(fn (): array => MasterJf::statusOptions()),
+                    ->options(ClientStatus::class),
                 Tables\Filters\SelectFilter::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
-                    ->options(fn (): array => MasterJf::statusKepegawaianOptions()),
+                    ->options(JenisKepegawaian::class),
                 Tables\Filters\SelectFilter::make('pengangkatan')
                     ->options(fn (): array => MasterJf::pengangkatanOptions()),
                 Tables\Filters\SelectFilter::make('type')
-                    ->label('Tipe')
-                    ->options(fn (): array => MasterJf::distinctOptions('type'))
+                    ->label('Kluster')
+                    ->options(ClientCluster::class)
                     ->searchable(),
                 Tables\Filters\SelectFilter::make('gol_ruang')
                     ->label('Golongan/Ruang')

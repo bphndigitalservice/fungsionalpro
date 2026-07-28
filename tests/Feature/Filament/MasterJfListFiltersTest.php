@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\ClientStatus;
 use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
 use App\Models\CRole;
@@ -32,12 +33,18 @@ class MasterJfListFiltersTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $aktif = MasterJf::factory()->create(['status' => 'Aktif', 'nama' => 'Aktif Person']);
-        $ctln = MasterJf::factory()->create(['status' => 'CTLN', 'nama' => 'CTLN Person']);
+        $aktif = MasterJf::factory()->create([
+            'status' => ClientStatus::Active,
+            'nama' => 'Aktif Person',
+        ]);
+        $ctln = MasterJf::factory()->create([
+            'status' => ClientStatus::NonActive_CTLN,
+            'nama' => 'CTLN Person',
+        ]);
 
         Livewire::test(ListMasterJfs::class)
             ->assertCanSeeTableRecords([$aktif, $ctln])
-            ->filterTable('status', 'Aktif')
+            ->filterTable('status', ClientStatus::Active->value)
             ->assertCanSeeTableRecords([$aktif])
             ->assertCanNotSeeTableRecords([$ctln]);
     }
