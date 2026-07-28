@@ -100,6 +100,36 @@ class MasterJfResource extends Resource
                     ->label('Status Kepegawaian')
                     ->searchable(),
             ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(fn (): array => MasterJf::statusOptions()),
+                Tables\Filters\SelectFilter::make('status_kepegawaian')
+                    ->label('Status Kepegawaian')
+                    ->options(fn (): array => MasterJf::statusKepegawaianOptions()),
+                Tables\Filters\SelectFilter::make('pengangkatan')
+                    ->options(fn (): array => MasterJf::pengangkatanOptions()),
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Tipe')
+                    ->options(fn (): array => MasterJf::distinctOptions('type'))
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('gol_ruang')
+                    ->label('Golongan/Ruang')
+                    ->options(fn (): array => MasterJf::distinctOptions('gol_ruang'))
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('instansi')
+                    ->options(fn (): array => MasterJf::distinctOptions('instansi'))
+                    ->searchable()
+                    ->multiple(),
+                Tables\Filters\SelectFilter::make('unit_kerja')
+                    ->label('Unit Kerja')
+                    ->options(fn (): array => MasterJf::distinctOptions('unit_kerja'))
+                    ->searchable()
+                    ->multiple(),
+                Tables\Filters\SelectFilter::make('jabatan')
+                    ->options(fn (): array => MasterJf::distinctOptions('jabatan'))
+                    ->searchable()
+                    ->multiple(),
+            ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->headerActions([
                 Action::make('import')
                     ->label('Import Data')
