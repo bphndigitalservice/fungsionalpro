@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.5.1...v0.6.0) (2026-07-28)
+
+
+### Features
+
+* **branding:** add custom brand name and logo to Filament admin panel ([992465a](https://github.com/bphndigitalservice/fungsionalpro/commit/992465afaaa2a149a7cfb6e8f661a4bfd8e52642))
+
 ## [0.5.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.5.0...v0.5.1) (2026-07-28)
 
 
