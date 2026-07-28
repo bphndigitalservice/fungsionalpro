@@ -31,6 +31,8 @@ x-shared-env: &shared-env
     SESSION_ENCRYPT: "${SESSION_ENCRYPT}"
     SESSION_PATH: "${SESSION_PATH}"
     SESSION_DOMAIN: "${SESSION_DOMAIN}"
+    SESSION_SECURE_COOKIE: "${SESSION_SECURE_COOKIE:-true}"
+    SESSION_SAME_SITE: "${SESSION_SAME_SITE:-lax}"
     SESSION_CONNECTION: "${SESSION_CONNECTION:-default}"
     BROADCAST_CONNECTION: "${BROADCAST_CONNECTION}"
     FILESYSTEM_DISK: "${FILESYSTEM_DISK}"
@@ -72,6 +74,9 @@ x-app-tmpfs: &app-tmpfs
     - /var/www/html/storage/framework/cache:nosuid,size=10m,uid=1000,gid=1000,mode=1777
     - /var/www/html/storage/framework/views:nosuid,size=64m,uid=1000,gid=1000,mode=1777
     - /var/www/html/bootstrap/cache:nosuid,size=10m,uid=1000,gid=1000,mode=1777
+    # Master JF Excel import uses disk(local) → storage/app/imports/...
+    # Container is read_only; without this mount mkdir/put fails.
+    - /var/www/html/storage/app/imports:nosuid,size=64m,uid=1000,gid=1000,mode=1777
 
 services:
     app:
@@ -96,6 +101,8 @@ services:
             <<: *shared-env
             CONTAINER_MODE: http
             OCTANE_SERVER: "${OCTANE_SERVER:-swoole}"
+            # true when TLS terminates at the reverse proxy (required to avoid Livewire 419).
+            OCTANE_HTTPS: "${OCTANE_HTTPS:-true}"
             OCTANE_WORKERS: "${OCTANE_WORKERS:-2}"
             OCTANE_MAX_REQUESTS: "${OCTANE_MAX_REQUESTS:-500}"
         security_opt:

@@ -18,7 +18,10 @@ class MasterJfNumbersOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $count = $this->getPageTableQuery()->toBase()->getCountForPagination();
+        $count = $this->getPageTableQuery()
+            ->toBase()
+            ->reorder()
+            ->getCountForPagination();
 
         return [
             Stat::make('Total Master JF', number_format($count))
