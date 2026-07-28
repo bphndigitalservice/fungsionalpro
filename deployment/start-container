@@ -4,7 +4,9 @@ set -e
 container_mode=${CONTAINER_MODE:-"http"}
 octane_server=${OCTANE_SERVER}
 running_migrations_and_seeders=${RUNNING_MIGRATIONS_AND_SEEDERS:-"false"}
-export WORKER_NUMPROCS=${WORKER_NUMPROCS:-"8"}
+export WORKER_NUMPROCS=${WORKER_NUMPROCS:-"2"}
+export OCTANE_WORKERS=${OCTANE_WORKERS:-"2"}
+export OCTANE_MAX_REQUESTS=${OCTANE_MAX_REQUESTS:-"500"}
 
 echo "Container mode: $container_mode"
 
@@ -22,17 +24,14 @@ wait_for() {
     echo "Waiting for $host:$port ..."
 
     while [ $attempt -lt $max_attempts ]; do
-        curl -s --connect-timeout 2 --max-time 2 "http://${host}:${port}" > /dev/null 2>&1 || {
-            rc=$?
-            if [ $rc -eq 6 ] || [ $rc -eq 7 ] || [ $rc -eq 28 ]; then
-                attempt=$((attempt + 1))
-                echo "Attempt $attempt/$max_attempts - $host:$port not available yet..."
-                sleep 2
-                continue
-            fi
-        }
-        echo "$host:$port is available"
-        return 0
+        # TCP connect via PHP — Redis/Postgres are not HTTP services.
+        if php -r "\$fp=@fsockopen('${host}', ${port}, \$errno, \$errstr, 2); if (\$fp) { fclose(\$fp); exit(0);} exit(1);" 2>/dev/null; then
+            echo "$host:$port is available"
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        echo "Attempt $attempt/$max_attempts - $host:$port not available yet..."
+        sleep 2
     done
 
     echo "ERROR: Unable to connect to $host:$port after $max_attempts attempts"
@@ -44,10 +43,13 @@ initialStuff() {
     wait_for "${DB_HOST:-postgres}:${DB_PORT:-5432}" || true
 
     php artisan storage:link || true
-    php artisan optimize:clear || true
-    php artisan event:cache || true
+
+    # Cache once per boot. Do not optimize:clear — that forces cold caches and
+    # recompiles on every restart under read-only + tmpfs layouts.
     php artisan config:cache || true
+    php artisan event:cache || true
     php artisan route:cache || true
+    php artisan view:cache || true
 
     if [ "${running_migrations_and_seeders}" = "true" ]; then
         echo "Running migrations and seeding database ..."
@@ -58,7 +60,7 @@ initialStuff() {
 if [ "$1" != "" ]; then
     exec "$@"
 elif [ "${container_mode}" = "http" ]; then
-    echo "Octane Server: $octane_server"
+    echo "Octane Server: $octane_server (workers=${OCTANE_WORKERS}, max-requests=${OCTANE_MAX_REQUESTS})"
     initialStuff
     if [ "${octane_server}"  = "frankenphp" ]; then
         exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.frankenphp.conf

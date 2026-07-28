@@ -54,12 +54,10 @@ class AppServiceProvider extends ServiceProvider
         // silently fail. Prefer adding $fillable per model, then remove this.
         // Sensitive columns are still stripped in mutateFormData* / forceFill paths.
         Model::unguard();
+        // Never throw in production (would 500 Filament pages), but always log so
+        // N+1s that make every page slow are visible in prod logs.
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation): void {
-            if ($this->app->isProduction()) {
-                return;
-            }
-
             logger()->warning(sprintf(
                 'Lazy loading [%s] on [%s:%s]',
                 $relation,
