@@ -8,10 +8,13 @@ use App\Filament\Widgets\MasterJfNumbersByStatusKepegawaianOverview;
 use App\Filament\Widgets\MasterJfNumbersByStatusOverview;
 use App\Filament\Widgets\MasterJfNumbersOverview;
 use Filament\Actions;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
 class ListMasterJfs extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = MasterJfResource::class;
 
     public bool $widgetsCollapsed = false;
