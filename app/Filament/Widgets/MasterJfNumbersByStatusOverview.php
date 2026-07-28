@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ClientStatus;
 use App\Filament\Widgets\Concerns\InteractsWithMasterJfPageTable;
-use App\Models\MasterJf;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
@@ -29,9 +29,9 @@ class MasterJfNumbersByStatusOverview extends StatsOverviewWidget
 
         $stats = [];
 
-        foreach (MasterJf::statusOptions() as $value => $label) {
-            $stats[] = Stat::make($label, number_format((int) ($counts[$value] ?? 0)))
-                ->icon($value === 'Aktif' ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle');
+        foreach (ClientStatus::cases() as $status) {
+            $stats[] = Stat::make($status->getLabel(), number_format((int) ($counts[$status->value] ?? 0)))
+                ->icon($status === ClientStatus::Active ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle');
         }
 
         $unknown = 0;

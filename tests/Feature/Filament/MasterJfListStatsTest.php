@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\ClientStatus;
+use App\Enums\JenisKepegawaian;
 use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
 use App\Filament\Widgets\MasterJfNumbersByGolRuangOverview;
@@ -61,12 +63,12 @@ class MasterJfListStatsTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->count(2)->create(['status' => 'Aktif']);
-        MasterJf::factory()->count(3)->create(['status' => 'CTLN']);
+        MasterJf::factory()->count(2)->create(['status' => ClientStatus::Active]);
+        MasterJf::factory()->count(3)->create(['status' => ClientStatus::NonActive_CTLN]);
 
         Livewire::test(MasterJfNumbersOverview::class, [
             'tableFilters' => [
-                'status' => ['value' => 'Aktif'],
+                'status' => ['value' => ClientStatus::Active->value],
             ],
         ])
             ->assertSee('Total Master JF')
@@ -77,8 +79,8 @@ class MasterJfListStatsTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->count(2)->create(['status' => 'Aktif']);
-        MasterJf::factory()->count(1)->create(['status' => 'CTLN']);
+        MasterJf::factory()->count(2)->create(['status' => ClientStatus::Active]);
+        MasterJf::factory()->count(1)->create(['status' => ClientStatus::NonActive_CTLN]);
 
         Livewire::test(MasterJfNumbersByStatusOverview::class)
             ->assertSee('Aktif')
@@ -91,8 +93,8 @@ class MasterJfListStatsTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->count(2)->create(['status_kepegawaian' => 'PNS']);
-        MasterJf::factory()->count(4)->create(['status_kepegawaian' => 'PPPK']);
+        MasterJf::factory()->count(2)->create(['status_kepegawaian' => JenisKepegawaian::PNS]);
+        MasterJf::factory()->count(4)->create(['status_kepegawaian' => JenisKepegawaian::PPPK]);
 
         Livewire::test(MasterJfNumbersByStatusKepegawaianOverview::class)
             ->assertSee('PNS')
@@ -134,30 +136,30 @@ class MasterJfListStatsTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->create(['status' => 'Aktif']);
-        MasterJf::factory()->create(['status' => 'CTLN']);
+        MasterJf::factory()->create(['status' => ClientStatus::Active]);
+        MasterJf::factory()->create(['status' => ClientStatus::NonActive_CTLN]);
 
         $component = Livewire::test(ListMasterJfs::class)
-            ->filterTable('status', 'Aktif');
+            ->filterTable('status', ClientStatus::Active->value);
 
         $widgetData = $component->instance()->getWidgetData();
 
         $this->assertArrayHasKey('tableFilters', $widgetData);
-        $this->assertSame('Aktif', data_get($widgetData, 'tableFilters.status.value'));
+        $this->assertSame(ClientStatus::Active->value, data_get($widgetData, 'tableFilters.status.value'));
     }
 
     public function test_list_total_widget_follows_status_filter_via_page(): void
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->count(2)->create(['status' => 'Aktif']);
-        MasterJf::factory()->count(3)->create(['status' => 'CTLN']);
+        MasterJf::factory()->count(2)->create(['status' => ClientStatus::Active]);
+        MasterJf::factory()->count(3)->create(['status' => ClientStatus::NonActive_CTLN]);
 
         $component = Livewire::test(ListMasterJfs::class)
             ->assertSeeLivewire(MasterJfNumbersOverview::class)
             ->assertSee('Total Master JF')
             ->assertSee('5')
-            ->filterTable('status', 'Aktif');
+            ->filterTable('status', ClientStatus::Active->value);
 
         Livewire::test(MasterJfNumbersOverview::class, $component->instance()->getWidgetData())
             ->assertSee('Total Master JF')

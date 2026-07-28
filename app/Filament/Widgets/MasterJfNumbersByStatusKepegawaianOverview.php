@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\JenisKepegawaian;
 use App\Filament\Widgets\Concerns\InteractsWithMasterJfPageTable;
-use App\Models\MasterJf;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +29,8 @@ class MasterJfNumbersByStatusKepegawaianOverview extends StatsOverviewWidget
 
         $stats = [];
 
-        foreach (MasterJf::statusKepegawaianOptions() as $value => $label) {
-            $stats[] = Stat::make($label, number_format((int) ($counts[$value] ?? 0)))
+        foreach (JenisKepegawaian::cases() as $jenis) {
+            $stats[] = Stat::make($jenis->getLabel(), number_format((int) ($counts[$jenis->value] ?? 0)))
                 ->icon('heroicon-o-identification');
         }
 

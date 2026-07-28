@@ -42,7 +42,7 @@ class MasterJfListFiltersTest extends TestCase
             'nama' => 'CTLN Person',
         ]);
 
-        Livewire::test(ListMasterJfs::class, ['widgetsCollapsed' => true])
+        Livewire::test(ListMasterJfs::class)
             ->assertCanSeeTableRecords([$aktif, $ctln])
             ->filterTable('status', ClientStatus::Active->value)
             ->assertCanSeeTableRecords([$aktif])
@@ -56,7 +56,7 @@ class MasterJfListFiltersTest extends TestCase
         $a = MasterJf::factory()->create(['instansi' => 'BPHN', 'nama' => 'BPHN Person']);
         $b = MasterJf::factory()->create(['instansi' => 'Kemenkumham', 'nama' => 'Kemenkumham Person']);
 
-        Livewire::test(ListMasterJfs::class, ['widgetsCollapsed' => true])
+        Livewire::test(ListMasterJfs::class)
             ->filterTable('instansi', ['BPHN'])
             ->assertCanSeeTableRecords([$a])
             ->assertCanNotSeeTableRecords([$b]);
@@ -78,7 +78,7 @@ class MasterJfListFiltersTest extends TestCase
             'c_role_id' => $penyuluh->id,
         ]);
 
-        Livewire::test(ListMasterJfs::class, ['widgetsCollapsed' => true])
+        Livewire::test(ListMasterJfs::class)
             ->assertCanSeeTableRecords([$a, $b])
             ->filterTable('c_role_id', $analis->id)
             ->assertCanSeeTableRecords([$a])
