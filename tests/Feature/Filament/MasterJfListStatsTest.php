@@ -4,6 +4,9 @@ namespace Tests\Feature\Filament;
 
 use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
+use App\Filament\Widgets\MasterJfNumbersByGolRuangOverview;
+use App\Filament\Widgets\MasterJfNumbersByStatusKepegawaianOverview;
+use App\Filament\Widgets\MasterJfNumbersByStatusOverview;
 use App\Filament\Widgets\MasterJfNumbersOverview;
 use App\Models\MasterJf;
 use App\Models\User;
@@ -67,6 +70,63 @@ class MasterJfListStatsTest extends TestCase
             ],
         ])
             ->assertSee('Total Master JF')
+            ->assertSee('2');
+    }
+
+    public function test_status_breakdown_reflects_fixture_counts(): void
+    {
+        $this->actingAsAdmin();
+
+        MasterJf::factory()->count(2)->create(['status' => 'Aktif']);
+        MasterJf::factory()->count(1)->create(['status' => 'CTLN']);
+
+        Livewire::test(MasterJfNumbersByStatusOverview::class)
+            ->assertSee('Aktif')
+            ->assertSee('2')
+            ->assertSee('CTLN')
+            ->assertSee('1');
+    }
+
+    public function test_status_kepegawaian_breakdown_reflects_fixture_counts(): void
+    {
+        $this->actingAsAdmin();
+
+        MasterJf::factory()->count(2)->create(['status_kepegawaian' => 'PNS']);
+        MasterJf::factory()->count(4)->create(['status_kepegawaian' => 'PPPK']);
+
+        Livewire::test(MasterJfNumbersByStatusKepegawaianOverview::class)
+            ->assertSee('PNS')
+            ->assertSee('2')
+            ->assertSee('PPPK')
+            ->assertSee('4');
+    }
+
+    public function test_gol_ruang_widget_shows_top_counts(): void
+    {
+        $this->actingAsAdmin();
+
+        MasterJf::factory()->count(3)->create(['gol_ruang' => 'III/a']);
+        MasterJf::factory()->count(1)->create(['gol_ruang' => 'IV/a']);
+
+        Livewire::test(MasterJfNumbersByGolRuangOverview::class)
+            ->assertSee('III/a')
+            ->assertSee('3')
+            ->assertSee('IV/a')
+            ->assertSee('1');
+    }
+
+    public function test_total_widget_follows_gol_ruang_filter(): void
+    {
+        $this->actingAsAdmin();
+
+        MasterJf::factory()->count(2)->create(['gol_ruang' => 'III/a']);
+        MasterJf::factory()->count(5)->create(['gol_ruang' => 'IV/a']);
+
+        Livewire::test(MasterJfNumbersOverview::class, [
+            'tableFilters' => [
+                'gol_ruang' => ['value' => 'III/a'],
+            ],
+        ])
             ->assertSee('2');
     }
 }

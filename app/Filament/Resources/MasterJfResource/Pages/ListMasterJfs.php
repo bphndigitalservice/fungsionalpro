@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\MasterJfResource\Pages;
 
 use App\Filament\Resources\MasterJfResource;
+use App\Filament\Widgets\MasterJfNumbersByGolRuangOverview;
+use App\Filament\Widgets\MasterJfNumbersByStatusKepegawaianOverview;
+use App\Filament\Widgets\MasterJfNumbersByStatusOverview;
 use App\Filament\Widgets\MasterJfNumbersOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -32,6 +35,9 @@ class ListMasterJfs extends ListRecords
 
         return [
             MasterJfNumbersOverview::class,
+            MasterJfNumbersByStatusOverview::class,
+            MasterJfNumbersByStatusKepegawaianOverview::class,
+            MasterJfNumbersByGolRuangOverview::class,
         ];
     }
 
