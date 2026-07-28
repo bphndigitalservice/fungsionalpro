@@ -38,7 +38,22 @@ wait_for() {
     return 1
 }
 
+prepare_runtime_dirs() {
+    # /run is a fresh tmpfs under read_only rootfs — recreate paths supervisord needs.
+    # /var/run is typically a symlink to /run on Alpine.
+    mkdir -p \
+        /run/supervisor \
+        /var/log/supervisor \
+        "${ROOT:-/var/www/html}/bootstrap/cache" \
+        "${ROOT:-/var/www/html}/storage/framework/cache" \
+        "${ROOT:-/var/www/html}/storage/framework/sessions" \
+        "${ROOT:-/var/www/html}/storage/framework/views" \
+        "${ROOT:-/var/www/html}/storage/logs"
+}
+
 initialStuff() {
+    prepare_runtime_dirs
+
     wait_for "${REDIS_HOST:-redis}:${REDIS_PORT:-6379}" || true
     wait_for "${DB_HOST:-postgres}:${DB_PORT:-5432}" || true
 
@@ -46,10 +61,10 @@ initialStuff() {
 
     # Cache once per boot. Do not optimize:clear — that forces cold caches and
     # recompiles on every restart under read-only + tmpfs layouts.
-    php artisan config:cache || true
-    php artisan event:cache || true
-    php artisan route:cache || true
-    php artisan view:cache || true
+    php artisan config:cache
+    php artisan event:cache
+    php artisan route:cache
+    php artisan view:cache
 
     if [ "${running_migrations_and_seeders}" = "true" ]; then
         echo "Running migrations and seeding database ..."

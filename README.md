@@ -168,6 +168,10 @@ Also set:
 
 - `not a directory` mount errors:
   usually means `docker compose` was run from the wrong directory for the relative bind mounts
+- `bootstrap/cache directory must be present and writable`:
+  tmpfs mounts must use `uid=1000,gid=1000` so the `octane` user can write; pull the latest `deployment/docker-compose.yml`
+- `/var/run/supervisor/supervisord.pid does not exist`:
+  `/run` is a tmpfs; `start-container` must recreate `/run/supervisor` on boot — pull the latest `deployment/start-container`
 - slow or inconsistent pages:
   verify `REDIS_PASSWORD` matches across the env file and Redis service
 - boot loops:
