@@ -99,7 +99,7 @@ class MasterJfModelTest extends TestCase
             'unit_kerjakanwil' => 'Unit A',
             'instansi' => 'Instansi A',
             'pengangkatan' => 'Inpassing',
-            'status' => 'active',
+            'status' => 'Aktif',
             'status_kepegawaian' => 'PNS',
         ]);
 
@@ -107,5 +107,41 @@ class MasterJfModelTest extends TestCase
 
         $this->assertSame('After Import', $row->nama);
         $this->assertSame($role->id, $row->c_role_id);
+    }
+
+    public function test_import_normalizes_status_label_to_enum_value(): void
+    {
+        (new MasterJfImport)->model([
+            'nip' => '333333333333333333',
+            'nama' => 'Imported',
+            'golruang' => 'III/a',
+            'jabatan' => 'Analis',
+            'unit_kerjakanwil' => 'Unit A',
+            'instansi' => 'Instansi A',
+            'pengangkatan' => 'Inpassing',
+            'status' => 'Aktif',
+            'status_kepegawaian' => 'PNS',
+        ]);
+
+        $this->assertDatabaseHas('master_jf', [
+            'nip' => '333333333333333333',
+            'status' => 'active',
+            'status_kepegawaian' => 'PNS',
+        ]);
+    }
+
+    public function test_import_nulls_unknown_status(): void
+    {
+        (new MasterJfImport)->model([
+            'nip' => '444444444444444444',
+            'nama' => 'Unknown Status',
+            'status' => 'bukan-status',
+            'status_kepegawaian' => 'Honorer',
+        ]);
+
+        $row = MasterJf::query()->where('nip', '444444444444444444')->first();
+        $this->assertNotNull($row);
+        $this->assertNull($row->status);
+        $this->assertNull($row->status_kepegawaian);
     }
 }

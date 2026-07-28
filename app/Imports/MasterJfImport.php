@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\MasterJf;
+use App\Support\MasterJfEnumMapper;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Exception;
@@ -32,8 +33,8 @@ class MasterJfImport implements ToModel, WithHeadingRow
                 'unit_kerja'         => $unitKerja,
                 'instansi'           => $instansi,
                 'pengangkatan'       => $row['pengangkatan'] ?? null,
-                'status'             => $row['status'] ?? null,
-                'status_kepegawaian' => $row['status_kepegawaian'] ?? null,
+                'status'             => MasterJfEnumMapper::status($row['status'] ?? null),
+                'status_kepegawaian' => MasterJfEnumMapper::statusKepegawaian($row['status_kepegawaian'] ?? null),
                 'type'               => $type,
             ]
         );
