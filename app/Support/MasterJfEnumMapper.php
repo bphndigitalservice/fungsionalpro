@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\JenisKepegawaian;
+use Illuminate\Support\Facades\DB;
 
 final class MasterJfEnumMapper
 {
@@ -63,5 +64,19 @@ final class MasterJfEnumMapper
         $trimmed = trim($raw);
 
         return JenisKepegawaian::tryFrom($trimmed)?->value;
+    }
+
+    public static function normalizeTable(): void
+    {
+        DB::table('master_jf')->orderBy('id')->chunkById(200, function ($rows) {
+            foreach ($rows as $row) {
+                DB::table('master_jf')->where('id', $row->id)->update([
+                    'status' => self::status($row->status),
+                    'type' => self::type($row->type),
+                    'status_kepegawaian' => self::statusKepegawaian($row->status_kepegawaian),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
     }
 }
