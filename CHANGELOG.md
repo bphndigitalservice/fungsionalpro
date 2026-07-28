@@ -1,3 +1,10 @@
+## [0.2.4](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.3...v0.2.4) (2026-07-28)
+
+
+### Bug Fixes
+
+* **perf:** enhance docker configuration and optimize php settings for performance ([bb01301](https://github.com/bphndigitalservice/fungsionalpro/commit/bb0130198adfa8f72416cdae27d2b01d5aef9f21))
+
 ## [0.2.3](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.2...v0.2.3) (2026-07-20)
 
 
