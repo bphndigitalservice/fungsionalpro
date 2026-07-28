@@ -1,3 +1,12 @@
+## [0.5.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.5.0...v0.5.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **master-jf:** drop filter-keyed widget remount; assert via widget data ([cb93b93](https://github.com/bphndigitalservice/fungsionalpro/commit/cb93b93d00904d0b20eddbcf1d8bc777c7fc98ed))
+* **master-jf:** ensure proper widget data handling for filter-keyed remounts ([9d5c804](https://github.com/bphndigitalservice/fungsionalpro/commit/9d5c80464ffcf4a5b7dc63b982e20cc5ede685fb))
+* **master-jf:** expose table filters to header stats widgets ([015d520](https://github.com/bphndigitalservice/fungsionalpro/commit/015d52089e4bddf30bf50f2a1eb361074f87bb3a))
+
 # [0.5.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.4.0...v0.5.0) (2026-07-28)
 
 
