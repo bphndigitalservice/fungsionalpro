@@ -1,3 +1,17 @@
+# [0.8.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.7.0...v0.8.0) (2026-07-28)
+
+
+### Features
+
+* **master-jf:** add enum label/value mapper ([030dc69](https://github.com/bphndigitalservice/fungsionalpro/commit/030dc69701de8c1287b14bbf19e82023e8123e1d))
+* **master-jf:** add JenisKepegawaian enum ([1a7d6a5](https://github.com/bphndigitalservice/fungsionalpro/commit/1a7d6a5888663450e75f169c54dcea81f9b064c1))
+* **master-jf:** cast type/status/kepegawaian to enums ([a427574](https://github.com/bphndigitalservice/fungsionalpro/commit/a42757434846580a8d3e6499d1b43f5e913b5be0))
+* **master-jf:** drive status widgets from enums ([7790416](https://github.com/bphndigitalservice/fungsionalpro/commit/77904162ab1954d3b7de05c144f02a07dd67438b))
+* **master-jf:** migrate status/type/kepegawaian to enum values ([b309027](https://github.com/bphndigitalservice/fungsionalpro/commit/b30902710ab0a8b1b3c40275cd90346f89df0fc1))
+* **master-jf:** normalize import status via enum mapper ([e9eef0d](https://github.com/bphndigitalservice/fungsionalpro/commit/e9eef0defb879cb633fcac2bbe1a54dcf74f6340))
+* **master-jf:** use Client enums for Kluster/Status filters ([cdd71b0](https://github.com/bphndigitalservice/fungsionalpro/commit/cdd71b059962e7d7e013b6997a5f14466efbc1d0))
+* **matching:** assign ClientStatus directly from Master JF ([0bf1316](https://github.com/bphndigitalservice/fungsionalpro/commit/0bf1316ba17481e138fae281833759113f73bce1))
+
 # [0.7.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.6.0...v0.7.0) (2026-07-28)
 
 
