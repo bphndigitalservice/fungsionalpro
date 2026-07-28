@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MasterJf extends Model
 {
@@ -16,6 +17,7 @@ class MasterJf extends Model
         'nip',
         'gol_ruang',
         'jabatan',
+        'c_role_id',
         'unit_kerja',
         'instansi',
         'pengangkatan',
@@ -23,6 +25,11 @@ class MasterJf extends Model
         'type',
         'status_kepegawaian',
     ];
+
+    public function cRole(): BelongsTo
+    {
+        return $this->belongsTo(CRole::class);
+    }
 
     /** @return array<string, string> */
     public static function statusOptions(): array
