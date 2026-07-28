@@ -36,13 +36,11 @@ class ListMasterJfs extends ListRecords
             return [];
         }
 
-        $filterKey = md5(json_encode($this->tableFilters ?? []));
-
         return [
-            "overview-{$filterKey}" => MasterJfNumbersOverview::class,
-            "status-{$filterKey}" => MasterJfNumbersByStatusOverview::class,
-            "status-kepegawaian-{$filterKey}" => MasterJfNumbersByStatusKepegawaianOverview::class,
-            "gol-ruang-{$filterKey}" => MasterJfNumbersByGolRuangOverview::class,
+            MasterJfNumbersOverview::class,
+            MasterJfNumbersByStatusOverview::class,
+            MasterJfNumbersByStatusKepegawaianOverview::class,
+            MasterJfNumbersByGolRuangOverview::class,
         ];
     }
 

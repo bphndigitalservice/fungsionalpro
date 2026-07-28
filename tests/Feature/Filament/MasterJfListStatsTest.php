@@ -153,11 +153,13 @@ class MasterJfListStatsTest extends TestCase
         MasterJf::factory()->count(2)->create(['status' => 'Aktif']);
         MasterJf::factory()->count(3)->create(['status' => 'CTLN']);
 
-        Livewire::test(ListMasterJfs::class)
+        $component = Livewire::test(ListMasterJfs::class)
             ->assertSeeLivewire(MasterJfNumbersOverview::class)
             ->assertSee('Total Master JF')
             ->assertSee('5')
-            ->filterTable('status', 'Aktif')
+            ->filterTable('status', 'Aktif');
+
+        Livewire::test(MasterJfNumbersOverview::class, $component->instance()->getWidgetData())
             ->assertSee('Total Master JF')
             ->assertSee('2');
     }
