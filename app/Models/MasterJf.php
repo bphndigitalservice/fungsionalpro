@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\JenisKepegawaian;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,23 +29,15 @@ class MasterJf extends Model
         'status_kepegawaian',
     ];
 
+    protected $casts = [
+        'type' => ClientCluster::class,
+        'status' => ClientStatus::class,
+        'status_kepegawaian' => JenisKepegawaian::class,
+    ];
+
     public function cRole(): BelongsTo
     {
         return $this->belongsTo(CRole::class);
-    }
-
-    /** @return array<string, string> */
-    public static function statusOptions(): array
-    {
-        return [
-            'Aktif' => 'Aktif',
-            'Mengundurkan diri' => 'Mengundurkan diri',
-            'Diberhentikan Sementara sebagai PNS' => 'Diberhentikan Sementara sebagai PNS',
-            'CTLN' => 'CTLN',
-            'Tugas belajar > 6 Bulan' => 'Tugas belajar > 6 Bulan',
-            'Ditugaskan secara penuh di luar jabatan' => 'Ditugaskan secara penuh di luar jabatan',
-            'Tidak Memenuhi Persyaratan Jabatan' => 'Tidak Memenuhi Persyaratan Jabatan',
-        ];
     }
 
     /** @return array<string, string> */
@@ -53,15 +48,6 @@ class MasterJf extends Model
             'Inpassing' => 'Inpassing',
             'PDJL' => 'PDJL',
             'Penyetaraan' => 'Penyetaraan',
-        ];
-    }
-
-    /** @return array<string, string> */
-    public static function statusKepegawaianOptions(): array
-    {
-        return [
-            'PNS' => 'PNS',
-            'PPPK' => 'PPPK',
         ];
     }
 

@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\JenisKepegawaian;
 use App\Models\MasterJf;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,9 +23,9 @@ class MasterJfFactory extends Factory
             'unit_kerja' => fake()->company(),
             'instansi' => fake()->company(),
             'pengangkatan' => fake()->randomElement(array_keys(MasterJf::pengangkatanOptions())),
-            'status' => fake()->randomElement(array_keys(MasterJf::statusOptions())),
-            'type' => fake()->randomElement(['central', 'local_province', null]),
-            'status_kepegawaian' => fake()->randomElement(['PNS', 'PPPK', null]),
+            'status' => fake()->randomElement(ClientStatus::cases())->value,
+            'type' => fake()->randomElement([...array_column(ClientCluster::cases(), 'value'), null]),
+            'status_kepegawaian' => fake()->randomElement([...array_column(JenisKepegawaian::cases(), 'value'), null]),
         ];
     }
 }

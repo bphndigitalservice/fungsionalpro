@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\JenisKepegawaian;
 use App\Imports\MasterJfImport;
 use App\Models\CRole;
 use App\Models\MasterJf;
@@ -29,23 +32,31 @@ class MasterJfModelTest extends TestCase
     public function test_it_persists_status_kepegawaian_via_factory(): void
     {
         $row = MasterJf::factory()->create([
-            'status_kepegawaian' => 'PNS',
-            'status' => 'Aktif',
+            'status_kepegawaian' => JenisKepegawaian::PNS,
+            'status' => ClientStatus::Active,
         ]);
 
         $this->assertDatabaseHas('master_jf', [
             'id' => $row->id,
             'status_kepegawaian' => 'PNS',
-            'status' => 'Aktif',
+            'status' => 'active',
         ]);
+
+        $this->assertInstanceOf(ClientStatus::class, $row->status);
+        $this->assertInstanceOf(JenisKepegawaian::class, $row->status_kepegawaian);
     }
 
-    public function test_status_options_match_known_keys(): void
+    public function test_it_casts_type_to_client_cluster(): void
     {
-        $options = MasterJf::statusOptions();
+        $row = MasterJf::factory()->create([
+            'type' => ClientCluster::Central,
+        ]);
 
-        $this->assertArrayHasKey('Aktif', $options);
-        $this->assertArrayHasKey('CTLN', $options);
+        $this->assertDatabaseHas('master_jf', [
+            'id' => $row->id,
+            'type' => 'central',
+        ]);
+        $this->assertInstanceOf(ClientCluster::class, $row->fresh()->type);
     }
 
     public function test_it_persists_c_role_id_and_loads_relation(): void
@@ -88,7 +99,7 @@ class MasterJfModelTest extends TestCase
             'unit_kerjakanwil' => 'Unit A',
             'instansi' => 'Instansi A',
             'pengangkatan' => 'Inpassing',
-            'status' => 'Aktif',
+            'status' => 'active',
             'status_kepegawaian' => 'PNS',
         ]);
 
