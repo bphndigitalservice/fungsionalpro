@@ -39,6 +39,9 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification(EmailVerificationPrompt::class)
             ->passwordReset()
             ->profile(isSimple: false)
+            ->brandName(config('app.name'))
+            ->brandLogo(fn () => view('filament.components.brand'))
+            ->brandLogoHeight('2.75rem')
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
