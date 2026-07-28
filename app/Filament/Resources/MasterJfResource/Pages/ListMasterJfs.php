@@ -8,10 +8,13 @@ use App\Filament\Widgets\MasterJfNumbersByStatusKepegawaianOverview;
 use App\Filament\Widgets\MasterJfNumbersByStatusOverview;
 use App\Filament\Widgets\MasterJfNumbersOverview;
 use Filament\Actions;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
 class ListMasterJfs extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = MasterJfResource::class;
 
     public bool $widgetsCollapsed = false;
@@ -33,11 +36,13 @@ class ListMasterJfs extends ListRecords
             return [];
         }
 
+        $filterKey = md5(json_encode($this->tableFilters ?? []));
+
         return [
-            MasterJfNumbersOverview::class,
-            MasterJfNumbersByStatusOverview::class,
-            MasterJfNumbersByStatusKepegawaianOverview::class,
-            MasterJfNumbersByGolRuangOverview::class,
+            "overview-{$filterKey}" => MasterJfNumbersOverview::class,
+            "status-{$filterKey}" => MasterJfNumbersByStatusOverview::class,
+            "status-kepegawaian-{$filterKey}" => MasterJfNumbersByStatusKepegawaianOverview::class,
+            "gol-ruang-{$filterKey}" => MasterJfNumbersByGolRuangOverview::class,
         ];
     }
 

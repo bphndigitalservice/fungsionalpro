@@ -129,4 +129,36 @@ class MasterJfListStatsTest extends TestCase
         ])
             ->assertSee('2');
     }
+
+    public function test_list_page_exposes_table_filters_in_widget_data(): void
+    {
+        $this->actingAsAdmin();
+
+        MasterJf::factory()->create(['status' => 'Aktif']);
+        MasterJf::factory()->create(['status' => 'CTLN']);
+
+        $component = Livewire::test(ListMasterJfs::class)
+            ->filterTable('status', 'Aktif');
+
+        $widgetData = $component->instance()->getWidgetData();
+
+        $this->assertArrayHasKey('tableFilters', $widgetData);
+        $this->assertSame('Aktif', data_get($widgetData, 'tableFilters.status.value'));
+    }
+
+    public function test_list_total_widget_follows_status_filter_via_page(): void
+    {
+        $this->actingAsAdmin();
+
+        MasterJf::factory()->count(2)->create(['status' => 'Aktif']);
+        MasterJf::factory()->count(3)->create(['status' => 'CTLN']);
+
+        Livewire::test(ListMasterJfs::class)
+            ->assertSeeLivewire(MasterJfNumbersOverview::class)
+            ->assertSee('Total Master JF')
+            ->assertSee('5')
+            ->filterTable('status', 'Aktif')
+            ->assertSee('Total Master JF')
+            ->assertSee('2');
+    }
 }
