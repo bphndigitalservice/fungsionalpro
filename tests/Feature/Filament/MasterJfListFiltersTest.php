@@ -4,6 +4,7 @@ namespace Tests\Feature\Filament;
 
 use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
+use App\Models\CRole;
 use App\Models\MasterJf;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,6 +51,29 @@ class MasterJfListFiltersTest extends TestCase
 
         Livewire::test(ListMasterJfs::class)
             ->filterTable('instansi', ['BPHN'])
+            ->assertCanSeeTableRecords([$a])
+            ->assertCanNotSeeTableRecords([$b]);
+    }
+
+    public function test_c_role_filter_limits_visible_table_records(): void
+    {
+        $this->actingAsAdmin();
+
+        $analis = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $penyuluh = CRole::create(['role_name' => 'Penyuluh Hukum', 'active' => true]);
+
+        $a = MasterJf::factory()->create([
+            'nama' => 'Analis Person',
+            'c_role_id' => $analis->id,
+        ]);
+        $b = MasterJf::factory()->create([
+            'nama' => 'Penyuluh Person',
+            'c_role_id' => $penyuluh->id,
+        ]);
+
+        Livewire::test(ListMasterJfs::class)
+            ->assertCanSeeTableRecords([$a, $b])
+            ->filterTable('c_role_id', $analis->id)
             ->assertCanSeeTableRecords([$a])
             ->assertCanNotSeeTableRecords([$b]);
     }

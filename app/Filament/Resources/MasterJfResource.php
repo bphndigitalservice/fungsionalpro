@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MasterJfResource\Pages;
+use App\Models\CRole;
 use App\Models\MasterJf;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -44,6 +45,11 @@ class MasterJfResource extends Resource
                     )
                     ->searchable(),
                 Forms\Components\TextInput::make('jabatan'),
+                Forms\Components\Select::make('c_role_id')
+                    ->label('Jabatan Fungsional')
+                    ->options(fn (): array => CRole::query()->pluck('role_name', 'id')->all())
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\TextInput::make('instansi'),
                 Forms\Components\TextInput::make('type')
                     ->label('Tipe'),
@@ -81,6 +87,9 @@ class MasterJfResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jabatan')
                     ->label('Jabatan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('cRole.role_name')
+                    ->label('Jabatan Fungsional')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('unit_kerja')
                     ->label('Unit Kerja')
@@ -129,6 +138,10 @@ class MasterJfResource extends Resource
                     ->options(fn (): array => MasterJf::distinctOptions('jabatan'))
                     ->searchable()
                     ->multiple(),
+                Tables\Filters\SelectFilter::make('c_role_id')
+                    ->label('Jabatan Fungsional')
+                    ->options(fn (): array => CRole::query()->pluck('role_name', 'id')->all())
+                    ->searchable(),
             ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->headerActions([
                 Action::make('import')
