@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\ClientStatus;
 use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
 use App\Models\CRole;
@@ -32,12 +33,18 @@ class MasterJfListFiltersTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        $aktif = MasterJf::factory()->create(['status' => 'Aktif', 'nama' => 'Aktif Person']);
-        $ctln = MasterJf::factory()->create(['status' => 'CTLN', 'nama' => 'CTLN Person']);
+        $aktif = MasterJf::factory()->create([
+            'status' => ClientStatus::Active,
+            'nama' => 'Aktif Person',
+        ]);
+        $ctln = MasterJf::factory()->create([
+            'status' => ClientStatus::NonActive_CTLN,
+            'nama' => 'CTLN Person',
+        ]);
 
-        Livewire::test(ListMasterJfs::class)
+        Livewire::test(ListMasterJfs::class, ['widgetsCollapsed' => true])
             ->assertCanSeeTableRecords([$aktif, $ctln])
-            ->filterTable('status', 'Aktif')
+            ->filterTable('status', ClientStatus::Active->value)
             ->assertCanSeeTableRecords([$aktif])
             ->assertCanNotSeeTableRecords([$ctln]);
     }
@@ -49,7 +56,7 @@ class MasterJfListFiltersTest extends TestCase
         $a = MasterJf::factory()->create(['instansi' => 'BPHN', 'nama' => 'BPHN Person']);
         $b = MasterJf::factory()->create(['instansi' => 'Kemenkumham', 'nama' => 'Kemenkumham Person']);
 
-        Livewire::test(ListMasterJfs::class)
+        Livewire::test(ListMasterJfs::class, ['widgetsCollapsed' => true])
             ->filterTable('instansi', ['BPHN'])
             ->assertCanSeeTableRecords([$a])
             ->assertCanNotSeeTableRecords([$b]);
@@ -71,7 +78,7 @@ class MasterJfListFiltersTest extends TestCase
             'c_role_id' => $penyuluh->id,
         ]);
 
-        Livewire::test(ListMasterJfs::class)
+        Livewire::test(ListMasterJfs::class, ['widgetsCollapsed' => true])
             ->assertCanSeeTableRecords([$a, $b])
             ->filterTable('c_role_id', $analis->id)
             ->assertCanSeeTableRecords([$a])
