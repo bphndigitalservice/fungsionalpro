@@ -42,6 +42,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName(config('app.name'))
             ->brandLogo(fn () => view('filament.components.brand'))
             ->brandLogoHeight('2.75rem')
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn () => view('filament.components.brand-styles'),
+            )
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
