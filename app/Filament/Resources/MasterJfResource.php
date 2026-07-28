@@ -51,37 +51,17 @@ class MasterJfResource extends Resource
                     ->label('Unit Kerja'),
                 Forms\Components\Select::make('pengangkatan')
                     ->label('Pengangkatan')
-                    ->options([
-                        'CPNS/PPPK' => 'CPNS/PPPK',
-                        'Inpassing' => 'Inpassing',
-                        'PDJL' => 'PDJL',
-                        'Penyetaraan' => 'Penyetaraan',
-                    ])
+                    ->options(MasterJf::pengangkatanOptions())
                     ->searchable()
                     ->preload(),
                 Forms\Components\Select::make('status')
                     ->label('Status')
-                    ->options([
-                        'Aktif' => 'Aktif',
-                        'Mengundurkan diri' => 'Mengundurkan diri',
-                        'Diberhentikan Sementara sebagai PNS'
-                            => 'Diberhentikan Sementara sebagai PNS',
-                        'CTLN' => 'CTLN',
-                        'Tugas belajar > 6 Bulan'
-                            => 'Tugas belajar > 6 Bulan',
-                        'Ditugaskan secara penuh di luar jabatan'
-                            => 'Ditugaskan secara penuh di luar jabatan',
-                        'Tidak Memenuhi Persyaratan Jabatan'
-                            => 'Tidak Memenuhi Persyaratan Jabatan',
-                    ])
+                    ->options(MasterJf::statusOptions())
                     ->searchable()
                     ->preload(),
                 Forms\Components\Select::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
-                    ->options([
-                        'PNS' => 'PNS',
-                        'PPPK' => 'PPPK',
-                    ])
+                    ->options(MasterJf::statusKepegawaianOptions())
                     ->searchable()
                     ->preload(),
             ]);
