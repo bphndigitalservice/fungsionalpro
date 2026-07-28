@@ -47,7 +47,11 @@ class MasterJfResource extends Resource
                 Forms\Components\TextInput::make('jabatan'),
                 Forms\Components\Select::make('c_role_id')
                     ->label('Jabatan Fungsional')
-                    ->options(fn (): array => CRole::query()->pluck('role_name', 'id')->all())
+                    ->options(fn (): array => CRole::query()
+                        ->where('active', true)
+                        ->orderBy('role_name')
+                        ->pluck('role_name', 'id')
+                        ->all())
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextInput::make('instansi'),
@@ -78,36 +82,48 @@ class MasterJfResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('nip')
                     ->label('NIP')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('gol_ruang')
                     ->label('Golongan/Ruang')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('jabatan')
                     ->label('Jabatan')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('cRole.role_name')
                     ->label('Jabatan Fungsional')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('unit_kerja')
                     ->label('Unit Kerja')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('instansi')
                     ->label('Instansi')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipe')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('pengangkatan')
                     ->label('Pengangkatan')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Status'),
+                    ->label('Status')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -140,7 +156,11 @@ class MasterJfResource extends Resource
                     ->multiple(),
                 Tables\Filters\SelectFilter::make('c_role_id')
                     ->label('Jabatan Fungsional')
-                    ->options(fn (): array => CRole::query()->pluck('role_name', 'id')->all())
+                    ->options(fn (): array => CRole::query()
+                        ->where('active', true)
+                        ->orderBy('role_name')
+                        ->pluck('role_name', 'id')
+                        ->all())
                     ->searchable(),
             ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->headerActions([
@@ -247,11 +267,16 @@ class MasterJfResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Import Data Klien');
+        return __('Master Data JF');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Import Data Klien');
+        return __('Master Data JF');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Master Data JF');
     }
 }
