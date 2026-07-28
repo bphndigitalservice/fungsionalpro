@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.4.0...v0.5.0) (2026-07-28)
+
+
+### Features
+
+* **master-jf:** enhance Master JF resource with sortable columns and active CRole filter ([2078dc0](https://github.com/bphndigitalservice/fungsionalpro/commit/2078dc050635e3b9dd001ffa4fc9111fdc668a8b))
+
 # [0.4.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.3.0...v0.4.0) (2026-07-28)
 
 
