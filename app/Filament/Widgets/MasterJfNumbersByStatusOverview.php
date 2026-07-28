@@ -22,6 +22,7 @@ class MasterJfNumbersByStatusOverview extends StatsOverviewWidget
     {
         $counts = $this->getPageTableQuery()
             ->toBase()
+            ->reorder()
             ->select('status', DB::raw('COUNT(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');

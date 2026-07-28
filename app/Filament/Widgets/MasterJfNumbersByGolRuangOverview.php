@@ -21,6 +21,7 @@ class MasterJfNumbersByGolRuangOverview extends StatsOverviewWidget
     {
         $rows = $this->getPageTableQuery()
             ->toBase()
+            ->reorder()
             ->select('gol_ruang', DB::raw('COUNT(*) as total'))
             ->groupBy('gol_ruang')
             ->orderByDesc('total')

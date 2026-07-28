@@ -22,6 +22,7 @@ class MasterJfNumbersByStatusKepegawaianOverview extends StatsOverviewWidget
     {
         $counts = $this->getPageTableQuery()
             ->toBase()
+            ->reorder()
             ->select('status_kepegawaian', DB::raw('COUNT(*) as total'))
             ->groupBy('status_kepegawaian')
             ->pluck('total', 'status_kepegawaian');
