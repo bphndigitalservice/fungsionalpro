@@ -33,4 +33,22 @@ class RegGradeResolverTest extends TestCase
         $this->assertNull(RegGradeResolver::resolveId(null));
         $this->assertNull(RegGradeResolver::resolveId(''));
     }
+
+    public function test_prefers_longest_code_over_shorter_substring(): void
+    {
+        RegGrade::create(['grade_name' => 'Juru Muda', 'grade_code' => 'I/a']);
+        RegGrade::create(['grade_name' => 'Pengatur Muda', 'grade_code' => 'II/a']);
+        $gradeIii = RegGrade::create(['grade_name' => 'Penata Muda', 'grade_code' => 'III/a']);
+
+        $this->assertSame($gradeIii->id, RegGradeResolver::resolveId('III/a'));
+    }
+
+    public function test_prefers_longest_code_without_slash(): void
+    {
+        RegGrade::create(['grade_name' => 'Juru Muda', 'grade_code' => 'Ia']);
+        RegGrade::create(['grade_name' => 'Pengatur Muda', 'grade_code' => 'IIa']);
+        $gradeIii = RegGrade::create(['grade_name' => 'Penata Muda', 'grade_code' => 'IIIa']);
+
+        $this->assertSame($gradeIii->id, RegGradeResolver::resolveId('IIIa'));
+    }
 }

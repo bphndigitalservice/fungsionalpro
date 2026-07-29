@@ -15,13 +15,46 @@ final class RegGradeResolver
         }
 
         $grades = once(fn () => RegGrade::query()->get());
+        $rawLower = strtolower($raw);
 
-        $grade = $grades->first(function (RegGrade $g) use ($raw) {
-            $matchCode = ! empty($g->grade_code) && stripos($raw, $g->grade_code) !== false;
-            $matchName = ! empty($g->grade_name) && stripos($raw, $g->grade_name) !== false;
+        $grade = $grades->first(function (RegGrade $g) use ($rawLower) {
+            $code = trim((string) $g->grade_code);
 
-            return $matchCode || $matchName;
+            return $code !== '' && strtolower($code) === $rawLower;
         });
+        if ($grade !== null) {
+            return $grade->id;
+        }
+
+        $grade = $grades->first(function (RegGrade $g) use ($rawLower) {
+            $name = trim((string) $g->grade_name);
+
+            return $name !== '' && strtolower($name) === $rawLower;
+        });
+        if ($grade !== null) {
+            return $grade->id;
+        }
+
+        $grade = $grades
+            ->filter(function (RegGrade $g) use ($raw) {
+                $code = trim((string) $g->grade_code);
+
+                return $code !== '' && stripos($raw, $code) !== false;
+            })
+            ->sortByDesc(fn (RegGrade $g) => strlen(trim((string) $g->grade_code)))
+            ->first();
+        if ($grade !== null) {
+            return $grade->id;
+        }
+
+        $grade = $grades
+            ->filter(function (RegGrade $g) use ($raw) {
+                $name = trim((string) $g->grade_name);
+
+                return $name !== '' && stripos($raw, $name) !== false;
+            })
+            ->sortByDesc(fn (RegGrade $g) => strlen(trim((string) $g->grade_name)))
+            ->first();
 
         return $grade?->id;
     }
