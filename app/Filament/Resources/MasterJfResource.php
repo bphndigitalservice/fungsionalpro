@@ -9,6 +9,7 @@ use App\Filament\Resources\MasterJfResource\Pages;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegGrade;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -100,8 +101,12 @@ class MasterJfResource extends Resource
                     ->label('NIP')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('gol_ruang')
+                Tables\Columns\TextColumn::make('grade.grade_code')
                     ->label('Golongan/Ruang')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('cRoleLevel.level')
+                    ->label('Jenjang')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('jabatan')
@@ -149,9 +154,19 @@ class MasterJfResource extends Resource
                     ->label('Kluster')
                     ->options(ClientCluster::class)
                     ->searchable(),
-                Tables\Filters\SelectFilter::make('gol_ruang')
+                Tables\Filters\SelectFilter::make('reg_grade_id')
                     ->label('Golongan/Ruang')
-                    ->options(fn (): array => MasterJf::distinctOptions('gol_ruang'))
+                    ->options(fn (): array => RegGrade::query()
+                        ->orderBy('grade_code')
+                        ->pluck('grade_code', 'id')
+                        ->all())
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('c_role_level_id')
+                    ->label('Jenjang')
+                    ->options(fn (): array => CRoleLevel::query()
+                        ->orderBy('level')
+                        ->pluck('level', 'id')
+                        ->all())
                     ->searchable(),
                 Tables\Filters\SelectFilter::make('instansi')
                     ->options(fn (): array => MasterJf::distinctOptions('instansi'))

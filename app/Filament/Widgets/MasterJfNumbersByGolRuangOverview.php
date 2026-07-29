@@ -22,16 +22,21 @@ class MasterJfNumbersByGolRuangOverview extends StatsOverviewWidget
         $rows = $this->getPageTableQuery()
             ->toBase()
             ->reorder()
-            ->select('gol_ruang', DB::raw('COUNT(*) as total'))
-            ->groupBy('gol_ruang')
+            ->select('reg_grade_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('reg_grade_id')
             ->orderByDesc('total')
             ->limit(6)
             ->get();
 
+        $gradeCodes = \App\Models\RegGrade::whereIn('id', $rows->pluck('reg_grade_id')->filter()->all())
+            ->pluck('grade_code', 'id');
+
         $stats = [];
 
         foreach ($rows as $row) {
-            $label = $row->gol_ruang ?: 'Tidak diketahui';
+            $label = $row->reg_grade_id
+                ? ($gradeCodes[$row->reg_grade_id] ?? ('Grade #' . $row->reg_grade_id))
+                : 'Tidak diketahui';
             $stats[] = Stat::make($label, number_format((int) $row->total))
                 ->icon('heroicon-o-academic-cap');
         }

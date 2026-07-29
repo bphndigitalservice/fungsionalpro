@@ -7,6 +7,7 @@ use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\ListMasterJfs;
 use App\Models\CRole;
 use App\Models\MasterJf;
+use App\Models\RegGrade;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -81,6 +82,22 @@ class MasterJfListFiltersTest extends TestCase
         Livewire::test(ListMasterJfs::class)
             ->assertCanSeeTableRecords([$a, $b])
             ->filterTable('c_role_id', $analis->id)
+            ->assertCanSeeTableRecords([$a])
+            ->assertCanNotSeeTableRecords([$b]);
+    }
+
+    public function test_reg_grade_filter_limits_visible_table_records(): void
+    {
+        $this->actingAsAdmin();
+
+        $iiia = RegGrade::create(['grade_name' => 'Penata', 'grade_code' => 'III/a']);
+        $iva = RegGrade::create(['grade_name' => 'Pembina', 'grade_code' => 'IV/a']);
+
+        $a = MasterJf::factory()->create(['nama' => 'Grade III', 'reg_grade_id' => $iiia->id]);
+        $b = MasterJf::factory()->create(['nama' => 'Grade IV', 'reg_grade_id' => $iva->id]);
+
+        Livewire::test(ListMasterJfs::class)
+            ->filterTable('reg_grade_id', $iiia->id)
             ->assertCanSeeTableRecords([$a])
             ->assertCanNotSeeTableRecords([$b]);
     }

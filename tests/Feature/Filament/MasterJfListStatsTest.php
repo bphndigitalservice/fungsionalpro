@@ -11,6 +11,7 @@ use App\Filament\Widgets\MasterJfNumbersByStatusKepegawaianOverview;
 use App\Filament\Widgets\MasterJfNumbersByStatusOverview;
 use App\Filament\Widgets\MasterJfNumbersOverview;
 use App\Models\MasterJf;
+use App\Models\RegGrade;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -107,8 +108,11 @@ class MasterJfListStatsTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->count(3)->create(['gol_ruang' => 'III/a']);
-        MasterJf::factory()->count(1)->create(['gol_ruang' => 'IV/a']);
+        $iiia = RegGrade::create(['grade_name' => 'Penata', 'grade_code' => 'III/a']);
+        $iva = RegGrade::create(['grade_name' => 'Pembina', 'grade_code' => 'IV/a']);
+
+        MasterJf::factory()->count(3)->create(['reg_grade_id' => $iiia->id]);
+        MasterJf::factory()->count(1)->create(['reg_grade_id' => $iva->id]);
 
         Livewire::test(MasterJfNumbersByGolRuangOverview::class)
             ->assertSee('III/a')
@@ -121,12 +125,15 @@ class MasterJfListStatsTest extends TestCase
     {
         $this->actingAsAdmin();
 
-        MasterJf::factory()->count(2)->create(['gol_ruang' => 'III/a']);
-        MasterJf::factory()->count(5)->create(['gol_ruang' => 'IV/a']);
+        $iiia = RegGrade::create(['grade_name' => 'Penata', 'grade_code' => 'III/a']);
+        $iva = RegGrade::create(['grade_name' => 'Pembina', 'grade_code' => 'IV/a']);
+
+        MasterJf::factory()->count(2)->create(['reg_grade_id' => $iiia->id]);
+        MasterJf::factory()->count(5)->create(['reg_grade_id' => $iva->id]);
 
         Livewire::test(MasterJfNumbersOverview::class, [
             'tableFilters' => [
-                'gol_ruang' => ['value' => 'III/a'],
+                'reg_grade_id' => ['value' => $iiia->id],
             ],
         ])
             ->assertSee('2');
