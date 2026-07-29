@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\MasterJf;
 use App\Support\MasterJfEnumMapper;
+use App\Support\RegGradeResolver;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Exception;
@@ -28,7 +29,7 @@ class MasterJfImport implements ToModel, WithHeadingRow
             ],
             [
                 'nama'               => $row['nama'] ?? null,
-                'gol_ruang'          => $row['golruang'] ?? null,
+                'reg_grade_id'       => RegGradeResolver::resolveId($row['golruang'] ?? null),
                 'jabatan'            => $row['jabatan'] ?? null,
                 'unit_kerja'         => $unitKerja,
                 'instansi'           => $instansi,

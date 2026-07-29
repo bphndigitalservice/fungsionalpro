@@ -147,6 +147,41 @@ class MasterJfModelTest extends TestCase
         $this->assertNull($row->status_kepegawaian);
     }
 
+    public function test_import_resolves_reg_grade_id_from_golruang(): void
+    {
+        $grade = RegGrade::create(['grade_name' => 'Penata', 'grade_code' => 'III/a']);
+
+        (new MasterJfImport)->model([
+            'nip' => '555555555555555555',
+            'nama' => 'Imported Grade',
+            'golruang' => 'III/a',
+            'jabatan' => 'Analis',
+            'unit_kerjakanwil' => 'Unit A',
+            'instansi' => 'Instansi A',
+            'pengangkatan' => 'Inpassing',
+            'status' => 'Aktif',
+            'status_kepegawaian' => 'PNS',
+        ]);
+
+        $row = MasterJf::query()->where('nip', '555555555555555555')->first();
+        $this->assertNotNull($row);
+        $this->assertSame($grade->id, $row->reg_grade_id);
+        $this->assertNull($row->gol_ruang);
+    }
+
+    public function test_import_nulls_unknown_golruang(): void
+    {
+        (new MasterJfImport)->model([
+            'nip' => '666666666666666666',
+            'nama' => 'Unknown Grade',
+            'golruang' => 'ZZ/z',
+        ]);
+
+        $row = MasterJf::query()->where('nip', '666666666666666666')->first();
+        $this->assertNotNull($row);
+        $this->assertNull($row->reg_grade_id);
+    }
+
     public function test_it_persists_reg_grade_and_c_role_level_relations(): void
     {
         $grade = RegGrade::create([
