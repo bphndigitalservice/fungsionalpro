@@ -18,6 +18,14 @@ class ClientObserver
 
     public function creating(Client $client): void
     {
+        if (blank($client->nip)) {
+            $client->is_verified = \App\Enums\Verified::Unverified;
+            $client->status = $client->status ?? null;
+            $client->assignation_type = $client->assignation_type ?? null;
+
+            return;
+        }
+
         $master = $this->service->findMasterByNip($client->nip);
 
         if ($master) {
@@ -33,15 +41,20 @@ class ClientObserver
 
     public function created(Client $client): void
     {
-        $master = $this->service->findMasterByNip($client->nip);
-        $extractedGender = $this->service->getGenderFromNip($client->nip);
+        $master = filled($client->nip)
+            ? $this->service->findMasterByNip($client->nip)
+            : null;
+
+        $extractedGender = filled($client->nip)
+            ? $this->service->getGenderFromNip($client->nip)
+            : 'male';
 
         $user = User::find($client->user_id);
 
         $client->identity()->create([
             'name'           => $master->nama ?? ($user->name ?? 'User'),
             'academic_title' => $master->academic_title ?? null,
-            'gender'         => $extractedGender,
+            'gender'         => $extractedGender ?? 'male',
             'address'        => '-',
             'phone_number'   => '-',
         ]);

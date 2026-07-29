@@ -69,7 +69,7 @@ return [
                 'university_name' => 'Universitas / Institusi Pendidikan',
                 'program_name' => 'Jurusan',
                 'gpa' => 'IPK',
-                'certificate' => 'Ijazah/Transkrip',
+                'certificate' => 'Ijazah',
                 'nip' => 'NIP',
                 'crole_name' => 'Jabatan',
                 'crole_grade' => 'Jenjang',

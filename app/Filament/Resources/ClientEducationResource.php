@@ -99,11 +99,11 @@ class ClientEducationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('level')
-                    ->label(__('labels.form.client.fields.education_level'))
+                    ->label(__('Jenjang Pendidikan'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('university_name')
-                    ->label(__('labels.form.client.fields.university_name'))
+                    ->label(__('Universitas'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('program_name')
@@ -122,7 +122,7 @@ class ClientEducationResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('level')
-                    ->label(__('labels.form.client.fields.education_level'))
+                    ->label(__('Jenjang Pendidikan'))
                     ->options(EducationLevel::class),
             ])
             ->actions([

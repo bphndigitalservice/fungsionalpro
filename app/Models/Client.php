@@ -35,6 +35,8 @@ class Client extends Model
         'status' => ClientStatus::class,
         'assignation_type' => CRoleAssignation::class,
         'is_verified' => Verified::class,
+        'is_profile_draft' => 'boolean',
+        'profile_draft_data' => 'array',
     ];
 
     public function user(): BelongsTo

@@ -490,11 +490,11 @@ class ClientResource extends Resource
                     Forms\Components\Group::make()
                         ->schema([
                             Forms\Components\Select::make('level')
-                                ->label(__('labels.form.client.fields.education_level'))
+                                ->label(__('Jenjang Pendidikan'))
                                 ->options(EducationLevel::class)
                                 ->required(),
                             Forms\Components\TextInput::make('university_name')
-                                ->label(__('labels.form.client.fields.university_name'))
+                                ->label(__('Universitas'))
                                 ->required(),
                         ])
                         ->columns(2),
@@ -506,19 +506,9 @@ class ClientResource extends Resource
                             Forms\Components\TextInput::make('academic_title')
                                 ->label(__('labels.form.client.fields.academic_title'))
                                 ->required(false)->hidden(true),
-                        ])
-                        ->columns(2),
-
-                    Forms\Components\Group::make()
-                        ->schema([
-                            Forms\Components\TextInput::make('gpa')
-                                ->label(__('labels.form.client.fields.gpa'))
-                                ->numeric()
-                                ->maxValue(4)
-                                ->required(),
                             Forms\Components\FileUpload::make('certificate')
                                 ->disk('s3')
-                                ->label(__('labels.form.client.fields.certificate'))
+                                ->label(__('Ijazah'))
                                 ->required()
                                 ->maxFiles(1)
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
@@ -527,7 +517,8 @@ class ClientResource extends Resource
                                 ->visibility('private')
                                 ->downloadable()
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
-                        ])->columns(2),
+                        ])
+                        ->columns(2),
                 ])
                 ->relationship('education'),
         ];

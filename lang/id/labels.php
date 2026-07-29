@@ -21,6 +21,8 @@ return [
         'client_profile' => [
             'nav' => 'Identitas',
             'title' => 'Identitas',
+            'save_draft' => 'Simpan Draft',
+            'draft_saved' => 'Draft berhasil disimpan',
         ],
         'client_point_list' => [
             'nav' => 'Riwayat',
@@ -138,7 +140,7 @@ return [
                 'university_name' => 'Sekolah/Universitas',
                 'program_name' => 'Jurusan',
                 'gpa' => 'IPK',
-                'certificate' => 'Ijazah/Transkrip',
+                'certificate' => 'Ijazah',
                 'nip' => 'NIP',
                 'crole_name' => 'Jabatan',
                 'crole_grade' => 'Jenjang',

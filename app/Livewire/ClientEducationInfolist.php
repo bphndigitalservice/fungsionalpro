@@ -40,7 +40,6 @@ class ClientEducationInfolist extends Component implements HasForms, HasInfolist
                                 TextEntry::make('level')->label('Jenjang'),
                                 TextEntry::make('program_name')->label('Jurusan'),
                                 TextEntry::make('university_name')->label('Sekolah/Universitas'),
-                                TextEntry::make('gpa')->label('Nilai/IPK'),
 
                                 TextEntry::make('certificate_date')
                                     ->label('Tanggal Ijazah')
@@ -51,7 +50,7 @@ class ClientEducationInfolist extends Component implements HasForms, HasInfolist
                                 MinioFileEntry::make('title_inclusion_file')
                                     ->label('Lembar Pencantuman Gelar')
                                     ->placeholder('Tidak ada file pencantuman gelar')
-                                    ->hidden(fn ($record) => empty($record?->title_inclusion_file)), 
+                                    ->hidden(fn ($record) => empty($record?->title_inclusion_file)),
                             ])
                             ->columns(2),
                     ]),

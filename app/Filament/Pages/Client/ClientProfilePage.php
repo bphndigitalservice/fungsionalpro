@@ -131,6 +131,11 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     protected function fillFormWithData(): void
     {
         $data = $this->resolveRecord();
+
+        if (static::$record?->is_profile_draft && filled(static::$record->profile_draft_data)) {
+            $data = array_replace_recursive($data, static::$record->profile_draft_data);
+        }
+
         $data = $this->mutateDataBeforeFill($data);
         $this->form->fill($data);
     }
@@ -163,8 +168,53 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     public function getFormActions(): array
     {
         return [
+            $this->saveDraftAction(),
             $this->saveClientProfileAction(),
         ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function saveDraft(): void
+    {
+        try {
+            $this->beginDatabaseTransaction();
+
+            $data = $this->form->getRawState();
+
+            if (is_null($this->getRecord())) {
+                static::$record = Client::create([
+                    'user_id' => auth('web')->user()->id,
+                    'is_profile_draft' => true,
+                    'profile_draft_data' => $data,
+                ]);
+            } else {
+                static::$record->update([
+                    'is_profile_draft' => true,
+                    'profile_draft_data' => $data,
+                ]);
+            }
+
+            $this->commitDatabaseTransaction();
+        } catch (Halt $exception) {
+            $exception->shouldRollbackDatabaseTransaction() ?
+                $this->rollBackDatabaseTransaction() :
+                $this->commitDatabaseTransaction();
+
+            return;
+        } catch (Throwable $exception) {
+            $this->rollBackDatabaseTransaction();
+
+            throw $exception;
+        }
+
+        $this->rememberData();
+
+        Notification::make()
+            ->success()
+            ->title(__('labels.page.client_profile.draft_saved'))
+            ->send();
     }
 
     /**
@@ -201,23 +251,27 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = auth('web')->user()->id;
+        $data['is_profile_draft'] = false;
+        $data['profile_draft_data'] = null;
 
-        $data['agency_type'] = match ($data['type']) {
-            ClientCluster::Central->value => RegDepartment::class,
-            ClientCluster::LocalProvince->value => RegProvince::class,
-            ClientCluster::LocalRegency->value => RegRegency::class,
-        };
+        if (filled($data['type'] ?? null)) {
+            $data['agency_type'] = match ($data['type']) {
+                ClientCluster::Central->value => RegDepartment::class,
+                ClientCluster::LocalProvince->value => RegProvince::class,
+                ClientCluster::LocalRegency->value => RegRegency::class,
+            };
 
-        $data['echelon_type'] = match ($data['type']) {
-            ClientCluster::Central->value => RegDepartmentEchelon1::class,
-            ClientCluster::LocalProvince->value => RegProvince::class,
-            ClientCluster::LocalRegency->value => RegRegency::class,
-        };
+            $data['echelon_type'] = match ($data['type']) {
+                ClientCluster::Central->value => RegDepartmentEchelon1::class,
+                ClientCluster::LocalProvince->value => RegProvince::class,
+                ClientCluster::LocalRegency->value => RegRegency::class,
+            };
 
-        if ($data['type'] === ClientCluster::Central->value) {
-            $data['echelon_x_text'] = null;
-        } else {
-            $data['echelon_id'] = null;
+            if ($data['type'] === ClientCluster::Central->value) {
+                $data['echelon_x_text'] = null;
+            } else {
+                $data['echelon_id'] = null;
+            }
         }
 
         return $data;
@@ -248,7 +302,7 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         $record = new Client($data);
         $record->save();
 
-        $this->form->model($this->getRecord())->saveRelationships();
+        $this->form->model($record)->saveRelationships();
 
         return $record;
     }
@@ -282,6 +336,14 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
         self::$record = $record;
 
         return static::$record;
+    }
+
+    public function saveDraftAction(): Action
+    {
+        return Action::make('saveDraft')
+            ->label(__('labels.page.client_profile.save_draft'))
+            ->color('gray')
+            ->action(fn () => $this->saveDraft());
     }
 
     public function saveClientProfileAction(): Action
