@@ -18,7 +18,8 @@ class MasterJfFactory extends Factory
         return [
             'nama' => fake()->name(),
             'nip' => fake()->unique()->numerify('##################'),
-            'gol_ruang' => fake()->randomElement(['III/a', 'III/b', 'IV/a', null]),
+            'reg_grade_id' => null,
+            'c_role_level_id' => null,
             'jabatan' => fake()->jobTitle(),
             'unit_kerja' => fake()->company(),
             'instansi' => fake()->company(),

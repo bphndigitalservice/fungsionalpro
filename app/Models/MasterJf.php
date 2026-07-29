@@ -18,9 +18,10 @@ class MasterJf extends Model
     protected $fillable = [
         'nama',
         'nip',
-        'gol_ruang',
         'jabatan',
         'c_role_id',
+        'reg_grade_id',
+        'c_role_level_id',
         'unit_kerja',
         'instansi',
         'pengangkatan',
@@ -38,6 +39,16 @@ class MasterJf extends Model
     public function cRole(): BelongsTo
     {
         return $this->belongsTo(CRole::class);
+    }
+
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(RegGrade::class, 'reg_grade_id');
+    }
+
+    public function cRoleLevel(): BelongsTo
+    {
+        return $this->belongsTo(CRoleLevel::class, 'c_role_level_id');
     }
 
     /** @return array<string, string> */

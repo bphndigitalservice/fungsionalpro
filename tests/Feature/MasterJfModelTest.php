@@ -7,7 +7,9 @@ use App\Enums\ClientStatus;
 use App\Enums\JenisKepegawaian;
 use App\Imports\MasterJfImport;
 use App\Models\CRole;
+use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegGrade;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -143,5 +145,39 @@ class MasterJfModelTest extends TestCase
         $this->assertNotNull($row);
         $this->assertNull($row->status);
         $this->assertNull($row->status_kepegawaian);
+    }
+
+    public function test_it_persists_reg_grade_and_c_role_level_relations(): void
+    {
+        $grade = RegGrade::create([
+            'grade_name' => 'Penata',
+            'grade_code' => 'III/a',
+        ]);
+
+        $role = CRole::create([
+            'role_name' => 'Analis Hukum',
+            'active' => true,
+        ]);
+
+        $level = CRoleLevel::create([
+            'c_role_id' => $role->id,
+            'level' => 'Ahli Pertama',
+        ]);
+
+        $row = MasterJf::factory()->create([
+            'reg_grade_id' => $grade->id,
+            'c_role_id' => $role->id,
+            'c_role_level_id' => $level->id,
+        ]);
+
+        $this->assertDatabaseHas('master_jf', [
+            'id' => $row->id,
+            'reg_grade_id' => $grade->id,
+            'c_role_level_id' => $level->id,
+        ]);
+
+        $fresh = $row->fresh();
+        $this->assertTrue($fresh->grade->is($grade));
+        $this->assertTrue($fresh->cRoleLevel->is($level));
     }
 }
