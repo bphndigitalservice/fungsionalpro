@@ -6,10 +6,10 @@ use App\Models\MasterJf;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
-use App\Models\RegGrade;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
+use App\Support\RegGradeResolver;
 
 class ClientMatchingService
 {
@@ -36,109 +36,122 @@ class ClientMatchingService
         $rawJabatan = $master->jabatan ?? '';
 
         $roles = once(fn () => CRole::query()->get());
-        $role = $roles->first(function ($cRole) use ($rawJabatan) {
-            return stripos($rawJabatan, $cRole->role_name) !== false;
-        });
 
-        if ($role) {
-            $client->c_role_id = $role->id;
+        $roleId = $master->c_role_id;
 
-            $level = CRoleLevel::where('c_role_id', $role->id)
-                ->get()
-                ->first(function ($cLevel) use ($rawJabatan) {
-                    return stripos($rawJabatan, $cLevel->level) !== false;
-                });
+        if (! $roleId && $master->c_role_level_id) {
+            $roleId = CRoleLevel::query()->whereKey($master->c_role_level_id)->value('c_role_id');
+        }
 
-            $client->c_role_level_id = $level ? $level->id : 1;
+        if (! $roleId) {
+            $role = $roles->first(function ($cRole) use ($rawJabatan) {
+                return stripos($rawJabatan, $cRole->role_name) !== false;
+            });
+            $roleId = $role?->id;
+        }
 
-            if (! empty($master->gol_ruang)) {
-                $rawGolongan = $master->gol_ruang;
+        if ($roleId) {
+            $client->c_role_id = $roleId;
 
-                $grades = once(fn () => RegGrade::query()->get());
-                $grade = $grades->first(function ($g) use ($rawGolongan) {
-                    $matchCode = ! empty($g->grade_code) && stripos($rawGolongan, $g->grade_code) !== false;
-
-                    $matchName = ! empty($g->grade_name) && stripos($rawGolongan, $g->grade_name) !== false;
-
-                    return $matchCode || $matchName;
-                });
-
-                if ($grade) {
-                    $client->reg_grade_id = $grade->id;
+            $levelId = null;
+            if ($master->c_role_level_id) {
+                $level = CRoleLevel::query()->whereKey($master->c_role_level_id)->first();
+                if ($level && (int) $level->c_role_id === (int) $roleId) {
+                    $levelId = $level->id;
                 }
             }
 
-            $rawInstansi = $master->instansi ?? '';
-            $rawUnitKerja = $master->unit_kerja ?? '';
-
-            [$agencyType, $agencyModel] = self::determineAgencyInfo($rawInstansi, $rawUnitKerja);
-
-            $client->type = $agencyType;
-            $client->agency_type = $agencyModel;
-
-            // Need to lookup agency_id
-            $cleanUnitKerja = self::cleanAgencyName($rawUnitKerja);
-            $cleanInstansi = self::cleanAgencyName($rawInstansi);
-
-            $agency = $agencyModel::where('name', '=', $cleanUnitKerja)->first();
-            if (! $agency && $cleanInstansi) {
-                $agency = $agencyModel::where('name', '=', $cleanInstansi)->first();
-            }
-            if (! $agency && $cleanUnitKerja) {
-                $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanUnitKerja . '%')->first();
-            }
-            if (! $agency && $cleanInstansi) {
-                $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanInstansi . '%')->first();
+            if (! $levelId) {
+                $level = CRoleLevel::where('c_role_id', $roleId)
+                    ->get()
+                    ->first(function ($cLevel) use ($rawJabatan) {
+                        return stripos($rawJabatan, $cLevel->level) !== false;
+                    });
+                $levelId = $level?->id ?? 1;
             }
 
-            if ($agency) {
-                $client->agency_id = $agency->id;
+            $client->c_role_level_id = $levelId;
+        }
+
+        if ($master->reg_grade_id) {
+            $client->reg_grade_id = $master->reg_grade_id;
+        } else {
+            $resolved = RegGradeResolver::resolveId($master->gol_ruang);
+            if ($resolved) {
+                $client->reg_grade_id = $resolved;
             }
+        }
 
-            if ($master->status instanceof \App\Enums\ClientStatus) {
-                $client->status = $master->status;
-            } else {
-                $rawStatus = strtolower((string) ($master->status ?? ''));
-                $client->status = match (true) {
-                    str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active')
-                    => \App\Enums\ClientStatus::Active,
+        $rawInstansi = $master->instansi ?? '';
+        $rawUnitKerja = $master->unit_kerja ?? '';
 
-                    str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign')
-                    => \App\Enums\ClientStatus::NonActive_Resign,
+        [$agencyType, $agencyModel] = self::determineAgencyInfo($rawInstansi, $rawUnitKerja);
 
-                    str_contains($rawStatus, 'sementara') || str_contains($rawStatus, 'suspend') || str_contains($rawStatus, 'skors')
-                    => \App\Enums\ClientStatus::NonActive_Suspended,
+        $client->type = $agencyType;
+        $client->agency_type = $agencyModel;
 
-                    str_contains($rawStatus, 'ctln')
-                    => \App\Enums\ClientStatus::NonActive_CTLN,
+        // Need to lookup agency_id
+        $cleanUnitKerja = self::cleanAgencyName($rawUnitKerja);
+        $cleanInstansi = self::cleanAgencyName($rawInstansi);
 
-                    str_contains($rawStatus, 'belajar') || str_contains($rawStatus, 'study')
-                    => \App\Enums\ClientStatus::NonActive_StudyLeave,
+        $agency = $agencyModel::where('name', '=', $cleanUnitKerja)->first();
+        if (! $agency && $cleanInstansi) {
+            $agency = $agencyModel::where('name', '=', $cleanInstansi)->first();
+        }
+        if (! $agency && $cleanUnitKerja) {
+            $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanUnitKerja . '%')->first();
+        }
+        if (! $agency && $cleanInstansi) {
+            $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanInstansi . '%')->first();
+        }
 
-                    str_contains($rawStatus, 'luar jabatan') || str_contains($rawStatus, 'external')
-                    => \App\Enums\ClientStatus::NonActive_ExternalAssignment,
+        if ($agency) {
+            $client->agency_id = $agency->id;
+        }
 
-                    str_contains($rawStatus, 'tidak memenuhi') || str_contains($rawStatus, 'requirement')
-                    => \App\Enums\ClientStatus::NonActive_DoesntMeetRoleRequirement,
+        if ($master->status instanceof \App\Enums\ClientStatus) {
+            $client->status = $master->status;
+        } else {
+            $rawStatus = strtolower((string) ($master->status ?? ''));
+            $client->status = match (true) {
+                str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active')
+                => \App\Enums\ClientStatus::Active,
 
-                    default => null,
-                };
-            }
+                str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign')
+                => \App\Enums\ClientStatus::NonActive_Resign,
 
-            if (! empty($master->pengangkatan)) {
-                $rawPengangkatan = strtolower($master->pengangkatan);
+                str_contains($rawStatus, 'sementara') || str_contains($rawStatus, 'suspend') || str_contains($rawStatus, 'skors')
+                => \App\Enums\ClientStatus::NonActive_Suspended,
 
-                $client->assignation_type = match (true) {
-                    str_contains($rawPengangkatan, 'cpns') || str_contains($rawPengangkatan, 'pppk') || str_contains($rawPengangkatan, 'pertama') => 'cpns',
-                    str_contains($rawPengangkatan, 'inpassing') => 'inpassing',
-                    str_contains($rawPengangkatan, 'pdjl') => 'pdjl',
-                    str_contains($rawPengangkatan, 'penyetaraan') => 'penyetaraan',
-                    str_contains($rawPengangkatan, 'promosi') => 'promosi',
-                    default => null,
-                };
-            } else {
-                $client->assignation_type = null;
-            }
+                str_contains($rawStatus, 'ctln')
+                => \App\Enums\ClientStatus::NonActive_CTLN,
+
+                str_contains($rawStatus, 'belajar') || str_contains($rawStatus, 'study')
+                => \App\Enums\ClientStatus::NonActive_StudyLeave,
+
+                str_contains($rawStatus, 'luar jabatan') || str_contains($rawStatus, 'external')
+                => \App\Enums\ClientStatus::NonActive_ExternalAssignment,
+
+                str_contains($rawStatus, 'tidak memenuhi') || str_contains($rawStatus, 'requirement')
+                => \App\Enums\ClientStatus::NonActive_DoesntMeetRoleRequirement,
+
+                default => null,
+            };
+        }
+
+        if (! empty($master->pengangkatan)) {
+            $rawPengangkatan = strtolower($master->pengangkatan);
+
+            $client->assignation_type = match (true) {
+                str_contains($rawPengangkatan, 'cpns') || str_contains($rawPengangkatan, 'pppk') || str_contains($rawPengangkatan, 'pertama') => 'cpns',
+                str_contains($rawPengangkatan, 'inpassing') => 'inpassing',
+                str_contains($rawPengangkatan, 'pdjl') => 'pdjl',
+                str_contains($rawPengangkatan, 'penyetaraan') => 'penyetaraan',
+                str_contains($rawPengangkatan, 'promosi') => 'promosi',
+                default => null,
+            };
+        } else {
+            $client->assignation_type = null;
         }
     }
 
