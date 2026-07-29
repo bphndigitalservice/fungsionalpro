@@ -1,3 +1,21 @@
+# [0.9.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.8.0...v0.9.0) (2026-07-29)
+
+
+### Bug Fixes
+
+* **master-jf:** dehydrate jenjang when role cleared ([b0df9c4](https://github.com/bphndigitalservice/fungsionalpro/commit/b0df9c485f2442d1c5eaed20b6c734ca8c832766))
+* **master-jf:** prefer exact then longest grade match ([e6675ee](https://github.com/bphndigitalservice/fungsionalpro/commit/e6675eed716db0b3a29c43a4550a5e95e53e8521))
+
+
+### Features
+
+* **master-jf:** add reg_grade and c_role_level FK columns ([ee4b5e5](https://github.com/bphndigitalservice/fungsionalpro/commit/ee4b5e5684798a1be8783b54fa5a7ad698406996))
+* **master-jf:** bind gol ruang and jenjang to FK selects ([8547e38](https://github.com/bphndigitalservice/fungsionalpro/commit/8547e38a994a41ec8b220fb803c43f44a2eded19))
+* **master-jf:** resolve and backfill reg_grade_id from gol_ruang ([1469b89](https://github.com/bphndigitalservice/fungsionalpro/commit/1469b89cb858926df48712b60525f82d22bfce0e))
+* **master-jf:** resolve import golruang to reg_grade_id ([d44ae06](https://github.com/bphndigitalservice/fungsionalpro/commit/d44ae0673c819cc69c4238aa86fa5906a237697d))
+* **master-jf:** switch list filter and grade widget to FKs ([7ea844d](https://github.com/bphndigitalservice/fungsionalpro/commit/7ea844d773f6d42fa5b034a4c0f07524a34c674d))
+* **matching:** prefer Master JF grade and level FKs ([b22e3ac](https://github.com/bphndigitalservice/fungsionalpro/commit/b22e3ac036edf8cecb088a21c6059ddda3bcad55))
+
 # [0.8.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.7.0...v0.8.0) (2026-07-28)
 
 
