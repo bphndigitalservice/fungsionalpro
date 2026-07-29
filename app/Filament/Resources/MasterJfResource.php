@@ -7,6 +7,7 @@ use App\Enums\ClientStatus;
 use App\Enums\JenisKepegawaian;
 use App\Filament\Resources\MasterJfResource\Pages;
 use App\Models\CRole;
+use App\Models\CRoleLevel;
 use App\Models\MasterJf;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -35,18 +36,11 @@ class MasterJfResource extends Resource
                     ->label('NIP')
                     ->required()
                     ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('gol_ruang')
+                Forms\Components\Select::make('reg_grade_id')
                     ->label('Golongan/Ruang')
-                    ->options(
-                        \App\Models\RegGrade::query()
-                            ->get()
-                            ->mapWithKeys(fn ($grade) => [
-                                "{$grade->grade_name} ({$grade->grade_code})"
-                                    => "{$grade->grade_name} ({$grade->grade_code})"
-                            ])
-                            ->toArray()
-                    )
-                    ->searchable(),
+                    ->relationship('grade', 'grade_code')
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\TextInput::make('jabatan'),
                 Forms\Components\Select::make('c_role_id')
                     ->label('Jabatan Fungsional')
@@ -56,7 +50,18 @@ class MasterJfResource extends Resource
                         ->pluck('role_name', 'id')
                         ->all())
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn (callable $set) => $set('c_role_level_id', null)),
+                Forms\Components\Select::make('c_role_level_id')
+                    ->label('Jenjang')
+                    ->options(fn (Forms\Get $get): array => CRoleLevel::query()
+                        ->where('c_role_id', $get('c_role_id') ?: 0)
+                        ->orderBy('level')
+                        ->pluck('level', 'id')
+                        ->all())
+                    ->searchable()
+                    ->disabled(fn (Forms\Get $get): bool => blank($get('c_role_id'))),
                 Forms\Components\TextInput::make('instansi'),
                 Forms\Components\Select::make('type')
                     ->label('Kluster')
