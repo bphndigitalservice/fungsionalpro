@@ -61,7 +61,8 @@ class MasterJfResource extends Resource
                         ->pluck('level', 'id')
                         ->all())
                     ->searchable()
-                    ->disabled(fn (Forms\Get $get): bool => blank($get('c_role_id'))),
+                    ->disabled(fn (Forms\Get $get): bool => blank($get('c_role_id')))
+                    ->dehydrated(true),
                 Forms\Components\TextInput::make('instansi'),
                 Forms\Components\Select::make('type')
                     ->label('Kluster')

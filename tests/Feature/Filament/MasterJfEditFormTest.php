@@ -84,4 +84,30 @@ class MasterJfEditFormTest extends TestCase
                 'c_role_level_id' => null,
             ]);
     }
+
+    public function test_clearing_c_role_persists_null_c_role_level(): void
+    {
+        $this->actingAsAdmin();
+
+        $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $level = CRoleLevel::create(['c_role_id' => $role->id, 'level' => 'Ahli Pertama']);
+
+        $record = MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'c_role_level_id' => $level->id,
+        ]);
+
+        Livewire::test(EditMasterJf::class, ['record' => $record->getRouteKey()])
+            ->fillForm([
+                'c_role_id' => null,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('master_jf', [
+            'id' => $record->id,
+            'c_role_id' => null,
+            'c_role_level_id' => null,
+        ]);
+    }
 }
