@@ -37,6 +37,7 @@ class MasterJfImport implements ToModel, WithHeadingRow
                 'status'             => MasterJfEnumMapper::status($row['status'] ?? null),
                 'status_kepegawaian' => MasterJfEnumMapper::statusKepegawaian($row['status_kepegawaian'] ?? null),
                 'type'               => $type,
+                'provinsi'           => $row['provinsi'] ?? null,
             ]
         );
     }

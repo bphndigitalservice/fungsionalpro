@@ -28,6 +28,17 @@ class MasterJfResource extends Resource
     protected static ?string $model = MasterJf::class;
     protected static ?int $navigationSort = 3;
 
+    public static function getEloquentQuery(): Builder
+    {
+        $user = auth()->user();
+        if ($user && $user->isSuperAdmin()) {
+            return parent::getEloquentQuery();
+        }
+
+        $allowedRoleIds = $user->adminAccesses()->pluck('c_role_id');
+        return parent::getEloquentQuery()->whereIn('c_role_id', $allowedRoleIds);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -73,6 +84,8 @@ class MasterJfResource extends Resource
                     ->preload(),
                 Forms\Components\TextInput::make('unit_kerja')
                     ->label('Unit Kerja'),
+                Forms\Components\TextInput::make('provinsi')
+                    ->label('Provinsi'),
                 Forms\Components\Select::make('pengangkatan')
                     ->label('Pengangkatan')
                     ->options(MasterJf::pengangkatanOptions())
@@ -119,6 +132,10 @@ class MasterJfResource extends Resource
                     ->label('Unit Kerja')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('provinsi')
+                    ->label('Provinsi')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('instansi')
                     ->label('Instansi')
                     ->searchable()
@@ -143,11 +160,16 @@ class MasterJfResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('c_role_id')
                     ->label('Jabatan Fungsional')
-                    ->options(fn (): array => CRole::query()
-                        ->where('active', true)
-                        ->orderBy('role_name')
-                        ->pluck('role_name', 'id')
-                        ->all())
+                    ->options(function () {
+                        $user = auth()->user();
+                        $query = CRole::query()->where('active', true)->orderBy('role_name');
+                        if ($user && !$user->isSuperAdmin()) {
+                            $allowedRoleIds = $user->adminAccesses()->pluck('c_role_id');
+                            $query->whereIn('id', $allowedRoleIds);
+                        }
+                        return $query->pluck('role_name', 'id')->all();
+                    })
+                    ->visible(fn () => auth()->user() && auth()->user()->isSuperAdmin())
                     ->searchable(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options(ClientStatus::class),
@@ -191,6 +213,11 @@ class MasterJfResource extends Resource
                 Tables\Filters\SelectFilter::make('unit_kerja')
                     ->label('Unit Kerja')
                     ->options(fn (): array => MasterJf::distinctOptions('unit_kerja'))
+                    ->searchable()
+                    ->multiple(),
+                Tables\Filters\SelectFilter::make('provinsi')
+                    ->label('Provinsi')
+                    ->options(fn (): array => MasterJf::distinctOptions('provinsi'))
                     ->searchable()
                     ->multiple(),
 
@@ -281,6 +308,11 @@ class MasterJfResource extends Resource
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

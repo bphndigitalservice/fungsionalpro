@@ -9,6 +9,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -112,9 +113,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         Notification::send($this, new SetPassword($token));
     }
 
-    public function adminAccesses()
+    public function adminAccesses(): HasMany
     {
-        return $this->hasMany(AdminAccess::class);
+        return $this->hasMany(AdminAccess::class, 'user_id', 'id');
     }
 
 }

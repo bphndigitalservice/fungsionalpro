@@ -28,6 +28,7 @@ class MasterJf extends Model
         'status',
         'type',
         'status_kepegawaian',
+        'provinsi',
     ];
 
     protected $casts = [
