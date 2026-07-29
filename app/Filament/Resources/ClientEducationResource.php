@@ -36,7 +36,7 @@ class ClientEducationResource extends Resource
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Select::make('level')
-                                    ->label(__('labels.form.client.fields.education_level'))
+                                    ->label(__('Jenjang Pendidikan'))
                                     ->options(EducationLevel::class)
                                     ->required(),
 
