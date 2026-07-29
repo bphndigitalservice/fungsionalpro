@@ -14,11 +14,29 @@ final class RegGradeResolver
             return null;
         }
 
+        // Try extracting potential code from format like (III/d)
+        $extractedCode = null;
+        if (preg_match('/\((.*?)\)/', $raw, $matches)) {
+            $extractedCode = str_replace('/', '', $matches[1]);
+        }
+
+        $rawNormalized = str_replace('/', '', $raw);
+        $rawLower = strtolower($rawNormalized);
+
         $grades = once(fn () => RegGrade::query()->get());
-        $rawLower = strtolower($raw);
+
+        // First attempt: match by extracted code
+        if ($extractedCode) {
+            $grade = $grades->first(function (RegGrade $g) use ($extractedCode) {
+                return strtolower(str_replace('/', '', trim((string) $g->grade_code))) === strtolower($extractedCode);
+            });
+            if ($grade !== null) {
+                return $grade->id;
+            }
+        }
 
         $grade = $grades->first(function (RegGrade $g) use ($rawLower) {
-            $code = trim((string) $g->grade_code);
+            $code = str_replace('/', '', trim((string) $g->grade_code));
 
             return $code !== '' && strtolower($code) === $rawLower;
         });
@@ -27,33 +45,34 @@ final class RegGradeResolver
         }
 
         $grade = $grades->first(function (RegGrade $g) use ($rawLower) {
-            $name = trim((string) $g->grade_name);
+            $name = str_replace('/', '', trim((string) $g->grade_name));
 
             return $name !== '' && strtolower($name) === $rawLower;
         });
         if ($grade !== null) {
             return $grade->id;
         }
+        // ... rest of the function
 
         $grade = $grades
-            ->filter(function (RegGrade $g) use ($raw) {
-                $code = trim((string) $g->grade_code);
+            ->filter(function (RegGrade $g) use ($rawNormalized) {
+                $code = str_replace('/', '', trim((string) $g->grade_code));
 
-                return $code !== '' && stripos($raw, $code) !== false;
+                return $code !== '' && stripos($rawNormalized, $code) !== false;
             })
-            ->sortByDesc(fn (RegGrade $g) => strlen(trim((string) $g->grade_code)))
+            ->sortByDesc(fn (RegGrade $g) => strlen(str_replace('/', '', trim((string) $g->grade_code))))
             ->first();
         if ($grade !== null) {
             return $grade->id;
         }
 
         $grade = $grades
-            ->filter(function (RegGrade $g) use ($raw) {
-                $name = trim((string) $g->grade_name);
+            ->filter(function (RegGrade $g) use ($rawNormalized) {
+                $name = str_replace('/', '', trim((string) $g->grade_name));
 
-                return $name !== '' && stripos($raw, $name) !== false;
+                return $name !== '' && stripos($rawNormalized, $name) !== false;
             })
-            ->sortByDesc(fn (RegGrade $g) => strlen(trim((string) $g->grade_name)))
+            ->sortByDesc(fn (RegGrade $g) => strlen(str_replace('/', '', trim((string) $g->grade_name))))
             ->first();
 
         return $grade?->id;

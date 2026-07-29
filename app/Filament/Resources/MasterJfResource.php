@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MasterJfImport;
 use Illuminate\Support\Facades\Storage;
@@ -101,21 +102,18 @@ class MasterJfResource extends Resource
                     ->label('NIP')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('grade.grade_code')
+                Tables\Columns\TextColumn::make('grade.clean_name')
                     ->label('Golongan/Ruang')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('cRoleLevel.level')
-                    ->label('Jenjang')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('jabatan')
-                    ->label('Jabatan')
-                    ->searchable()
+                    ->searchable(['grade_code', 'grade_name'])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('cRole.role_name')
                     ->label('Jabatan Fungsional')
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('jenjang_display')
+                    ->getStateUsing(fn ($record) => preg_replace('/^(Penyuluh Hukum|Analis Hukum)\s+/i', '', $record->jabatan))
+                    ->label('Jenjang')
+                    ->searchable(['jabatan'])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('unit_kerja')
                     ->label('Unit Kerja')
@@ -143,6 +141,14 @@ class MasterJfResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('c_role_id')
+                    ->label('Jabatan Fungsional')
+                    ->options(fn (): array => CRole::query()
+                        ->where('active', true)
+                        ->orderBy('role_name')
+                        ->pluck('role_name', 'id')
+                        ->all())
+                    ->searchable(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options(ClientStatus::class),
                 Tables\Filters\SelectFilter::make('status_kepegawaian')
@@ -158,15 +164,25 @@ class MasterJfResource extends Resource
                     ->label('Golongan/Ruang')
                     ->options(fn (): array => RegGrade::query()
                         ->orderBy('grade_code')
-                        ->pluck('grade_code', 'id')
+                        ->get()
+                        ->mapWithKeys(fn (RegGrade $g) => [$g->id => $g->clean_name])
                         ->all())
                     ->searchable(),
-                Tables\Filters\SelectFilter::make('c_role_level_id')
+                Tables\Filters\SelectFilter::make('jenjang')
                     ->label('Jenjang')
-                    ->options(fn (): array => CRoleLevel::query()
-                        ->orderBy('level')
-                        ->pluck('level', 'id')
-                        ->all())
+                    ->options([
+                        'Ahli Pertama' => 'Ahli Pertama',
+                        'Ahli Muda' => 'Ahli Muda',
+                        'Ahli Madya' => 'Ahli Madya',
+                        'Ahli Utama' => 'Ahli Utama',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (empty($data['value'])) {
+                            return $query;
+                        }
+
+                        return $query->whereRaw('LOWER(jabatan) LIKE ?', ['%' . strtolower($data['value'])]);
+                    })
                     ->searchable(),
                 Tables\Filters\SelectFilter::make('instansi')
                     ->options(fn (): array => MasterJf::distinctOptions('instansi'))
@@ -177,18 +193,7 @@ class MasterJfResource extends Resource
                     ->options(fn (): array => MasterJf::distinctOptions('unit_kerja'))
                     ->searchable()
                     ->multiple(),
-                Tables\Filters\SelectFilter::make('jabatan')
-                    ->options(fn (): array => MasterJf::distinctOptions('jabatan'))
-                    ->searchable()
-                    ->multiple(),
-                Tables\Filters\SelectFilter::make('c_role_id')
-                    ->label('Jabatan Fungsional')
-                    ->options(fn (): array => CRole::query()
-                        ->where('active', true)
-                        ->orderBy('role_name')
-                        ->pluck('role_name', 'id')
-                        ->all())
-                    ->searchable(),
+
             ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->headerActions([
                 Action::make('import')
