@@ -228,6 +228,8 @@ class Register extends BaseRegister
             $this->form->model($user)->saveRelationships();
             $this->callHook('afterRegister');
 
+            $this->sendEmailVerificationNotification($user);
+
             Filament::auth()->login($user);
             session()->regenerate();
 
