@@ -1,3 +1,10 @@
+## [0.9.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.9.0...v0.9.1) (2026-08-03)
+
+
+### Bug Fixes
+
+* **email:** resolve issue preventing verification emails on registration ([60d4fe0](https://github.com/bphndigitalservice/fungsionalpro/commit/60d4fe001027cb9f8a276c3cf343d3496495cd71))
+
 # [0.9.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.8.0...v0.9.0) (2026-07-29)
 
 
