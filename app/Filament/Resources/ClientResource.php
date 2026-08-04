@@ -447,7 +447,7 @@ class ClientResource extends Resource
 
                             Forms\Components\TextInput::make('academic_title')
                                 ->label(__('Gelar Belakang'))
-                                ->hint('e.g: S.H, M.H')
+                                ->hint('e.g: S.H., M.H.')
                                 ->required(),
                         ])
                         ->columns(2),
@@ -458,6 +458,7 @@ class ClientResource extends Resource
                                 ->options(Gender::class)
                                 ->inline()
                                 ->required(),
+
                             Forms\Components\TextInput::make('phone_number')
                                 ->label(__('labels.form.client.fields.phone_number'))
                                 ->required(),
