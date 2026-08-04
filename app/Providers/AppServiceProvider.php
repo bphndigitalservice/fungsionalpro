@@ -6,6 +6,7 @@ use App\Subscribers\ClientEventSubscriber;
 use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
 use BezhanSalleh\FilamentShield\FilamentShield;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\RegistrationResponse;
 use Illuminate\Auth\AuthenticationException;
@@ -73,5 +74,9 @@ class AppServiceProvider extends ServiceProvider
         Client::observe(ClientObserver::class);
 
         FilamentShield::prohibitDestructiveCommands($this->app->isProduction());
+
+        VerifyEmail::createUrlUsing(function ($notifiable) {
+            return Filament::getVerifyEmailUrl($notifiable);
+        });
     }
 }

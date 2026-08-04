@@ -31,9 +31,6 @@ class EmailVerificationPrompt extends BaseEmailVerification
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
-        $notification = app(VerifyEmail::class);
-        $notification->url = Filament::getVerifyEmailUrl($user);
-
-        $user->notify($notification);
+        $user->sendEmailVerificationNotification();
     }
 }
