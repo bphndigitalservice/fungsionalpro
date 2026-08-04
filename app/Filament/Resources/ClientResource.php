@@ -215,6 +215,7 @@ class ClientResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(ClientExporter::class)
+                    ->modifyQueryUsing(fn (Builder $query) => $query)
                     ->color('success')
                     ->button()
                     ->icon('heroicon-m-arrow-down-tray'),
@@ -232,6 +233,11 @@ class ClientResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return app(\App\Services\ClientAccessService::class)->scopedQuery(auth()->user());
     }
 
     public static function getRelations(): array

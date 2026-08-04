@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports;
 
+use App\Filament\Resources\ClientActivityResource;
 use App\Models\Client;
 use App\Models\ClientActivity;
 use Filament\Actions\Exports\ExportColumn;
@@ -19,24 +20,18 @@ class ClientActivityExporter extends Exporter
     public static function getColumns(): array
     {
         $roleId = Client::current()?->c_role_id;
+        $columns = [];
 
-        $columns = [
-        ];
-
-        if ($roleId == 2) {
+        if ($roleId != 1) {
             $columns[] = ExportColumn::make('jenis_kegiatan')
                 ->label('Jenis Kegiatan')
-                ->formatStateUsing(fn ($state) => match ((int) $state) {
-                    1 => 'Konsultasi Hukum',
-                    2 => 'Penyuluhan Hukum',
-                    default => '-',
-                });
+                ->formatStateUsing(fn ($state) => ClientActivityResource::getJenisKegiatanOptions()[(int)$state] ?? '-');
         }
 
         $columns[] = ExportColumn::make('title')
             ->label('Nama Kegiatan');
 
-        if ($roleId == 2) {
+        if ($roleId != 1) {
             $columns[] = ExportColumn::make('regProvince.name')
                 ->label('Provinsi Pelaksanaan')
                 ->default('-');
@@ -46,11 +41,13 @@ class ClientActivityExporter extends Exporter
             ->label('Tanggal Mulai')
             ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-');
 
-        $columns[] = ExportColumn::make('end_period')
-            ->label('Tanggal Selesai')
-            ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-');
+        if ($roleId != 2) {
+            $columns[] = ExportColumn::make('end_period')
+                ->label('Tanggal Selesai')
+                ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d-m-Y') : '-');
+        }
 
-        if ($roleId == 2) {
+        if ($roleId != 1) {
             $columns[] = ExportColumn::make('jam')
                 ->label('Waktu/Jam')
                 ->getStateUsing(fn (ClientActivity $record) =>

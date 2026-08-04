@@ -17,10 +17,4 @@ class ListClientActivities extends ListRecords
             Actions\CreateAction::make()
         ];
     }
-
-
-    protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
-    {
-        return parent::getTableQuery()->where('client_id', Client::current()?->id ?? 0);
-    }
 }

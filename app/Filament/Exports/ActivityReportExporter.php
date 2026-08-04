@@ -23,7 +23,7 @@ class ActivityReportExporter extends Exporter
             ExportColumn::make('client.identity.name')
                 ->label('Nama'),
 
-            ExportColumn::make('client.identity.nip')
+            ExportColumn::make('client.nip')
                 ->label('NIP'),
         ];
 

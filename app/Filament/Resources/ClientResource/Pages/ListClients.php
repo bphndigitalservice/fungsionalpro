@@ -45,14 +45,4 @@ class ListClients extends ListRecords
     {
         return 3;
     }
-
-    protected function getTableQuery(): ?Builder
-    {
-        return app(ClientAccessService::class)->scopedQuery($this->getPrincipal());
-    }
-
-    protected function getPrincipal(): \Illuminate\Contracts\Auth\Authenticatable|User
-    {
-        return auth()->user();
-    }
 }

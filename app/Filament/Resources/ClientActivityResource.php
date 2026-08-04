@@ -343,6 +343,11 @@ class ClientActivityResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('client_id', Client::current()?->id ?? 0);
+    }
+
     public static function getRelations(): array
     {
         return [
