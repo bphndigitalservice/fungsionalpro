@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.9.1...v0.10.0) (2026-08-05)
+
+
+### Features
+
+* add Indonesian localization files ([0193cb3](https://github.com/bphndigitalservice/fungsionalpro/commit/0193cb3c72320a8b603f21b2a4ee76fe1b8b0ca8))
+
 ## [0.9.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.9.0...v0.9.1) (2026-08-03)
 
 
