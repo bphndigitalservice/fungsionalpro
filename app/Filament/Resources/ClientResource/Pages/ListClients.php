@@ -6,11 +6,14 @@ use App\Filament\Resources\ClientResource;
 use App\Models\User;
 use App\Services\ClientAccessService;
 use Filament\Actions;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListClients extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = ClientResource::class;
 
     public bool $widgetsCollapsed = false;

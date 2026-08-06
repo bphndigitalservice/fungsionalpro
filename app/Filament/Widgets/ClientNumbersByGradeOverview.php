@@ -2,22 +2,30 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\InteractsWithClientPageTable;
 use App\Models\RegGrade;
 use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
 
 class ClientNumbersByGradeOverview extends StatsOverviewWidget
 {
+    use InteractsWithClientPageTable;
+
+    protected static bool $isDiscovered = false;
+
+    protected static bool $isLazy = false;
+
     protected ?string $heading = 'Klien berdasarkan Pangkat/Golongan';
 
-    protected function getCards(): array
+    protected function getStats(): array
     {
-        $query = $this->baseClientQuery();
+        $query = $this->getPageTableQuery();
 
         $rows = $query
             ->toBase()
+            ->reorder()
             ->select('clients.reg_grade_id', DB::raw('COUNT(*) as total'))
             ->groupBy('clients.reg_grade_id')
             ->orderByDesc('total')
@@ -27,18 +35,13 @@ class ClientNumbersByGradeOverview extends StatsOverviewWidget
         $gradeNames = RegGrade::whereIn('id', $rows->pluck('reg_grade_id')->filter()->all())
             ->pluck('grade_name', 'id');
 
-        $cards = [];
+        $stats = [];
         foreach ($rows as $row) {
             $label = $row->reg_grade_id ? ($gradeNames[$row->reg_grade_id] ?? ('Grade #' . $row->reg_grade_id)) : 'Tidak diketahui';
-            $cards[] = Card::make($label, number_format((int) $row->total))
+            $stats[] = Stat::make($label, number_format((int) $row->total))
                 ->icon('heroicon-o-academic-cap');
         }
 
-        return $cards;
-    }
-
-    protected function baseClientQuery()
-    {
-        return app(ClientAccessService::class)->scopedQuery(auth()->user());
+        return $stats;
     }
 }

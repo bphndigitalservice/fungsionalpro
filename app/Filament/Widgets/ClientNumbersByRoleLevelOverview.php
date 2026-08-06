@@ -2,22 +2,30 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\InteractsWithClientPageTable;
 use App\Models\CRoleLevel;
 use App\Services\ClientAccessService;
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
 
 class ClientNumbersByRoleLevelOverview extends StatsOverviewWidget
 {
+    use InteractsWithClientPageTable;
+
+    protected static bool $isDiscovered = false;
+
+    protected static bool $isLazy = false;
+
     protected ?string $heading = 'Klien berdasarkan Jenjang Jabatan';
 
-    protected function getCards(): array
+    protected function getStats(): array
     {
-        $query = $this->baseClientQuery();
+        $query = $this->getPageTableQuery();
 
         $rows = $query
             ->toBase()
+            ->reorder()
             ->select('clients.c_role_level_id', DB::raw('COUNT(*) as total'))
             ->groupBy('clients.c_role_level_id')
             ->orderByDesc('total')
@@ -27,18 +35,13 @@ class ClientNumbersByRoleLevelOverview extends StatsOverviewWidget
         $levelNames = CRoleLevel::whereIn('id', $rows->pluck('c_role_level_id')->filter()->all())
             ->pluck('level', 'id');
 
-        $cards = [];
+        $stats = [];
         foreach ($rows as $row) {
             $label = $row->c_role_level_id ? ($levelNames[$row->c_role_level_id] ?? ('Level #' . $row->c_role_level_id)) : 'Tidak diketahui';
-            $cards[] = Card::make($label, number_format((int) $row->total))
+            $stats[] = Stat::make($label, number_format((int) $row->total))
                 ->icon('heroicon-o-briefcase');
         }
 
-        return $cards;
-    }
-
-    protected function baseClientQuery()
-    {
-        return app(ClientAccessService::class)->scopedQuery(auth()->user());
+        return $stats;
     }
 }
