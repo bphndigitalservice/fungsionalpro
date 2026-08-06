@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('master_jf', 'provinsi')) {
+            return;
+        }
+
         Schema::table('master_jf', function (Blueprint $table) {
             $table->string('provinsi')->nullable();
         });

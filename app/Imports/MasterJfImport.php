@@ -13,15 +13,29 @@ class MasterJfImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
+        if (empty(array_filter($row))) {
+            return null;
+        }
+
         if (empty($row['nip'])) {
             throw new Exception(
-                'Import gagal: terdapat data tanpa NIP atau baris kosong. Periksa kembali file.' . ($row['nama'] ?? '-')
+                'Import gagal: terdapat data tanpa NIP pada baris data. Periksa kembali file. Nama: ' . ($row['nama'] ?? '-')
             );
         }
 
         $instansi = $row['instansi'] ?? null;
-        $unitKerja = $row['unit_kerjakanwil'] ?? null;
+        $unitKerja = $row['unit_kerja'] ?? $row['unit_kerjakanwil'] ?? null;
         [$type, $model] = \App\Services\ClientMatchingService::determineAgencyInfo($instansi ?? '', $unitKerja ?? '');
+
+        $jabatan = $row['jabatan'] ?? null;
+        $cRoleId = null;
+        if ($jabatan) {
+            if (stripos($jabatan, 'Analis Hukum') !== false) {
+                $cRoleId = 1;
+            } elseif (stripos($jabatan, 'Penyuluh Hukum') !== false) {
+                $cRoleId = 2;
+            }
+        }
 
         return MasterJf::updateOrCreate(
             [
@@ -30,7 +44,8 @@ class MasterJfImport implements ToModel, WithHeadingRow
             [
                 'nama'               => $row['nama'] ?? null,
                 'reg_grade_id'       => RegGradeResolver::resolveId($row['golruang'] ?? null),
-                'jabatan'            => $row['jabatan'] ?? null,
+                'jabatan'            => $jabatan,
+                'c_role_id'          => $cRoleId,
                 'unit_kerja'         => $unitKerja,
                 'instansi'           => $instansi,
                 'pengangkatan'       => $row['pengangkatan'] ?? null,
@@ -38,6 +53,7 @@ class MasterJfImport implements ToModel, WithHeadingRow
                 'status_kepegawaian' => MasterJfEnumMapper::statusKepegawaian($row['status_kepegawaian'] ?? null),
                 'type'               => $type,
                 'provinsi'           => $row['provinsi'] ?? null,
+                'divisi'             => $row['divisi'] ?? null,
             ]
         );
     }

@@ -297,7 +297,7 @@ class MasterJfResource extends Resource
 
                             Notification::make()
                                 ->title('Import gagal')
-                                ->body('Terjadi kendala saat membaca file. Silakan upload ulang.')
+                                ->body($e->getMessage() ?: 'Terjadi kendala saat membaca file. Silakan upload ulang.')
                                 ->danger()
                                 ->persistent()
                                 ->send();

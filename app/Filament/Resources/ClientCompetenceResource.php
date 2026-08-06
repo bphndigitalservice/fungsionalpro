@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Enums\TrainingType;
 use App\Enums\TrainingCompletionStatus;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
 use App\Models\Client;
@@ -42,10 +43,9 @@ class ClientCompetenceResource extends Resource
                         ToggleButtons::make('category')
                             ->label('Jenis Diklat/Pelatihan')
                             ->live()
-                            ->options([
-                                'PROMOTION_TRAINING' => 'Diklat Fungsional',
-                                'TECHNICAL_TRAINING' => 'Diklat/Pelatihan Teknis',
-                            ])->inline()->required(),
+                            ->options(TrainingType::class)
+                            ->inline()
+                            ->required(),
                         Forms\Components\Select::make('promotion_training_level_id')
                             ->relationship('promotionLevel', 'level', function (Builder $query) {
                                 $query->where("c_role_id", Client::current()->c_role_id)->orderBy('id');
@@ -60,7 +60,8 @@ class ClientCompetenceResource extends Resource
                             ->label('Status')
                             ->options(TrainingCompletionStatus::class)
                             ->inline()
-                            ->required(),
+                            ->hidden(fn (Forms\Get $get) => $get('category') === TrainingType::OTHER_TRAINING->value)
+                            ->required(fn (Forms\Get $get) => $get('category') !== TrainingType::OTHER_TRAINING->value),
                         TextInput::make('jam_pelajaran')
                             ->label('Jam Pelajaran (JP)')
                             ->numeric()
@@ -107,9 +108,12 @@ class ClientCompetenceResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('promotionLevel.level')
                     ->label('Jenjang Diklat Fungsional')
+                    ->default('-')
+                    ->alignCenter()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('jam_pelajaran')
                     ->label('Jam Pelajaran')
+                    ->alignCenter()
                     ->formatStateUsing(fn ($state) => ($state && $state > 0) ? $state . ' JP' : ''),
                 Tables\Columns\TextColumn::make('certificate_number')
                     ->label('Nomor Sertifikat')
@@ -118,14 +122,17 @@ class ClientCompetenceResource extends Resource
                 Tables\Columns\TextColumn::make('completion_status')
                     ->label('Status')
                     ->badge()
+                    ->alignCenter()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_period')
                     ->label('Awal Pelatihan')
                     ->date()
+                    ->alignCenter()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('end_period')
                     ->label('Selesai Pelatihan')
                     ->date()
+                    ->alignCenter()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('institution')
                     ->label('Lembaga Pelatihan')
@@ -135,10 +142,7 @@ class ClientCompetenceResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
                     ->label('Jenis Diklat/Pelatihan')
-                    ->options([
-                        'PROMOTION_TRAINING' => 'Diklat Fungsional',
-                        'TECHNICAL_TRAINING' => 'Diklat/Pelatihan Teknis',
-                    ]),
+                    ->options(TrainingType::class),
                 Tables\Filters\SelectFilter::make('completion_status')
                     ->label('Status')
                     ->options(collect(TrainingCompletionStatus::cases())->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])->toArray()),
