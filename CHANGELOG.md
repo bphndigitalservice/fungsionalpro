@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.0...v0.10.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* unify verification action styles and set default client verification to false ([bcca995](https://github.com/bphndigitalservice/fungsionalpro/commit/bcca99514e7f79148a7eb321b1a42585c74bbaee))
+
 # [0.10.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.9.1...v0.10.0) (2026-08-05)
 
 
