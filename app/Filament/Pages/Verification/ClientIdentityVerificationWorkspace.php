@@ -42,28 +42,17 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                     Tables\Columns\TextColumn::make('id')
                         ->toggleable(isToggledHiddenByDefault: true)
                         ->label(__('labels.table.client.id')),
-                    Tables\Columns\TextColumn::make('nip')
-                        ->label(__('labels.table.client.nip'))
-                        ->searchable(),
                     Tables\Columns\TextColumn::make('identity.name')
-                        ->label(__('labels.table.client.name'))
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('crole.role_name')
-                        ->label(__('labels.table.client.role'))
-                        ->numeric()
-                        ->sortable(),
-                    Tables\Columns\TextColumn::make('croleLevel.level')
-                        ->label(__('labels.table.client.grade'))
-                        ->numeric()
-                        ->sortable(),
-                    Tables\Columns\TextColumn::make('type')
-                        ->label(__('labels.table.client.cluster'))
-                        ->searchable(),
+                        ->label('Nama')
+                        ->searchable(isIndividual: true),
+                    Tables\Columns\TextColumn::make('nip')
+                        ->label('NIP')
+                        ->searchable(isIndividual: true),
                     Tables\Columns\TextColumn::make('agenciable.name')
-                        ->label(__('labels.table.client.agency'))
+                        ->label('Instansi')
                         ->searchable()->sortable(),
                     Tables\Columns\TextColumn::make('echelonable.name')
-                        ->label(__('labels.table.client.echelon'))
+                        ->label('Unit Kerja')
                         ->searchable()->sortable(),
                     Tables\Columns\TextColumn::make('echelon_x_text')
                         ->label(__('labels.table.client.echelon_text'))
@@ -76,7 +65,20 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                         ->searchable()
                         ->toggleable(isToggledHiddenByDefault: true),
                     Tables\Columns\TextColumn::make('is_verified')
-                        ->label(__('labels.table.client.is_verified'))
+                        ->label('Status Verifikasi')
+                        ->state(function (Model $record) {
+                            if ($record->is_verified === \App\Enums\Verified::Unverified) {
+                                return 'Belum diproses';
+                            }
+
+                            return $record->is_verified;
+                        })
+                        ->color(fn (Model $record) =>
+                            $record->is_verified === \App\Enums\Verified::Unverified ? 'gray' : null
+                        )
+                        ->icon(fn (Model $record) =>
+                            $record->is_verified === \App\Enums\Verified::Unverified ? 'heroicon-o-clock' : null
+                        )
                         ->searchable()
                         ->toggleable(isToggledHiddenByDefault: false),
                     Tables\Columns\TextColumn::make('created_at')
@@ -94,8 +96,6 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                 ])
                 ->actions([
                     ViewClientIdentityAction::make(),
-                    AcceptClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
-                    RejectClientIdentityAction::make()->hidden(fn(Model $record) => $record->is_verified),
                 ]);
     }
 
@@ -152,9 +152,9 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
         return [
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
-                ->badge($this->getTableQuery()->whereNull('is_verified')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('is_verified')),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('is_verified')),
+                ->badge($this->getTableQuery()->where('is_verified', \App\Enums\Verified::Unverified)->count())
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_verified', \App\Enums\Verified::Unverified)),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->where('is_verified', '!=', \App\Enums\Verified::Unverified)),
         ];
     }
 

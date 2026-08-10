@@ -482,6 +482,8 @@ class ClientResource extends Resource
                         ->image()
                         ->visibility('private')
                         ->downloadable()
+                        ->openable()
+                        ->previewable()
                         ->avatar()
                         ->required(),
                 ])
@@ -523,6 +525,8 @@ class ClientResource extends Resource
                                 ->directory('education_certificate')
                                 ->visibility('private')
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ])
                         ->columns(2),
@@ -548,6 +552,8 @@ class ClientResource extends Resource
                                 ->visibility(static::storageVisibility())
                                 ->directory('employee-cards')
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
@@ -564,6 +570,8 @@ class ClientResource extends Resource
                                 ->directory('sk-cpns')
                                 ->visibility(static::storageVisibility())
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                             Forms\Components\DatePicker::make('sk_pns_tmt')
@@ -574,6 +582,8 @@ class ClientResource extends Resource
                                 ->visibility(static::storageVisibility())
                                 ->directory('sk-pns')
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
@@ -596,6 +606,9 @@ class ClientResource extends Resource
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->directory('sk-jf')
                                 ->maxFiles(1)
+                                ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
@@ -616,6 +629,9 @@ class ClientResource extends Resource
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->directory('sk-grade')
                                 ->maxFiles(1)
+                                ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),

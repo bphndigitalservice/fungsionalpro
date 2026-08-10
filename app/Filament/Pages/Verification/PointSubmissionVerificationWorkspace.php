@@ -38,8 +38,12 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return $table
             ->columns([
                 TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('client.identity.name')->label('Nama'),
-                TextColumn::make('client.nip')->label('NIP'),
+                TextColumn::make('client.identity.name')
+                    ->label('Nama')
+                    ->searchable(isIndividual: true),
+                TextColumn::make('client.nip')
+                    ->label('NIP')
+                    ->searchable(isIndividual: true),
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
                 TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
@@ -64,14 +68,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()
-                    ->hidden(fn (Model $record) =>
-                        ! static::canVerifying() ||
-                        in_array($record->status, [
-                            PointSubmissionStatus::Verified,
-                            PointSubmissionStatus::ShouldRevise,
-                        ])
-                    ),
+                VerifyPointSubmissionAction::make(),
             ]);
     }
 

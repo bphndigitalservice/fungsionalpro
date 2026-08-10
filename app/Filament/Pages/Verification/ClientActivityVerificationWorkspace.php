@@ -22,8 +22,6 @@ use Illuminate\Database\Query\JoinClause;
 use Filament\Tables\Concerns\InteractsWithTable;
 
 use App\Filament\Pages\Verification\Actions\ViewClientActivityAction;
-use App\Filament\Pages\Verification\Actions\AcceptClientActivityAction;
-use App\Filament\Pages\Verification\Actions\RejectClientActivityAction;
 use Filament\Resources\Concerns\HasTabs;
 
 class ClientActivityVerificationWorkspace extends Page
@@ -96,24 +94,14 @@ implements HasTable, HasInfolists
                                 return "Alasan Penolakan: {$record->verification_note}";
                             } if ($record?->is_verified === true) {
                                 return "Kegiatan telah diverifikasi";
-                            } 
+                            }
                             return null;
                         }),
 
             ])
 
             ->actions([
-
                 ViewClientActivityAction::make(),
-
-                AcceptClientActivityAction::make()
-                    ->hidden(fn(Model $record)
-                        => $record->is_verified),
-
-                RejectClientActivityAction::make()
-                    ->hidden(fn(Model $record)
-                        => $record->is_verified),
-
             ]);
     }
 
