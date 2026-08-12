@@ -1,3 +1,10 @@
+# [0.11.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.1...v0.11.0) (2026-08-12)
+
+
+### Features
+
+* fix notification timezones and URLs, and update identity rejection logic to maintain unverified status while showing as rejected ([831e3f9](https://github.com/bphndigitalservice/fungsionalpro/commit/831e3f9320555c3bc98c1dc8eda472ea18e1e59a))
+
 ## [0.10.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.0...v0.10.1) (2026-08-10)
 
 
