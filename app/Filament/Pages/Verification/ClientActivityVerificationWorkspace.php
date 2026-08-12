@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\JoinClause;
 use Filament\Tables\Concerns\InteractsWithTable;
 
+use App\Filament\Resources\ClientActivityResource;
 use App\Filament\Pages\Verification\Actions\ViewClientActivityAction;
 use Filament\Resources\Concerns\HasTabs;
 
@@ -81,21 +82,49 @@ implements HasTable, HasInfolists
                     ->wrap()
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('jenis_kegiatan')
+                    ->label('Jenis Kegiatan')
+                    ->formatStateUsing(fn ($state) => ClientActivityResource::getJenisKegiatanOptions()[(int)$state] ?? $state)
+                    ->visible(fn () => VerifierAccess::query()->where('user_id', auth()->id())->where('c_role_id', 2)->exists())
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('start_period')
                     ->date()
                     ->label('Tanggal'),
 
-                Tables\Columns\IconColumn::make('is_verified')
-                    ->label('Verified')
-                    ->tooltip(function ($record) {
-
-                            if ($record?->is_verified === \App\Enums\Acceptance::Reject) {
-                                return "Alasan Penolakan: {$record->verification_note}";
-                            } if ($record?->is_verified === \App\Enums\Acceptance::Accept) {
-                                return "Kegiatan telah diverifikasi";
-                            }
-                            return null;
-                        }),
+                Tables\Columns\TextColumn::make('is_verified')
+                    ->label('Status Verifikasi')
+                    ->badge()
+                    ->state(function (Model $record) {
+                        if ($record->is_verified === null) {
+                            return 'Belum Diproses';
+                        }
+                        return $record->is_verified->getLabel();
+                    })
+                    ->color(function (Model $record) {
+                        if ($record->is_verified === null) {
+                            return 'gray';
+                        }
+                        return $record->is_verified->getColor();
+                    })
+                    ->icon(function (Model $record) {
+                        if ($record->is_verified === null) {
+                            return 'heroicon-o-clock';
+                        }
+                        if ($record->is_verified === \App\Enums\Acceptance::Reject) {
+                            return 'heroicon-o-x-circle';
+                        }
+                        return $record->is_verified->getIcon();
+                    })
+                    ->tooltip(function (Model $record) {
+                        if ($record->is_verified === \App\Enums\Acceptance::Reject) {
+                            return "Alasan Penolakan: {$record->verification_note}";
+                        }
+                        if ($record->is_verified === \App\Enums\Acceptance::Accept) {
+                            return "Kegiatan telah diverifikasi";
+                        }
+                        return null;
+                    }),
 
             ])
 

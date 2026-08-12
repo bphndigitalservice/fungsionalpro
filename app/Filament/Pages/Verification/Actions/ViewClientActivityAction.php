@@ -9,6 +9,7 @@ use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Actions\StaticAction;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Field;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
@@ -53,6 +54,13 @@ class ViewClientActivityAction extends Action
                     ->map(function (Component $component) {
                         if ($component instanceof Field) {
                             $component->required(false);
+                        }
+
+                        if ($component instanceof \Filament\Forms\Components\FileUpload) {
+                            $component->openable()->previewable()->extraAttributes([
+                                'onclick' => "const links = this.querySelectorAll('a'); links.forEach(link => link.setAttribute('target', '_blank'));",
+                                'onmouseover' => "const links = this.querySelectorAll('a'); links.forEach(link => link.setAttribute('target', '_blank'));"
+                            ]);
                         }
 
                         return $component;
@@ -105,7 +113,7 @@ class ViewClientActivityAction extends Action
                 } else {
                     $record->forceFill([
                         'is_verified' => Acceptance::Reject,
-                        'verification_note' => $data['verifier_notes'],
+                        'verification_note' => $data['verification_note'],
                         'verified_by' => auth()->id(),
                         'verified_at' => now(),
                     ])->save();
@@ -115,7 +123,7 @@ class ViewClientActivityAction extends Action
                         new ActivityStatusNotification(
                             $record,
                             'rejected',
-                            $data['verifier_notes']
+                            $data['verification_note']
                         )
                     );
                 }

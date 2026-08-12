@@ -130,6 +130,13 @@ class ViewClientIdentityAction extends Action
                 $component->unique(ignoreRecord: true);
             }
 
+            if ($component instanceof \Filament\Forms\Components\FileUpload) {
+                $component->openable()->previewable()->extraAttributes([
+                    'onclick' => "const links = this.querySelectorAll('a'); links.forEach(link => link.setAttribute('target', '_blank'));",
+                    'onmouseover' => "const links = this.querySelectorAll('a'); links.forEach(link => link.setAttribute('target', '_blank'));"
+                ]);
+            }
+
             try {
                 $reflection = new \ReflectionProperty($component, 'rules');
                 $reflection->setAccessible(true);

@@ -181,7 +181,9 @@ class ClientActivityResource extends Resource
                         ->maxSize(config('fungsional-pro.max_upload_file_size'))
                         ->directory('activity_file')
                         ->visibility('private')
-                        ->downloadable(),
+                        ->downloadable()
+                        ->openable()
+                        ->previewable(),
                 ])
         ];
     }

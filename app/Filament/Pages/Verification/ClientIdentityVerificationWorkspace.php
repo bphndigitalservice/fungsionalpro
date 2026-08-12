@@ -66,6 +66,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                         ->toggleable(isToggledHiddenByDefault: true),
                     Tables\Columns\TextColumn::make('is_verified')
                         ->label('Status Verifikasi')
+                        ->badge()
                         ->state(function (Model $record) {
                             if ($record->is_verified === \App\Enums\Verified::Unverified) {
                                 if ($record->note && !empty($record->note->verifier_notes)) {
@@ -74,7 +75,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                                 return 'Belum diproses';
                             }
 
-                            return $record->is_verified;
+                            return $record->is_verified->getLabel();
                         })
                         ->color(function (Model $record) {
                             if ($record->is_verified === \App\Enums\Verified::Unverified) {
@@ -83,7 +84,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                                 }
                                 return 'gray';
                             }
-                            return null;
+                            return $record->is_verified->getColor();
                         })
                         ->icon(function (Model $record) {
                             if ($record->is_verified === \App\Enums\Verified::Unverified) {
@@ -92,7 +93,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                                 }
                                 return 'heroicon-o-clock';
                             }
-                            return null;
+                            return $record->is_verified->getIcon();
                         })
                         ->tooltip(function (Model $record) {
                             if ($record->is_verified === \App\Enums\Verified::Unverified && $record->note && !empty($record->note->verifier_notes)) {

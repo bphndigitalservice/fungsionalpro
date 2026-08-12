@@ -49,21 +49,42 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
                 TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('is_approved')
-                    ->label('Status Persetujuan')
-                    ->tooltip(fn (Model $record): ?string => $record->verifier_note)
+                    ->label('Status Verifikasi')
+                    ->badge()
                     ->state(function (Model $record) {
                         if ($record->status === PointSubmissionStatus::Submitted) {
-                            return 'Belum diproses';
+                            return 'Belum Diproses';
                         }
 
-                        return $record->is_approved;
+                        if ($record->status === PointSubmissionStatus::ShouldRevise) {
+                            return 'Rejected';
+                        }
+
+                        return 'Accepted';
                     })
-                    ->color(fn (Model $record) =>
-                        $record->status === PointSubmissionStatus::Submitted ? 'gray' : null
-                    )
-                    ->icon(fn (Model $record) =>
-                        $record->status === PointSubmissionStatus::Submitted ? 'heroicon-o-clock' : null
-                    ),
+                    ->color(function (Model $record) {
+                        if ($record->status === PointSubmissionStatus::Submitted) {
+                            return 'gray';
+                        }
+
+                        if ($record->status === PointSubmissionStatus::ShouldRevise) {
+                            return 'danger';
+                        }
+
+                        return 'success';
+                    })
+                    ->icon(function (Model $record) {
+                        if ($record->status === PointSubmissionStatus::Submitted) {
+                            return 'heroicon-o-clock';
+                        }
+
+                        if ($record->status === PointSubmissionStatus::ShouldRevise) {
+                            return 'heroicon-o-x-circle';
+                        }
+
+                        return 'heroicon-o-check-badge';
+                    })
+                    ->tooltip(fn (Model $record): ?string => $record->verifier_note),
 
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
