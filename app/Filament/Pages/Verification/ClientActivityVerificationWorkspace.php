@@ -86,13 +86,12 @@ implements HasTable, HasInfolists
                     ->label('Tanggal'),
 
                 Tables\Columns\IconColumn::make('is_verified')
-                    ->boolean()
                     ->label('Verified')
                     ->tooltip(function ($record) {
 
-                            if ($record?->is_verified === false) {
+                            if ($record?->is_verified === \App\Enums\Acceptance::Reject) {
                                 return "Alasan Penolakan: {$record->verification_note}";
-                            } if ($record?->is_verified === true) {
+                            } if ($record?->is_verified === \App\Enums\Acceptance::Accept) {
                                 return "Kegiatan telah diverifikasi";
                             }
                             return null;

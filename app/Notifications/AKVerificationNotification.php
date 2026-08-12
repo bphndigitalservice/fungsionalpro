@@ -12,8 +12,8 @@ class AKVerificationNotification extends Notification
     use Queueable;
 
     public function __construct(
-        protected $record, 
-        protected string $status, 
+        protected $record,
+        protected string $status,
         protected ?string $reason = null
     ) {}
 
@@ -25,12 +25,12 @@ class AKVerificationNotification extends Notification
     public function toDatabase($notifiable): array
     {
         $isAccepted = $this->status === 'accepted';
-        
+
         $statusTitle = $isAccepted ? 'Poin Diverifikasi' : 'Poin Gagal Diverifikasi';
         $statusText = $isAccepted ? 'telah berhasil diverifikasi' : 'gagal diverifikasi';
-        
+
         $bodyText = "Pengajuan AK Anda sebesar {$this->record->point} poin {$statusText}.";
-        
+
         if (!$isAccepted && $this->reason) {
             $bodyText .= " Alasan: {$this->reason}";
         }
@@ -43,7 +43,7 @@ class AKVerificationNotification extends Notification
             ->actions([
                 Action::make('view')
                     ->label('Lihat Riwayat Poin')
-                    ->url(fn() => route('filament.admin.pages.client-point-list')) 
+                    ->url(fn() => route('filament.admin.pages.client-point-list', [], false))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

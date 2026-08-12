@@ -68,17 +68,38 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
                         ->label('Status Verifikasi')
                         ->state(function (Model $record) {
                             if ($record->is_verified === \App\Enums\Verified::Unverified) {
+                                if ($record->note && !empty($record->note->verifier_notes)) {
+                                    return 'Rejected';
+                                }
                                 return 'Belum diproses';
                             }
 
                             return $record->is_verified;
                         })
-                        ->color(fn (Model $record) =>
-                            $record->is_verified === \App\Enums\Verified::Unverified ? 'gray' : null
-                        )
-                        ->icon(fn (Model $record) =>
-                            $record->is_verified === \App\Enums\Verified::Unverified ? 'heroicon-o-clock' : null
-                        )
+                        ->color(function (Model $record) {
+                            if ($record->is_verified === \App\Enums\Verified::Unverified) {
+                                if ($record->note && !empty($record->note->verifier_notes)) {
+                                    return 'danger';
+                                }
+                                return 'gray';
+                            }
+                            return null;
+                        })
+                        ->icon(function (Model $record) {
+                            if ($record->is_verified === \App\Enums\Verified::Unverified) {
+                                if ($record->note && !empty($record->note->verifier_notes)) {
+                                    return 'heroicon-o-x-circle';
+                                }
+                                return 'heroicon-o-clock';
+                            }
+                            return null;
+                        })
+                        ->tooltip(function (Model $record) {
+                            if ($record->is_verified === \App\Enums\Verified::Unverified && $record->note && !empty($record->note->verifier_notes)) {
+                                return $record->note->verifier_notes;
+                            }
+                            return null;
+                        })
                         ->searchable()
                         ->toggleable(isToggledHiddenByDefault: false),
                     Tables\Columns\TextColumn::make('created_at')
@@ -133,6 +154,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
             'croleLevel',
             'agenciable',
             'echelonable',
+            'note',
         ])
             ->where('is_profile_draft', false)
             ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
@@ -152,9 +174,9 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
         return [
             'all' => Tab::make(__('All')),
             'new' => Tab::make(__('New'))
-                ->badge($this->getTableQuery()->where('is_verified', \App\Enums\Verified::Unverified)->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_verified', \App\Enums\Verified::Unverified)),
-            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->where('is_verified', '!=', \App\Enums\Verified::Unverified)),
+                ->badge($this->getTableQuery()->where('is_verified', \App\Enums\Verified::Unverified)->whereDoesntHave('note', fn(Builder $q) => $q->whereNotNull('verifier_notes'))->count())
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_verified', \App\Enums\Verified::Unverified)->whereDoesntHave('note', fn(Builder $q) => $q->whereNotNull('verifier_notes'))),
+            'processed' => Tab::make(__('Processed'))->modifyQueryUsing(fn(Builder $query) => $query->where('is_verified', '!=', \App\Enums\Verified::Unverified)->orWhereHas('note', fn(Builder $q) => $q->whereNotNull('verifier_notes'))),
         ];
     }
 

@@ -7,6 +7,8 @@ use App\Filament\Resources\ClientActivityResource;
 use App\Notifications\ActivityStatusNotification;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Actions\StaticAction;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
@@ -46,7 +48,18 @@ class ViewClientActivityAction extends Action
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('close')));
 
         $this->form([
-            Group::make(ClientActivityResource::getFormSchema())
+            Group::make(
+                collect(ClientActivityResource::getFormSchema())
+                    ->map(function (Component $component) {
+                        if ($component instanceof Field) {
+                            $component->required(false);
+                        }
+
+                        return $component;
+                    })
+                    ->toArray()
+            )
+                ->dehydrated(false)
                 ->disabled(),
             ToggleButtons::make('is_verified')
                 ->live()
@@ -91,7 +104,7 @@ class ViewClientActivityAction extends Action
                     );
                 } else {
                     $record->forceFill([
-                        'is_verified' => false,
+                        'is_verified' => Acceptance::Reject,
                         'verification_note' => $data['verifier_notes'],
                         'verified_by' => auth()->id(),
                         'verified_at' => now(),
@@ -110,6 +123,8 @@ class ViewClientActivityAction extends Action
 
             $this->success();
         });
+
+        $this->extraModalFooterActions([]);
     }
 
     public function mutateRecordDataUsing(?Closure $callback): static

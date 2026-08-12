@@ -9,6 +9,8 @@ use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Actions\StaticAction;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
@@ -46,7 +48,18 @@ class VerifyPointSubmissionAction extends Action
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
 
         $this->form([
-            Group::make(ViewPointSubmission::getFormSubmissionView(true))
+            Group::make(
+                collect(ViewPointSubmission::getFormSubmissionView(true))
+                    ->map(function (Component $component) {
+                        if ($component instanceof Field) {
+                            $component->required(false);
+                        }
+
+                        return $component;
+                    })
+                    ->toArray()
+            )
+                ->dehydrated(false)
                 ->disabled(),
             ToggleButtons::make('is_verified')
                 ->live()
@@ -88,6 +101,8 @@ class VerifyPointSubmissionAction extends Action
 
             $this->success();
         });
+
+        $this->extraModalFooterActions([]);
     }
 
     public function mutateRecordDataUsing(?Closure $callback): static

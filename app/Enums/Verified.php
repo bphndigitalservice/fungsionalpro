@@ -11,12 +11,14 @@ enum Verified: int implements HasColor, HasIcon, HasLabel
 {
     case Verified = 1;
     case Unverified = 0;
+    case Rejected = 2;
 
     public function getLabel(): ?string
     {
         return match ($this) {
             self::Verified => 'Verified',
             self::Unverified => 'Not Verified',
+            self::Rejected => 'Rejected',
         };
     }
 
@@ -24,7 +26,8 @@ enum Verified: int implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::Verified => 'heroicon-o-check-badge',
-            self::Unverified => 'heroicon-o-x-circle',
+            self::Unverified => 'heroicon-o-clock',
+            self::Rejected => 'heroicon-o-x-circle',
         };
     }
 
@@ -32,7 +35,8 @@ enum Verified: int implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::Verified => Color::Green,
-            self::Unverified => Color::Gray
+            self::Unverified => Color::Gray,
+            self::Rejected => Color::Red,
         };
     }
 }

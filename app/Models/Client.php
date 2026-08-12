@@ -127,7 +127,7 @@ class Client extends Model
     public function verified(): void
     {
         $this->forceFill([
-            'is_verified' => true,
+            'is_verified' => Verified::Verified,
             'verified_at' => now(),
         ])->save();
     }
@@ -135,7 +135,7 @@ class Client extends Model
     public function reject(): void
     {
         $this->forceFill([
-            'is_verified' => false,
+            'is_verified' => Verified::Unverified,
         ])->save();
     }
 
