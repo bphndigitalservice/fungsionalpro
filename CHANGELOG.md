@@ -1,3 +1,10 @@
+# [0.12.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.11.0...v0.12.0) (2026-08-12)
+
+
+### Features
+
+* unify Status Verifikasi column styles, icons, and labels across all verification workspaces ([b8bd0fa](https://github.com/bphndigitalservice/fungsionalpro/commit/b8bd0faa66fdf0ebae833366c243712803f48559))
+
 # [0.11.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.1...v0.11.0) (2026-08-12)
 
 
