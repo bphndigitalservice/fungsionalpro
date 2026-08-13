@@ -1,3 +1,11 @@
+# [0.14.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.13.0...v0.14.0) (2026-08-13)
+
+
+### Features
+
+* add Verifikator BPHN global scope for verifier access without regional entity ([c439005](https://github.com/bphndigitalservice/fungsionalpro/commit/c4390054fc08bd341d567411411d7b2864a03ee0))
+* add Verifikator BPHN global scope for verifier access without regional entity ([e3d8d17](https://github.com/bphndigitalservice/fungsionalpro/commit/e3d8d17e410dcb3b285f8a63fff7cbe0c54a642a))
+
 # [0.13.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.12.0...v0.13.0) (2026-08-13)
 
 
