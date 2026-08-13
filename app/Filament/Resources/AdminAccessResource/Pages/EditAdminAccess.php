@@ -10,6 +10,15 @@ class EditAdminAccess extends EditRecord
 {
     protected static string $resource = AdminAccessResource::class;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return AdminAccessResource::formDataForSelectedUser($data);
+    }
+
     protected function getHeaderActions(): array
     {
         return [

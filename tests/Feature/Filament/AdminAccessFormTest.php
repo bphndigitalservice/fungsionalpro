@@ -98,4 +98,64 @@ class AdminAccessFormTest extends TestCase
             'entity_id' => null,
         ]);
     }
+
+    public function test_switching_to_admin_clears_region(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $instansi = User::factory()->create();
+        $instansi->assignRole(SystemRole::AdminInstansi->value);
+        $admin = User::factory()->create();
+        $admin->assignRole(SystemRole::Admin->value);
+        $jabatan = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        $record = AdminAccess::create([
+            'user_id' => $instansi->id,
+            'c_role_id' => $jabatan->id,
+            'entity_type' => RegDepartment::class,
+            'entity_id' => $department->id,
+        ]);
+
+        Livewire::test(EditAdminAccess::class, ['record' => $record->getRouteKey()])
+            ->fillForm([
+                'user_id' => $admin->id,
+                'c_role_id' => $jabatan->id,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $record->refresh();
+
+        $this->assertTrue($record->user->is($admin));
+        $this->assertNull($record->entity_type);
+        $this->assertNull($record->entity_id);
+    }
+
+    public function test_creating_admin_with_region_filled_still_saves_null_region(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $admin = User::factory()->create();
+        $admin->assignRole(SystemRole::Admin->value);
+        $jabatan = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        Livewire::test(CreateAdminAccess::class)
+            ->fillForm([
+                'user_id' => $admin->id,
+                'c_role_id' => $jabatan->id,
+                'entity_type' => RegDepartment::class,
+                'entity_id' => $department->id,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('admin_accesses', [
+            'user_id' => $admin->id,
+            'c_role_id' => $jabatan->id,
+            'entity_type' => null,
+            'entity_id' => null,
+        ]);
+    }
 }
