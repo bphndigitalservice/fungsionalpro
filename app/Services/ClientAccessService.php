@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\SystemRole;
 use App\Models\Client;
 use App\Models\User;
+use App\Models\VerifierAccess;
 use Illuminate\Database\Eloquent\Builder;
 
 final class ClientAccessService
@@ -56,9 +57,8 @@ final class ClientAccessService
                 $query->selectRaw('1')
                     ->from('verifier_accesses as va')
                     ->whereColumn('va.c_role_id', 'clients.c_role_id')
-                    ->whereColumn('va.entity_type', 'clients.agency_type')
-                    ->whereColumn('va.entity_id', 'clients.agency_id')
                     ->where('va.user_id', $user->id);
+                VerifierAccess::constrainMatchingClientAgency($query, 'va');
             });
         }
 

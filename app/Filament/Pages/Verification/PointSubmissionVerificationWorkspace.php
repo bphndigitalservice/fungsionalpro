@@ -115,9 +115,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
             ])
             ->join('clients', 'client_point_submissions.client_id', '=', 'clients.id')
             ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'va.c_role_id')
-                    ->on('va.entity_type', '=', 'clients.agency_type')
-                    ->on('va.entity_id', '=', 'clients.agency_id');
+                VerifierAccess::joinClientAgencyMatch($join);
             })
             ->select('client_point_submissions.*')
             ->distinct();

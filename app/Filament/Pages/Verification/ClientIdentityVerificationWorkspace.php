@@ -159,9 +159,7 @@ class ClientIdentityVerificationWorkspace extends Page implements HasInfolists, 
         ])
             ->where('is_profile_draft', false)
             ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'va.c_role_id');
-                $join->on('va.entity_type', '=', 'clients.agency_type');
-                $join->on('va.entity_id', '=', 'clients.agency_id');
+                VerifierAccess::joinClientAgencyMatch($join);
             })->select('clients.*');
     }
 
