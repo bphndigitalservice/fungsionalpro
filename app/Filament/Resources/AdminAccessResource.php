@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Models\RegDepartment;
@@ -39,6 +40,43 @@ class AdminAccessResource extends Resource
     public static function canDelete(Model $record): bool
     {
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
+    }
+
+    public static function eligibleUsersQuery(): Builder
+    {
+        return User::role([
+            SystemRole::Admin->value,
+            SystemRole::AdminInstansi->value,
+        ]);
+    }
+
+    public static function selectedUserRequiresRegion(int|string|null $userId): bool
+    {
+        if (blank($userId)) {
+            return false;
+        }
+
+        $user = User::query()->find($userId);
+
+        if ($user === null) {
+            return false;
+        }
+
+        if ($user->hasSystemRole(SystemRole::Admin)) {
+            return false;
+        }
+
+        return $user->hasSystemRole(SystemRole::AdminInstansi);
+    }
+
+    public static function formDataForSelectedUser(array $data): array
+    {
+        if (! static::selectedUserRequiresRegion($data['user_id'] ?? null)) {
+            $data['entity_type'] = null;
+            $data['entity_id'] = null;
+        }
+
+        return $data;
     }
 
     public static function form(Form $form): Form
