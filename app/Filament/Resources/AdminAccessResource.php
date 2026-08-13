@@ -8,6 +8,7 @@ use App\Models\AdminAccess;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -97,9 +98,14 @@ class AdminAccessResource extends Resource
                                 Forms\Components\Select::make('user_id')
                                     ->label(__('labels.form.user.fields.name'))
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Admin->value]))
+                                    ->relationship(
+                                        'user',
+                                        'name',
+                                        modifyQueryUsing: fn (): Builder => static::eligibleUsersQuery(),
+                                    )
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->live(),
                             ])->columns(2),
 
                         Forms\Components\Group::make()
@@ -112,7 +118,9 @@ class AdminAccessResource extends Resource
                                             ->titleAttribute('name'),
                                         Forms\Components\MorphToSelect\Type::make(RegRegency::class)
                                             ->titleAttribute('name'),
-                                    ]),
+                                    ])
+                                    ->visible(fn (Get $get): bool => static::selectedUserRequiresRegion($get('user_id')))
+                                    ->required(fn (Get $get): bool => static::selectedUserRequiresRegion($get('user_id'))),
                             ])->columns(2),
                     ]),
             ]);
