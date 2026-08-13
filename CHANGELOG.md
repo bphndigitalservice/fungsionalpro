@@ -1,3 +1,19 @@
+# [0.13.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.12.0...v0.13.0) (2026-08-13)
+
+
+### Features
+
+* add admin access region rules by system role ([4ae4c02](https://github.com/bphndigitalservice/fungsionalpro/commit/4ae4c0210c90a77485fb3d6a37c1d811d8c468bd))
+* clear admin access region when user is global admin ([90817a5](https://github.com/bphndigitalservice/fungsionalpro/commit/90817a527ded9c225c33036ed86f94a1bd1cbcce))
+* require admin access region only for admin-instansi ([c910252](https://github.com/bphndigitalservice/fungsionalpro/commit/c9102525c749bb92bf4ce2fab5637dd1dbe64a17))
+
+# [0.12.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.11.0...v0.12.0) (2026-08-12)
+
+
+### Features
+
+* unify Status Verifikasi column styles, icons, and labels across all verification workspaces ([b8bd0fa](https://github.com/bphndigitalservice/fungsionalpro/commit/b8bd0faa66fdf0ebae833366c243712803f48559))
+
 # [0.11.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.1...v0.11.0) (2026-08-12)
 
 
