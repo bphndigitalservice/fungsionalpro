@@ -1,0 +1,406 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "FungsionalPro",
+        "version": "1.0.0",
+        "description": "Master JF aggregate API for superapps integration.\n\n**Authentication:** send header `X-Api-Key` with the value of `SUPERAPPS_API_KEY`.\n\n**Response:** grouped by jenis JF \u00d7 cluster. Each group has `aggregate` (card metrics) and `data[]` instansi list (`name`, `client_count`).\n\n**Primary filters:** `province_id`/`provinsi` (daerah), `c_role_id` (jenis JF), `type` (effective cluster)."
+    },
+    "servers": [
+        {
+            "url": "http://fungsionalpro.test/api"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Master JF"
+        }
+    ],
+    "security": [
+        {
+            "apiKey": []
+        }
+    ],
+    "paths": {
+        "/v1/master-jf": {
+            "get": {
+                "operationId": "masterJf.index",
+                "description": "Returns grouped aggregations of Jabatan Fungsional data for superapps dashboards.\n\nEach group represents one **jenis JF \u00d7 cluster** combination and includes:\n- group-level `aggregate` (card metrics)\n- `data[]` instansi list with `name` and `client_count` only\n\n**Primary filters (superapps UX):**\n- `province_id` / `provinsi` \u2014 daerah (hybrid; Pemda only unless `type=central`)\n- `c_role_id` \u2014 jenis JF (e.g. 1=Analis Hukum, 2=Penyuluh Hukum)\n- `type` \u2014 effective cluster (`central`, `local_province`, `local_regency`)\n\nWhen `type=central`, daerah filters are ignored. When daerah is set without `type=central`, K/L rows are excluded.\n\nAuthenticate with header `X-Api-Key`.",
+                "summary": "Master JF aggregations by type and cluster",
+                "tags": [
+                    "Master JF"
+                ],
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search nama, NIP, instansi, or unit_kerja (LIKE).",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "c_role_id",
+                        "in": "query",
+                        "description": "Filter jenis Jabatan Fungsional (`c_roles.id`). Example: 1=Analis Hukum, 2=Penyuluh Hukum.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "c_role_level_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "jenjang",
+                        "in": "query",
+                        "description": "Filter jenjang parsed from jabatan text (LIKE), e.g. `Ahli Muda`.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "reg_grade_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "province_id",
+                        "in": "query",
+                        "description": "Filter daerah via FK `reg_provinces.id`. Applies to Pemda rows only; excludes K/L unless combined with `type=central`.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 11
+                    },
+                    {
+                        "name": "provinsi",
+                        "in": "query",
+                        "description": "Filter daerah via text column. Matches only when `province_id` IS NULL (hybrid fallback). Pemda only.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        },
+                        "example": "BALI"
+                    },
+                    {
+                        "name": "pengangkatan",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "$ref": "#/components/schemas/ClientStatus"
+                        }
+                    },
+                    {
+                        "name": "status_kepegawaian",
+                        "in": "query",
+                        "schema": {
+                            "$ref": "#/components/schemas/JenisKepegawaian"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter effective cluster (resolved from stored type or instansi matching). Values: `central`, `local_province`, `local_regency`. When `central`, daerah filters are ignored.",
+                        "schema": {
+                            "$ref": "#/components/schemas/ClientCluster"
+                        },
+                        "example": "local_province"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grouped aggregations. `aggregate` exists only on each group/card \u2014 not on instansi items.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "jf_type_id": 1,
+                                                    "jf_label": "Analis Hukum",
+                                                    "cluster_id": "central",
+                                                    "cluster_label": "Kementerian Lembaga",
+                                                    "aggregate": {
+                                                        "total_jf": 120,
+                                                        "by_jenjang": {
+                                                            "Ahli Pertama": 10,
+                                                            "Ahli Muda": 25,
+                                                            "Ahli Madya": 18,
+                                                            "Ahli Utama": 5,
+                                                            "unknown": 0
+                                                        },
+                                                        "by_status": {
+                                                            "active": 30,
+                                                            "unknown": 90
+                                                        },
+                                                        "by_status_kepegawaian": {
+                                                            "PNS": 80,
+                                                            "PPPK": 20,
+                                                            "unknown": 20
+                                                        },
+                                                        "by_pengangkatan": {
+                                                            "Penyetaraan": 15,
+                                                            "unknown": 105
+                                                        }
+                                                    },
+                                                    "data": [
+                                                        {
+                                                            "name": "Kementerian Hukum",
+                                                            "client_count": 46
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "$ref": "#/components/schemas/MasterJfIndexResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/ping": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "ok"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "apiKey": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-Api-Key"
+            }
+        },
+        "schemas": {
+            "ClientCluster": {
+                "type": "string",
+                "enum": [
+                    "central",
+                    "local_province",
+                    "local_regency"
+                ],
+                "title": "ClientCluster"
+            },
+            "ClientStatus": {
+                "type": "string",
+                "enum": [
+                    "active",
+                    "non_active_resign",
+                    "non_active_suspended",
+                    "non_active_ctln",
+                    "non_active_study_leave",
+                    "non_active_external_assignment",
+                    "non_active_doesnt_meet_role_requirement"
+                ],
+                "title": "ClientStatus"
+            },
+            "JenisKepegawaian": {
+                "type": "string",
+                "enum": [
+                    "PNS",
+                    "PPPK"
+                ],
+                "title": "JenisKepegawaian"
+            },
+            "MasterJfGroupResource": {
+                "type": "object",
+                "properties": {
+                    "jf_type_id": {
+                        "type": "integer"
+                    },
+                    "jf_label": {
+                        "type": "string"
+                    },
+                    "cluster_id": {
+                        "type": "string",
+                        "description": "Effective cluster: `central`, `local_province`, or `local_regency`."
+                    },
+                    "cluster_label": {
+                        "type": "string"
+                    },
+                    "aggregate": {
+                        "$ref": "#/components/schemas/MasterJfSliceAggregateResource"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MasterJfInstansiItemResource"
+                        }
+                    }
+                },
+                "required": [
+                    "jf_type_id",
+                    "jf_label",
+                    "cluster_id",
+                    "cluster_label",
+                    "aggregate",
+                    "data"
+                ],
+                "title": "MasterJfGroupResource"
+            },
+            "MasterJfIndexResource": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MasterJfGroupResource"
+                        }
+                    }
+                },
+                "required": [
+                    "data"
+                ],
+                "title": "MasterJfIndexResource"
+            },
+            "MasterJfInstansiItemResource": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "client_count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "client_count"
+                ],
+                "title": "MasterJfInstansiItemResource"
+            },
+            "MasterJfSliceAggregateResource": {
+                "type": "object",
+                "properties": {
+                    "total_jf": {
+                        "type": "integer"
+                    },
+                    "by_jenjang": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "by_status": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "by_status_kepegawaian": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "by_pengangkatan": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "total_jf",
+                    "by_jenjang",
+                    "by_status",
+                    "by_status_kepegawaian",
+                    "by_pengangkatan"
+                ],
+                "title": "MasterJfSliceAggregateResource"
+            }
+        },
+        "responses": {
+            "ValidationException": {
+                "description": "Validation error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Errors overview."
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "A detailed description of each field that failed validation.",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "message",
+                                "errors"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

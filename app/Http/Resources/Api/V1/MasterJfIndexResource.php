@@ -12,7 +12,9 @@ class MasterJfIndexResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'agregasi' => $this->resource['agregasi'],
+            'data' => MasterJfGroupResource::collection(
+                collect($this->resource['data'] ?? []),
+            ),
         ];
     }
 }

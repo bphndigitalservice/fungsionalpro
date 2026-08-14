@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Client;
 use App\Observers\ClientObserver;
+use App\Support\OpenApi\MasterJfOpenApiDocumentTransformer;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,6 +80,10 @@ class AppServiceProvider extends ServiceProvider
 
         VerifyEmail::createUrlUsing(function ($notifiable) {
             return Filament::getVerifyEmailUrl($notifiable);
+        });
+
+        Scramble::afterOpenApiGenerated(function (OpenApi $openApi): void {
+            MasterJfOpenApiDocumentTransformer::transform($openApi);
         });
     }
 }
