@@ -10,7 +10,7 @@ ARG BUN_VERSION=1.2.9
 ARG SUPERCRONIC_VERSION=0.2.47
 
 # Must be declared before first FROM so BuildKit can expand it in FROM lines.
-ARG GOLANG_VERSION=1.26.5
+ARG GOLANG_VERSION=1.26.6
 
 ###########################################
 # Build frontend assets with Bun
@@ -38,7 +38,7 @@ FROM composer:${COMPOSER_VERSION} AS vendor
 
 ###########################################
 # Build supercronic with a patched Go toolchain
-# Upstream v0.2.47 ships Go 1.26.4; rebuild with 1.26.5 for CVE-2026-39822.
+# Upstream v0.2.47 ships Go 1.26.4; rebuild with 1.26.6 for CVE-2026-39821/46600.
 ###########################################
 
 FROM golang:${GOLANG_VERSION}-alpine AS supercronic
