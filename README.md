@@ -4,6 +4,10 @@
 
 Read full documentation [https://docs.fungsionalpro.bphn.go.id](here)
 
+## Local Development
+
+For local setup with PostgreSQL, Redis, and MinIO via Docker, see [docs/local-development.md](docs/local-development.md).
+
 ## Production Deployment
 
 This application ships a production Docker Compose stack in `deployment/`.
