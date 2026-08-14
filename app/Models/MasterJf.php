@@ -29,6 +29,7 @@ class MasterJf extends Model
         'type',
         'status_kepegawaian',
         'provinsi',
+        'province_id',
     ];
 
     protected $casts = [
@@ -50,6 +51,11 @@ class MasterJf extends Model
     public function cRoleLevel(): BelongsTo
     {
         return $this->belongsTo(CRoleLevel::class, 'c_role_level_id');
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(RegProvince::class, 'province_id');
     }
 
     /** @return array<string, string> */

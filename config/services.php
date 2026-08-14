@@ -31,4 +31,8 @@ return [
         ],
     ],
 
+    'superapps' => [
+        'api_key' => env('SUPERAPPS_API_KEY'),
+    ],
+
 ];
