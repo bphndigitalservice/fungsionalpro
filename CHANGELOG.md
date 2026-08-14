@@ -1,3 +1,10 @@
+# [0.16.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.2...v0.16.0) (2026-08-14)
+
+
+### Features
+
+* **api:** refine master-jf aggregations with effective cluster and OpenAPI docs ([ce707c0](https://github.com/bphndigitalservice/fungsionalpro/commit/ce707c068ed8a8c3f1e486141b7f083e81c3dd1b))
+
 ## [0.15.2](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.1...v0.15.2) (2026-08-14)
 
 
