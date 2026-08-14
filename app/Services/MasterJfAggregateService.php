@@ -13,27 +13,14 @@ use Illuminate\Support\Facades\DB;
 
 class MasterJfAggregateService
 {
-    /** @return array{total_filtered:int,page:int,per_page:int,total_pages:int,agregasi:array,items:\Illuminate\Support\Collection} */
-    public function paginate(array $filters): array
+    /** @return array{agregasi: array<string, mixed>} */
+    public function aggregate(array $filters): array
     {
-        $page = max(1, (int) ($filters['page'] ?? 1));
-        $perPage = min(100, max(1, (int) ($filters['per_page'] ?? 20)));
-
         $baseQuery = $this->buildFilteredQuery($filters);
         $totalFiltered = (clone $baseQuery)->count();
 
-        $paginator = (clone $baseQuery)
-            ->with(['cRole', 'cRoleLevel', 'grade', 'province'])
-            ->orderBy('id')
-            ->paginate($perPage, ['*'], 'page', $page);
-
         return [
-            'total_filtered' => $totalFiltered,
-            'page' => $paginator->currentPage(),
-            'per_page' => $paginator->perPage(),
-            'total_pages' => $paginator->lastPage(),
             'agregasi' => $this->computeAggregations($baseQuery, $totalFiltered),
-            'items' => collect($paginator->items()),
         ];
     }
 

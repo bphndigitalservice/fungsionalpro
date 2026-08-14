@@ -32,12 +32,10 @@ class MasterJfAggregateServiceTest extends TestCase
         MasterJf::factory()->create(['c_role_id' => $roleB->id, 'status' => ClientStatus::Active]);
 
         $service = app(MasterJfAggregateService::class);
-        $result = $service->paginate(['c_role_id' => $roleA->id, 'page' => 1, 'per_page' => 10]);
+        $result = $service->aggregate(['c_role_id' => $roleA->id]);
 
-        $this->assertSame(2, $result['total_filtered']);
         $this->assertSame(2, $result['agregasi']['total_jf']);
         $this->assertSame(2, $result['agregasi']['by_jabatan_fungsional']['Analis Hukum'] ?? 0);
-        $this->assertCount(2, $result['items']);
     }
 
     public function test_search_matches_nama_or_nip(): void
@@ -46,9 +44,9 @@ class MasterJfAggregateServiceTest extends TestCase
         MasterJf::factory()->create(['nama' => 'Other Person', 'nip' => '222']);
 
         $service = app(MasterJfAggregateService::class);
-        $result = $service->paginate(['search' => 'Akbar', 'page' => 1, 'per_page' => 10]);
+        $result = $service->aggregate(['search' => 'Akbar']);
 
-        $this->assertSame(1, $result['total_filtered']);
+        $this->assertSame(1, $result['agregasi']['total_jf']);
     }
 
     public function test_jenjang_filter_matches_jabatan_text(): void
@@ -57,9 +55,9 @@ class MasterJfAggregateServiceTest extends TestCase
         MasterJf::factory()->create(['jabatan' => 'Penyuluh Hukum Ahli Pertama']);
 
         $service = app(MasterJfAggregateService::class);
-        $result = $service->paginate(['jenjang' => 'Ahli Madya', 'page' => 1, 'per_page' => 10]);
+        $result = $service->aggregate(['jenjang' => 'Ahli Madya']);
 
-        $this->assertSame(1, $result['total_filtered']);
+        $this->assertSame(1, $result['agregasi']['total_jf']);
     }
 
     public function test_c_role_level_id_filter_resolves_level_to_jabatan_like(): void
@@ -71,9 +69,9 @@ class MasterJfAggregateServiceTest extends TestCase
         MasterJf::factory()->create(['jabatan' => 'Analis Hukum Ahli Muda', 'c_role_level_id' => null]);
 
         $service = app(MasterJfAggregateService::class);
-        $result = $service->paginate(['c_role_level_id' => $level->id, 'page' => 1, 'per_page' => 10]);
+        $result = $service->aggregate(['c_role_level_id' => $level->id]);
 
-        $this->assertSame(1, $result['total_filtered']);
+        $this->assertSame(1, $result['agregasi']['total_jf']);
     }
 
     public function test_provinsi_filter_only_applies_when_province_id_is_null(): void
@@ -84,8 +82,8 @@ class MasterJfAggregateServiceTest extends TestCase
         MasterJf::factory()->create(['province_id' => 11, 'provinsi' => 'ACEH']);
 
         $service = app(MasterJfAggregateService::class);
-        $result = $service->paginate(['provinsi' => 'BENGKULU', 'page' => 1, 'per_page' => 10]);
+        $result = $service->aggregate(['provinsi' => 'BENGKULU']);
 
-        $this->assertSame(1, $result['total_filtered']);
+        $this->assertSame(1, $result['agregasi']['total_jf']);
     }
 }

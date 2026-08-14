@@ -13,7 +13,7 @@ class MasterJfController extends Controller
 
     public function index(MasterJfIndexRequest $request): MasterJfIndexResource
     {
-        $payload = $this->service->paginate($request->validated());
+        $payload = $this->service->aggregate($request->validated());
 
         return new MasterJfIndexResource($payload);
     }

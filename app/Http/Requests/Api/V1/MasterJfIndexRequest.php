@@ -18,8 +18,6 @@ class MasterJfIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'search' => ['sometimes', 'string', 'max:255'],
             'c_role_id' => ['sometimes', 'integer', 'exists:c_roles,id'],
             'c_role_level_id' => ['sometimes', 'integer', 'exists:c_role_levels,id'],
