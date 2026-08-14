@@ -62,6 +62,7 @@ x-shared-env: &shared-env
     AWS_BUCKET: "${AWS_BUCKET}"
     AWS_USE_PATH_STYLE_ENDPOINT: "${AWS_USE_PATH_STYLE_ENDPOINT}"
     VITE_APP_NAME: "${VITE_APP_NAME}"
+    SUPERAPPS_API_KEY: "${SUPERAPPS_API_KEY}"
 
 # uid/gid 1000 = octane user in the image. Without this, tmpfs mounts are
 # root-owned and artisan/supervisord cannot write under read_only rootfs.
