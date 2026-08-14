@@ -1,3 +1,10 @@
+## [0.15.2](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.1...v0.15.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* **deploy:** pass SUPERAPPS_API_KEY into app and worker containers ([9e26beb](https://github.com/bphndigitalservice/fungsionalpro/commit/9e26beb070cdff043dca7ec9d9c527264e2e90bb))
+
 ## [0.15.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.0...v0.15.1) (2026-08-14)
 
 
