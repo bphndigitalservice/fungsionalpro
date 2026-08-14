@@ -1,3 +1,10 @@
+## [0.15.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.0...v0.15.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **security:** resolve Trivy HIGH vulnerabilities in Docker image ([8964184](https://github.com/bphndigitalservice/fungsionalpro/commit/8964184e28c83e1599d8a52d016bc08970d38fc1))
+
 # [0.15.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.14.0...v0.15.0) (2026-08-14)
 
 
