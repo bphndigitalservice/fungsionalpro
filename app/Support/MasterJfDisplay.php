@@ -7,12 +7,15 @@ use App\Models\MasterJf;
 final class MasterJfDisplay
 {
     /** @var list<string> */
-    private const KNOWN_JENJANG = [
+    public const JENJANG_LABELS = [
         'Ahli Pertama',
         'Ahli Muda',
         'Ahli Madya',
         'Ahli Utama',
     ];
+
+    /** @var list<string> */
+    private const KNOWN_JENJANG = self::JENJANG_LABELS;
 
     public static function parseJenjangFromJabatan(?string $jabatan): ?string
     {
@@ -76,5 +79,17 @@ final class MasterJfDisplay
         }
 
         return trim($value);
+    }
+
+    public static function isPemdaInstansi(?string $instansi): bool
+    {
+        return $instansi !== null
+            && str_contains(strtolower($instansi), 'pemerintah daerah');
+    }
+
+    /** @return 'pemda'|'kl' */
+    public static function classifyJenisInstansi(?string $instansi): string
+    {
+        return self::isPemdaInstansi($instansi) ? 'pemda' : 'kl';
     }
 }

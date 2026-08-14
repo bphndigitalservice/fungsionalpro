@@ -40,4 +40,11 @@ class MasterJfDisplayTest extends TestCase
 
         $this->assertSame('Penyuluh Hukum', MasterJfDisplay::resolveJabatanFungsional($row));
     }
+
+    public function test_it_classifies_pemda_when_instansi_contains_pemerintah_daerah(): void
+    {
+        $this->assertSame('pemda', MasterJfDisplay::classifyJenisInstansi('PEMERINTAH DAERAH KABUPATEN TANGERANG'));
+        $this->assertSame('kl', MasterJfDisplay::classifyJenisInstansi('KEMENTERIAN HUKUM'));
+        $this->assertSame('kl', MasterJfDisplay::classifyJenisInstansi(null));
+    }
 }
