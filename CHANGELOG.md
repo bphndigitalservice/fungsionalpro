@@ -1,3 +1,10 @@
+# [0.15.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.14.0...v0.15.0) (2026-08-14)
+
+
+### Features
+
+* **api:** add Master JF aggregate endpoint for superapps integration ([9801d3d](https://github.com/bphndigitalservice/fungsionalpro/commit/9801d3d4be630d81288d4ac8ef0fb3b988c174d8))
+
 # [0.14.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.13.0...v0.14.0) (2026-08-13)
 
 
