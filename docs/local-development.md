@@ -42,6 +42,10 @@ Keep `DB_PORT` / `REDIS_PORT` matching your `docker-compose.dev.env` host mappin
 ```bash
 cd ~/Workdir/fungsionalpro
 
+# 0. LERD (first time only)
+lerd init          # or commit .lerd.yaml already in repo
+lerd link fungsionalpro
+
 # 1. Start infrastructure
 cp docker-compose.dev.env.example docker-compose.dev.env   # adjust ports if needed
 docker compose --env-file docker-compose.dev.env -f docker-compose.dev.yml up -d
@@ -61,6 +65,10 @@ bun install && bun run build
 # 6. Optional
 php artisan storage:link
 ```
+
+Open **http://fungsionalpro.test** (LERD). Do **not** use `http://localhost:8000` — that port is often taken by Portainer or other tools, not this app.
+
+If you are not using LERD, run `php artisan serve --port=8002` and set `APP_URL=http://127.0.0.1:8002`.
 
 ## Docker services
 
@@ -160,13 +168,11 @@ Uploads in Filament use the `s3` disk pointed at this bucket.
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-**Terminal 2 — Laravel:**
+**Terminal 2 — Laravel (LERD serves the app automatically):**
 
-```bash
-php artisan serve
-```
+Open [http://fungsionalpro.test](http://fungsionalpro.test)
 
-App: [http://localhost:8000](http://localhost:8000)
+Without LERD: `php artisan serve --port=8002` → `http://127.0.0.1:8002`
 
 **Terminal 3 — Vite (hot reload):**
 

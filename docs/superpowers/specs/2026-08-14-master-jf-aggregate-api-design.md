@@ -25,20 +25,39 @@ Provide a single API endpoint that lets the superapps frontend team integrate Ma
 | Auth | Static API key via header `X-Api-Key` |
 | Env var | `SUPERAPPS_API_KEY` |
 | HTTP methods | GET only (read-only) |
-| Filters | Full set: search, c_role_id, c_role_level_id, reg_grade_id, province_id, provinsi, pengangkatan, status, status_kepegawaian, type |
+| Filters | Full set: search, c_role_id, c_role_level_id, **jenjang**, reg_grade_id, province_id, provinsi, pengangkatan, status, status_kepegawaian, type |
 | Province | Hybrid: canonical `province_id` → `reg_provinces.name`; fallback text column `provinsi` when FK null |
 | Docs | Scramble (auto OpenAPI) at `/docs/api` |
 | Rate limit | 60 requests/minute per API key |
 
+## Data source audit (running app — dev DB restore, 958 rows)
+
+Trace of how Filament and import **actually** resolve display values today. API must follow this, not assumed FK-only logic.
+
+| Field | Filament / import source | FK fill rate (dev) | API resolution rule |
+|---|---|---|---|
+| **Jabatan Fungsional** | Table: `cRole.role_name`. Import: hardcoded from `jabatan` text (`Analis Hukum` → id 1, `Penyuluh Hukum` → id 2) | `c_role_id` **958/958** | `cRole.role_name`; if FK null, infer from `jabatan` like `MasterJfImport` |
+| **Jenjang** | Table: **parsed from `jabatan`** via regex — **not** `c_role_level_id`. Filter "Jenjang": `jabatan LIKE %Ahli …%`. Widget counts same pattern. Form allows `c_role_level_id` select but import never sets it | `c_role_level_id` **0/958** | Parse `jabatan` (same regex as Filament). Normalize known labels to title case (`Ahli Pertama`, …). Use `cRoleLevel.level` only when FK is set (manual edit path) |
+| **Golongan/Ruang** | Table: `grade.clean_name` (`RegGrade` accessor). Import: `RegGradeResolver::resolveId(golruang)`. Backfill migration fills from `gol_ruang` text | `reg_grade_id` **805/958** (73 rows still have `gol_ruang` but no FK) | `grade.clean_name` / `grade.grade_name` via relation; null when unmapped |
+| **Provinsi** | Table + filters: **text column `provinsi`** via `MasterJf::distinctOptions('provinsi')`. Import sets `provinsi` only — **not** `province_id`. `province_id` exists in prod backup (884 rows) but **no repo migration/backfill**; values align with `reg_provinces.name` | `province_id` **884/958**, `provinsi` **884/958** (always paired in dev) | Response: `reg_provinces.name` when `province_id` set; else trimmed `provinsi`. Filter `province_id`: exact FK. Filter `provinsi`: text column only when `province_id` IS NULL |
+
+**Code references:**
+
+- Jenjang display: `MasterJfResource` — `preg_replace('/^(Penyuluh Hukum|Analis Hukum)\s+/i', '', $record->jabatan)`
+- Import: `app/Imports/MasterJfImport.php` — sets `c_role_id`, `reg_grade_id`, `provinsi`; does **not** set `c_role_level_id` or `province_id`
+- Grade resolver: `app/Support/RegGradeResolver.php`
+
+Shared helper (new): `app/Support/MasterJfDisplay.php` — centralize jenjang parse + title-case normalization so API and Filament stay aligned.
+
 ## Foreign key relationships
 
-| `master_jf` column | Related table | Display field(s) | Filament label |
-|---|---|---|---|
-| `c_role_id` | `c_roles` | `role_name` | Jabatan Fungsional |
-| `c_role_level_id` | `c_role_levels` | `level` | Jenjang |
-| `reg_grade_id` | `reg_grades` | `grade_code`, `grade_name` | Golongan/Ruang |
-| `province_id` | `reg_provinces` | `name` | Provinsi (canonical) |
-| `provinsi` | *(text column)* | raw string | Provinsi (legacy fallback) |
+| `master_jf` column | Related table | Display field(s) | Filament label | Reliable today? |
+|---|---|---|---|---|
+| `c_role_id` | `c_roles` | `role_name` | Jabatan Fungsional | Yes (100%) |
+| `c_role_level_id` | `c_role_levels` | `level` | Jenjang (form only) | **No** — use `jabatan` parse for display/filter |
+| `reg_grade_id` | `reg_grades` | `grade_code`, `grade_name`, `clean_name` | Golongan/Ruang | Mostly (84%) |
+| `province_id` | `reg_provinces` | `name` | *(not used in Filament table)* | Yes when set; Filament ignores FK |
+| `provinsi` | *(text column)* | raw string | Provinsi | Yes for filter/display in admin |
 
 Non-FK columns used in filters and aggregations:
 
@@ -47,7 +66,7 @@ Non-FK columns used in filters and aggregations:
 - `status_kepegawaian` — `JenisKepegawaian` enum (`PNS`, `PPPK`)
 - `type` — `ClientCluster` enum (`central`, `local_province`, `local_regency`)
 
-**Model gap:** `MasterJf` lacks `province()` relationship and `province_id` in `$fillable`. Add `province(): BelongsTo` → `RegProvince` on `province_id`.
+**Model update (code only, no migration):** Add `province(): BelongsTo` → `RegProvince` on existing `province_id` column; add `province_id` to `$fillable`. DB restore already has the column — API does not run migrations or mutate rows.
 
 ## Approach
 
@@ -124,10 +143,11 @@ Accept: application/json
 | `per_page` | integer | `20` | min 1, max 100 |
 | `search` | string | — | max 255; matches `nama`, `nip`, `instansi`, `unit_kerja` (LIKE) |
 | `c_role_id` | integer | — | exists:c_roles,id |
-| `c_role_level_id` | integer | — | exists:c_role_levels,id |
+| `c_role_level_id` | integer | — | exists:c_role_levels,id; resolves `c_role_levels.level` then filters `jabatan LIKE` (FK column is empty in prod data) |
+| `jenjang` | string | — | max 255; matches `jabatan LIKE` (same as Filament Jenjang filter) |
 | `reg_grade_id` | integer | — | exists:reg_grades,id |
 | `province_id` | integer | — | exists:reg_provinces,id |
-| `provinsi` | string | — | max 255; matches text column when `province_id` is null |
+| `provinsi` | string | — | max 255; matches text column **only when** `province_id` IS NULL |
 | `pengangkatan` | string | — | max 255 |
 | `status` | string | — | valid `ClientStatus` enum value |
 | `status_kepegawaian` | string | — | valid `JenisKepegawaian` enum value |
@@ -199,9 +219,11 @@ All filters combine with AND logic. Aggregations reflect the full filtered query
 
 **Field rules for `data[]`:**
 
+- `jabatan_fungsional`: `MasterJfDisplay::resolveJabatanFungsional($row)` — `cRole.role_name` with import-style fallback from `jabatan`.
+- `jenjang`: `MasterJfDisplay::resolveJenjang($row)` — parse from `jabatan` when `c_role_level_id` is null; honor `cRoleLevel.level` when FK is set (manual edit).
 - `provinsi`: use `reg_provinces.name` when `province_id` is set; otherwise use trimmed `provinsi` text column.
 - Enum-backed fields expose human label + machine `*_code` value.
-- `golongan_ruang_code`: use existing `RegGrade::clean_name` accessor pattern.
+- `golongan_ruang_code`: use existing `RegGrade::clean_name` accessor via `grade` relation; null when `reg_grade_id` unset.
 - Eager-load `cRole`, `cRoleLevel`, `grade`, `province` to avoid N+1.
 
 **Aggregation rules:**
@@ -266,7 +288,7 @@ Protect docs in production via middleware or `SCRAMBLE_ENABLED=false` if require
 
 ## Environment
 
-Add to `.env.example` and deployment env templates:
+Add to `.env.example`, `.env.template`, `deployment/fungsionalpro.env`, and runtime `.env`:
 
 ```env
 SUPERAPPS_API_KEY=
@@ -296,6 +318,9 @@ File: `tests/Feature/Api/V1/MasterJfIndexTest.php`
 | `per_page=101` | 422 |
 | Aggregations | `agregasi.total_jf` equals `total_filtered` |
 | Province hybrid | row with `province_id` returns `reg_provinces.name`; null FK uses `provinsi` text |
+| Jenjang from jabatan | row with null `c_role_level_id` still returns parsed jenjang (e.g. `"Ahli Muda"`) |
+| Filter `jenjang` | matches Filament — filters via `jabatan LIKE` |
+| Filter `c_role_level_id` | resolves level name → `jabatan LIKE` when FK column unused |
 | Pagination | `data` count ≤ `per_page`; `total_pages` correct |
 
 Use `MasterJf::factory()` and existing reference seeders/factories where available.
@@ -315,7 +340,8 @@ Use `MasterJf::factory()` and existing reference seeders/factories where availab
 - Monorepo or separate deployable API package
 - User-level authorization (admin vs regional scoping) — v1 returns all Master JF rows matching filters; row-level scoping can be added in v2 if superapps requires it
 - Caching layer (Redis) — defer until performance testing shows need
-- Normalization migration for `province_id` backfill — use hybrid fallback instead
+- Normalization migration for `province_id` backfill — not needed; column already populated in prod/dev restore; hybrid read covers gaps
+- New Laravel migrations for `master_jf` / `reg_provinces` as part of this API — schema exists; PHPUnit uses `EnsuresMasterJfApiSchema` trait only
 
 ## Future considerations (v2+)
 

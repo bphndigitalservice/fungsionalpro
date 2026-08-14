@@ -8,18 +8,58 @@
 
 **Tech Stack:** Laravel 12, PHP 8.2+, PHPUnit 11, SQLite in-memory tests (`RefreshDatabase`), dedoc/scramble for OpenAPI
 
+## Implementation status (2026-08-14)
+
+Tasks 1–5 **implemented** in working tree; **not committed** (per team request). Task 6 manual verification pending locally.
+
 ## Global Constraints
 
 - Spec: `docs/superpowers/specs/2026-08-14-master-jf-aggregate-api-design.md`
 - Branch: `feat/master-jf-aggregate-api`
-- Endpoint: `GET /api/v1/master-jf` (read-only)
+- Endpoint: `GET /api/v1/master-jf` (read-only — **no INSERT/UPDATE/DELETE** on `master_jf`)
 - Auth header: `X-Api-Key` compared to `SUPERAPPS_API_KEY` via `config('services.superapps.api_key')`
 - Rate limit: `throttle:60,1`
 - Single Laravel app — no monorepo
+- **No new migrations** for `master_jf` / `reg_provinces` — prod/dev DB restore already has `province_id`, `c_role_id`, `reg_grade_id`, etc.; do not add Laravel migrations that could worry operators or touch existing schema
 - Province hybrid: `province_id` → `reg_provinces.name`; fallback trimmed `provinsi` text
+- Jenjang: parse from `jabatan` (Filament behavior); `c_role_level_id` FK is 0% filled in prod data
 - Aggregations over full filtered set; pagination only on `data[]`
+- Enum aggregation buckets: zero-fill all known enum values + `unknown` for null/unmapped
+- JSON response: top-level keys must not be wrapped in `"data"` — use `MasterJfIndexResource::withoutWrapping()` or `response()->json()`
 - Conventional commits in English; commit after each task
 - PHPUnit feature tests with `RefreshDatabase` (repo does not use Pest for this area)
+
+---
+
+## Data source audit (must match running Filament)
+
+Verified against dev DB restore (958 rows) and live code paths:
+
+| Field | Where admin UI gets it | Fill rate | API must |
+|---|---|---|---|
+| Jabatan Fungsional | `cRole.role_name`; import maps from `jabatan` text | 958/958 | Same FK + import-style fallback |
+| Jenjang | **`jabatan` regex** in table; filter uses `jabatan LIKE` | `c_role_level_id` **0/958** | `MasterJfDisplay::resolveJenjang()` — parse first, FK only if set |
+| Golongan/Ruang | `grade.clean_name`; import via `RegGradeResolver` | 805/958 | Relation; null if unmapped |
+| Provinsi | **text `provinsi`** in table/filters; import sets text only | 884/884 paired | Hybrid response; filter `provinsi` only when `province_id` IS NULL |
+
+**Key files:** `MasterJfResource.php` (lines 118–130, 193–207, 218–221), `MasterJfImport.php`, `RegGradeResolver.php`, `MasterJfNumbersByJenjangOverview.php`
+
+**New shared helper:** `app/Support/MasterJfDisplay.php`
+
+---
+
+## Schema policy (no migrations)
+
+Prod/dev database (SQL restore via DBeaver) **already contains**:
+
+- `master_jf.province_id`, `c_role_id`, `reg_grade_id`, `c_role_level_id`, `provinsi`, …
+- `reg_provinces`, `reg_grades`, `c_roles`, `c_role_levels` reference tables
+
+The API **only reads** this data. Model changes (`province()` relation, `$fillable`) map to existing columns — they do not alter the database.
+
+**PHPUnit only:** `tests/Concerns/EnsuresMasterJfApiSchema.php` creates minimal `reg_provinces` + `master_jf.province_id` in SQLite `:memory:` when missing (same pattern as `MasterJfModelTest::setUp`). This affects tests only, never prod/dev PostgreSQL.
+
+**Do not run** `php artisan migrate` for this feature on restored databases.
 
 ---
 
@@ -28,17 +68,22 @@
 | File | Responsibility |
 | --- | --- |
 | `bootstrap/app.php` | Register `api` routes + `verify.api.key` alias |
-| `routes/api.php` | `GET v1/master-jf` route group |
+| `routes/api.php` | `GET v1/master-jf` route group (register **after** controller exists) |
 | `config/services.php` | `superapps.api_key` config |
 | `.env.example` | `SUPERAPPS_API_KEY=` |
-| `database/migrations/2026_08_14_000001_add_province_id_to_master_jf_table.php` | Nullable FK `province_id` → `reg_provinces` |
-| `app/Models/MasterJf.php` | Add `province()` relation + `$fillable` entries |
+| `.env.template` | `SUPERAPPS_API_KEY=` (LERD/local template used by team) |
+| `deployment/fungsionalpro.env` | `SUPERAPPS_API_KEY=` placeholder |
+| `app/Support/MasterJfDisplay.php` | Jenjang parse + title-case normalization (shared with API) |
+| `app/Models/MasterJf.php` | Add `province()` relation + `province_id` in `$fillable` |
+| `tests/Concerns/EnsuresMasterJfApiSchema.php` | Test-only schema for `reg_provinces` + `province_id` column |
 | `app/Http/Middleware/VerifyApiKey.php` | API key gate |
 | `app/Services/MasterJfAggregateService.php` | Filter query + aggregations + pagination |
 | `app/Http/Requests/Api/V1/MasterJfIndexRequest.php` | Query validation |
 | `app/Http/Resources/Api/V1/MasterJfItemResource.php` | Row JSON shape |
 | `app/Http/Resources/Api/V1/MasterJfIndexResource.php` | Top-level wrapper |
 | `app/Http/Controllers/Api/V1/MasterJfController.php` | HTTP handler |
+| `tests/Feature/Services/MasterJfAggregateServiceTest.php` | Service-layer filter/aggregate tests |
+| `tests/Unit/Support/MasterJfDisplayTest.php` | Jenjang parse + role inference unit tests |
 | `tests/Feature/Api/V1/MasterJfIndexTest.php` | End-to-end API tests |
 | `tests/Feature/Http/Middleware/VerifyApiKeyTest.php` | Middleware tests |
 | `config/scramble.php` | OpenAPI docs (published) |
@@ -46,66 +91,203 @@
 
 ---
 
-### Task 1: API scaffold, config, and `province_id` migration
+### Task 1: API scaffold, config, display helpers, and model
 
 **Files:**
 - Modify: `bootstrap/app.php`
-- Create: `routes/api.php`
+- Create: `routes/api.php` (ping route initially — **no controller reference yet**)
 - Modify: `config/services.php`
 - Modify: `.env.example`
+- Modify: `.env.template`
+- Modify: `deployment/fungsionalpro.env`
 - Modify: `phpunit.xml`
-- Create: `database/migrations/2026_08_14_000001_add_province_id_to_master_jf_table.php`
+- Create: `app/Support/MasterJfDisplay.php`
+- Create: `tests/Unit/Support/MasterJfDisplayTest.php`
+- Create: `tests/Concerns/EnsuresMasterJfApiSchema.php`
 - Modify: `app/Models/MasterJf.php`
 
 **Interfaces:**
-- Consumes: existing `MasterJf`, `RegProvince` models
-- Produces: working `/api/v1/master-jf` route (404/401 until controller added); `MasterJf::province()` relation
+- Consumes: existing `MasterJf`, `RegProvince` models; existing DB columns (no migration)
+- Produces: API route file + bootstrap wiring; `MasterJf::province()` relation; jenjang helper; test schema trait
 
-- [ ] **Step 1: Add migration for `province_id`**
+- [x] **Step 1: Create `MasterJfDisplay` helper**
 
-Create `database/migrations/2026_08_14_000001_add_province_id_to_master_jf_table.php`:
+Create `app/Support/MasterJfDisplay.php`:
 
 ```php
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+namespace App\Support;
+
+use App\Models\MasterJf;
+
+final class MasterJfDisplay
+{
+    /** @var list<string> */
+    private const KNOWN_JENJANG = [
+        'Ahli Pertama',
+        'Ahli Muda',
+        'Ahli Madya',
+        'Ahli Utama',
+    ];
+
+    public static function parseJenjangFromJabatan(?string $jabatan): ?string
+    {
+        if ($jabatan === null || trim($jabatan) === '') {
+            return null;
+        }
+
+        $parsed = preg_replace('/^(Penyuluh Hukum|Analis Hukum)\s+/i', '', trim($jabatan));
+
+        return self::normalizeJenjangLabel($parsed !== '' ? $parsed : null);
+    }
+
+    public static function resolveJenjang(MasterJf $row): ?string
+    {
+        if ($row->c_role_level_id !== null) {
+            $level = $row->relationLoaded('cRoleLevel') ? $row->getRelation('cRoleLevel') : null;
+            if ($level?->level) {
+                return self::normalizeJenjangLabel($level->level);
+            }
+        }
+
+        return self::parseJenjangFromJabatan($row->jabatan);
+    }
+
+    public static function inferRoleNameFromJabatan(?string $jabatan): ?string
+    {
+        if ($jabatan === null || trim($jabatan) === '') {
+            return null;
+        }
+
+        if (stripos($jabatan, 'Analis Hukum') !== false) {
+            return 'Analis Hukum';
+        }
+
+        if (stripos($jabatan, 'Penyuluh Hukum') !== false) {
+            return 'Penyuluh Hukum';
+        }
+
+        return null;
+    }
+
+    public static function resolveJabatanFungsional(MasterJf $row): ?string
+    {
+        $role = $row->relationLoaded('cRole') ? $row->getRelation('cRole') : null;
+
+        return $role?->role_name ?? self::inferRoleNameFromJabatan($row->jabatan);
+    }
+
+    public static function normalizeJenjangLabel(?string $value): ?string
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        $lower = strtolower(trim($value));
+
+        foreach (self::KNOWN_JENJANG as $known) {
+            if ($lower === strtolower($known)) {
+                return $known;
+            }
+        }
+
+        return trim($value);
+    }
+}
+```
+
+- [x] **Step 2: Write unit tests for `MasterJfDisplay`**
+
+Create `tests/Unit/Support/MasterJfDisplayTest.php` — extend `Tests\TestCase` (Laravel app required for Eloquent model stubs):
+
+```php
+<?php
+
+namespace Tests\Unit\Support;
+
+use App\Models\CRole;
+use App\Models\CRoleLevel;
+use App\Models\MasterJf;
+use App\Support\MasterJfDisplay;
+use Tests\TestCase;
+
+class MasterJfDisplayTest extends TestCase
+{
+    public function test_it_parses_jenjang_from_jabatan_and_normalizes_case(): void
+    {
+        $this->assertSame('Ahli Muda', MasterJfDisplay::parseJenjangFromJabatan('Penyuluh Hukum AHLI MUDA'));
+    }
+
+    public function test_it_prefers_c_role_level_when_fk_is_set(): void
+    {
+        $row = new MasterJf([
+            'jabatan' => 'Penyuluh Hukum Ahli Pertama',
+            'c_role_level_id' => 99,
+        ]);
+        $row->setRelation('cRoleLevel', new CRoleLevel(['level' => 'Ahli Madya']));
+
+        $this->assertSame('Ahli Madya', MasterJfDisplay::resolveJenjang($row));
+    }
+
+    public function test_it_infers_jabatan_fungsional_from_jabatan_text(): void
+    {
+        $row = new MasterJf(['jabatan' => 'Analis Hukum Ahli Muda']);
+
+        $this->assertSame('Analis Hukum', MasterJfDisplay::resolveJabatanFungsional($row));
+    }
+
+    public function test_it_prefers_c_role_relation_for_jabatan_fungsional(): void
+    {
+        $row = new MasterJf(['jabatan' => 'Analis Hukum Ahli Muda']);
+        $row->setRelation('cRole', new CRole(['role_name' => 'Penyuluh Hukum']));
+
+        $this->assertSame('Penyuluh Hukum', MasterJfDisplay::resolveJabatanFungsional($row));
+    }
+}
+```
+
+Run: `lerd php artisan test tests/Unit/Support/MasterJfDisplayTest.php`
+
+Expected: PASS
+
+- [x] **Step 3: Create test-only schema trait**
+
+Create `tests/Concerns/EnsuresMasterJfApiSchema.php` (used by API/service feature tests):
+
+```php
+<?php
+
+namespace Tests\Concerns;
+
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+trait EnsuresMasterJfApiSchema
 {
-    public function up(): void
+    protected function ensureMasterJfApiSchema(): void
     {
-        if (Schema::hasColumn('master_jf', 'province_id')) {
-            return;
+        if (! Schema::hasTable('reg_provinces')) {
+            Schema::create('reg_provinces', function (Blueprint $table) {
+                $table->unsignedInteger('id')->primary();
+                $table->string('name');
+            });
         }
 
-        Schema::table('master_jf', function (Blueprint $table) {
-            $table->unsignedBigInteger('province_id')->nullable()->after('provinsi');
-            $table->foreign('province_id')
-                ->references('id')
-                ->on('reg_provinces')
-                ->nullOnDelete();
-        });
-    }
-
-    public function down(): void
-    {
-        if (! Schema::hasColumn('master_jf', 'province_id')) {
-            return;
+        if (Schema::hasTable('master_jf') && ! Schema::hasColumn('master_jf', 'province_id')) {
+            Schema::table('master_jf', function (Blueprint $table) {
+                $table->unsignedInteger('province_id')->nullable();
+            });
         }
-
-        Schema::table('master_jf', function (Blueprint $table) {
-            $table->dropForeign(['province_id']);
-            $table->dropColumn('province_id');
-        });
     }
-};
+}
 ```
 
-- [ ] **Step 2: Update `MasterJf` model**
+In `MasterJfIndexTest` and `MasterJfAggregateServiceTest`: `use EnsuresMasterJfApiSchema;` and call `$this->ensureMasterJfApiSchema()` in `setUp()`.
 
-Add to `$fillable`: `'provinsi'`, `'province_id'`, `'c_role_id'`.
+- [x] **Step 4: Update `MasterJf` model**
+
+Add to `$fillable`: `'province_id'` ( `provinsi` and `c_role_id` already present).
 
 Add relation:
 
@@ -118,7 +300,7 @@ public function province(): BelongsTo
 
 Add `use App\Models\RegProvince;` if importing by name (or same-namespace import not needed).
 
-- [ ] **Step 3: Register API routes in `bootstrap/app.php`**
+- [x] **Step 5: Register API routes in `bootstrap/app.php`**
 
 Change `withRouting` to:
 
@@ -140,22 +322,24 @@ $middleware->alias([
 ]);
 ```
 
-- [ ] **Step 4: Create stub `routes/api.php`**
+- [x] **Step 6: Create stub `routes/api.php` with auth ping route**
+
+Avoid referencing `MasterJfController` until Task 4. Add a ping route so Task 2 middleware tests can hit a real HTTP endpoint (empty group → 404, not 401).
 
 ```php
 <?php
 
-use App\Http\Controllers\Api\V1\MasterJfController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
     ->middleware(['verify.api.key', 'throttle:60,1'])
     ->group(function () {
-        Route::get('master-jf', [MasterJfController::class, 'index']);
+        Route::get('ping', fn () => response()->json(['ok' => true]));
+        // GET master-jf registered in Task 4 after controller exists
     });
 ```
 
-- [ ] **Step 5: Add config and env**
+- [x] **Step 7: Add config and env**
 
 In `config/services.php`:
 
@@ -171,24 +355,40 @@ In `.env.example` append:
 SUPERAPPS_API_KEY=
 ```
 
+In `.env.template` append (same block):
+
+```env
+SUPERAPPS_API_KEY=
+```
+
+In `deployment/fungsionalpro.env` (add new section before Vite):
+
+```env
+# ── Superapps API Integration ──────────────────────────────────────────────────
+
+SUPERAPPS_API_KEY=
+```
+
 In `phpunit.xml` inside `<php>`:
 
 ```xml
 <env name="SUPERAPPS_API_KEY" value="test-superapps-key"/>
 ```
 
-- [ ] **Step 6: Run migration in dev**
+- [x] **Step 8: Run unit tests**
 
-Run: `lerd php artisan migrate`
+Run: `lerd php artisan test tests/Unit/Support/MasterJfDisplayTest.php`
 
-Expected: migration applies (or skips if column already exists from backup).
+Expected: PASS
 
-- [ ] **Step 7: Commit**
+**Do not run** `php artisan migrate` on prod/dev restored DB — schema already exists.
+
+- [ ] **Step 9: Commit** *(wait for explicit request)*
 
 ```bash
-git add bootstrap/app.php routes/api.php config/services.php .env.example phpunit.xml \
-  database/migrations/2026_08_14_000001_add_province_id_to_master_jf_table.php app/Models/MasterJf.php
-git commit -m "feat(api): scaffold API routes and master_jf province_id FK"
+git add bootstrap/app.php routes/api.php config/services.php .env.example .env.template deployment/fungsionalpro.env phpunit.xml \
+  app/Support/MasterJfDisplay.php tests/Unit/Support/MasterJfDisplayTest.php tests/Concerns/EnsuresMasterJfApiSchema.php app/Models/MasterJf.php
+git commit -m "feat(api): scaffold API routes, display helpers, and MasterJf province relation"
 ```
 
 ---
@@ -224,7 +424,7 @@ class VerifyApiKeyTest extends TestCase
 
     public function test_it_rejects_missing_api_key(): void
     {
-        $response = $this->getJson('/api/v1/master-jf');
+        $response = $this->getJson('/api/v1/ping');
 
         $response->assertUnauthorized()
             ->assertJson(['message' => 'Unauthorized']);
@@ -232,7 +432,7 @@ class VerifyApiKeyTest extends TestCase
 
     public function test_it_rejects_invalid_api_key(): void
     {
-        $response = $this->getJson('/api/v1/master-jf', [
+        $response = $this->getJson('/api/v1/ping', [
             'X-Api-Key' => 'wrong-key',
         ]);
 
@@ -243,7 +443,7 @@ class VerifyApiKeyTest extends TestCase
     public function test_middleware_passes_valid_key(): void
     {
         $middleware = new VerifyApiKey();
-        $request = Request::create('/api/v1/master-jf', 'GET');
+        $request = Request::create('/api/v1/ping', 'GET');
         $request->headers->set('X-Api-Key', 'test-superapps-key');
 
         $response = $middleware->handle($request, fn () => new Response('ok', 200));
@@ -293,7 +493,7 @@ class VerifyApiKey
 
 Run: `lerd php artisan test tests/Feature/Http/Middleware/VerifyApiKeyTest.php`
 
-Expected: PASS (first two tests hit route; third tests middleware directly).
+Expected: PASS (first two tests hit `/api/v1/ping`; third tests middleware directly).
 
 - [ ] **Step 5: Commit**
 
@@ -359,6 +559,44 @@ class MasterJfAggregateServiceTest extends TestCase
 
         $service = app(MasterJfAggregateService::class);
         $result = $service->paginate(['search' => 'Akbar', 'page' => 1, 'per_page' => 10]);
+
+        $this->assertSame(1, $result['total_filtered']);
+    }
+
+    public function test_jenjang_filter_matches_jabatan_text(): void
+    {
+        MasterJf::factory()->create(['jabatan' => 'Analis Hukum Ahli Madya']);
+        MasterJf::factory()->create(['jabatan' => 'Penyuluh Hukum Ahli Pertama']);
+
+        $service = app(MasterJfAggregateService::class);
+        $result = $service->paginate(['jenjang' => 'Ahli Madya', 'page' => 1, 'per_page' => 10]);
+
+        $this->assertSame(1, $result['total_filtered']);
+    }
+
+    public function test_c_role_level_id_filter_resolves_level_to_jabatan_like(): void
+    {
+        $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $level = CRoleLevel::create(['c_role_id' => $role->id, 'level' => 'Ahli Utama']);
+
+        MasterJf::factory()->create(['jabatan' => 'Analis Hukum Ahli Utama', 'c_role_level_id' => null]);
+        MasterJf::factory()->create(['jabatan' => 'Analis Hukum Ahli Muda', 'c_role_level_id' => null]);
+
+        $service = app(MasterJfAggregateService::class);
+        $result = $service->paginate(['c_role_level_id' => $level->id, 'page' => 1, 'per_page' => 10]);
+
+        $this->assertSame(1, $result['total_filtered']);
+    }
+
+    public function test_provinsi_filter_only_applies_when_province_id_is_null(): void
+    {
+        RegProvince::query()->create(['id' => 11, 'name' => 'ACEH']);
+
+        MasterJf::factory()->create(['province_id' => null, 'provinsi' => 'BENGKULU']);
+        MasterJf::factory()->create(['province_id' => 11, 'provinsi' => 'ACEH']);
+
+        $service = app(MasterJfAggregateService::class);
+        $result = $service->paginate(['provinsi' => 'BENGKULU', 'page' => 1, 'per_page' => 10]);
 
         $this->assertSame(1, $result['total_filtered']);
     }
@@ -433,7 +671,16 @@ class MasterJfAggregateService
         }
 
         if (isset($filters['c_role_level_id'])) {
-            $query->where('c_role_level_id', $filters['c_role_level_id']);
+            $level = \App\Models\CRoleLevel::query()->find($filters['c_role_level_id']);
+            if ($level?->level) {
+                $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($level->level).'%']);
+            } else {
+                $query->whereRaw('0 = 1');
+            }
+        }
+
+        if ($jenjang = trim((string) ($filters['jenjang'] ?? ''))) {
+            $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($jenjang).'%']);
         }
 
         if (isset($filters['reg_grade_id'])) {
@@ -445,13 +692,8 @@ class MasterJfAggregateService
         }
 
         if ($provinsi = trim((string) ($filters['provinsi'] ?? ''))) {
-            $query->where(function (Builder $q) use ($provinsi) {
-                $like = '%'.$provinsi.'%';
-                $q->where(function (Builder $inner) use ($like) {
-                    $inner->whereNull('province_id')
-                        ->where('provinsi', 'like', $like);
-                })->orWhereHas('province', fn (Builder $p) => $p->where('name', 'like', $like));
-            });
+            $query->whereNull('province_id')
+                ->where('provinsi', 'like', '%'.$provinsi.'%');
         }
 
         if ($pengangkatan = trim((string) ($filters['pengangkatan'] ?? ''))) {
@@ -632,6 +874,17 @@ class MasterJfIndexTest extends TestCase
         return ['X-Api-Key' => 'test-superapps-key'];
     }
 
+    public function test_it_requires_api_key(): void
+    {
+        $this->getJson('/api/v1/master-jf')->assertUnauthorized();
+    }
+
+    public function test_it_rejects_wrong_api_key(): void
+    {
+        $this->getJson('/api/v1/master-jf', ['X-Api-Key' => 'bad'])
+            ->assertUnauthorized();
+    }
+
     public function test_it_returns_paginated_payload_with_aggregations(): void
     {
         $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
@@ -686,6 +939,29 @@ class MasterJfIndexTest extends TestCase
             ->assertJsonPath('data.0.provinsi', 'BENGKULU')
             ->assertJsonPath('data.0.provinsi_id', null);
     }
+
+    public function test_jenjang_is_parsed_from_jabatan_when_level_fk_null(): void
+    {
+        MasterJf::factory()->create([
+            'c_role_level_id' => null,
+            'jabatan' => 'Penyuluh Hukum Ahli Muda',
+        ]);
+
+        $response = $this->getJson('/api/v1/master-jf', $this->apiHeaders());
+
+        $response->assertOk()
+            ->assertJsonPath('data.0.jenjang', 'Ahli Muda');
+    }
+
+    public function test_jenjang_filter_matches_jabatan_like_filament(): void
+    {
+        MasterJf::factory()->create(['jabatan' => 'Analis Hukum Ahli Madya', 'c_role_level_id' => null]);
+        MasterJf::factory()->create(['jabatan' => 'Penyuluh Hukum Ahli Pertama', 'c_role_level_id' => null]);
+
+        $response = $this->getJson('/api/v1/master-jf?jenjang=Ahli%20Madya', $this->apiHeaders());
+
+        $response->assertOk()->assertJsonPath('total_filtered', 1);
+    }
 }
 ```
 
@@ -725,6 +1001,7 @@ class MasterJfIndexRequest extends FormRequest
             'search' => ['sometimes', 'string', 'max:255'],
             'c_role_id' => ['sometimes', 'integer', 'exists:c_roles,id'],
             'c_role_level_id' => ['sometimes', 'integer', 'exists:c_role_levels,id'],
+            'jenjang' => ['sometimes', 'string', 'max:255'],
             'reg_grade_id' => ['sometimes', 'integer', 'exists:reg_grades,id'],
             'province_id' => ['sometimes', 'integer', 'exists:reg_provinces,id'],
             'provinsi' => ['sometimes', 'string', 'max:255'],
@@ -747,6 +1024,7 @@ class MasterJfIndexRequest extends FormRequest
 namespace App\Http\Resources\Api\V1;
 
 use App\Models\MasterJf;
+use App\Support\MasterJfDisplay;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -760,8 +1038,8 @@ class MasterJfItemResource extends JsonResource
             'nama' => $this->nama,
             'nip' => $this->nip,
             'jabatan' => $this->jabatan,
-            'jabatan_fungsional' => $this->cRole?->role_name,
-            'jenjang' => $this->cRoleLevel?->level,
+            'jabatan_fungsional' => MasterJfDisplay::resolveJabatanFungsional($this->resource),
+            'jenjang' => MasterJfDisplay::resolveJenjang($this->resource),
             'golongan_ruang' => $this->grade?->grade_name,
             'golongan_ruang_code' => $this->grade?->clean_name,
             'instansi' => $this->instansi,
@@ -791,6 +1069,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class MasterJfIndexResource extends JsonResource
 {
+    public static $wrap = null;
+
     public function toArray(Request $request): array
     {
         return [
@@ -805,7 +1085,15 @@ class MasterJfIndexResource extends JsonResource
 }
 ```
 
-- [ ] **Step 5: Create controller**
+- [ ] **Step 5: Register route and create controller**
+
+Add to `routes/api.php` inside the existing group:
+
+```php
+use App\Http\Controllers\Api\V1\MasterJfController;
+
+Route::get('master-jf', [MasterJfController::class, 'index']);
+```
 
 `app/Http/Controllers/Api/V1/MasterJfController.php`:
 
@@ -841,7 +1129,8 @@ Expected: PASS
 - [ ] **Step 7: Commit**
 
 ```bash
-git add app/Http/Requests/Api/V1/MasterJfIndexRequest.php \
+git add routes/api.php \
+  app/Http/Requests/Api/V1/MasterJfIndexRequest.php \
   app/Http/Resources/Api/V1/MasterJfItemResource.php \
   app/Http/Resources/Api/V1/MasterJfIndexResource.php \
   app/Http/Controllers/Api/V1/MasterJfController.php \
@@ -930,11 +1219,19 @@ Provide:
 
 | Spec requirement | Task |
 |---|---|
-| `GET /api/v1/master-jf` | Task 1 route, Task 4 controller |
+| `GET /api/v1/master-jf` | Task 1 bootstrap, Task 4 route + controller |
 | `X-Api-Key` auth | Task 2 |
-| `SUPERAPPS_API_KEY` env | Task 1 |
-| Full filter set | Task 3 service + Task 4 request |
-| Province hybrid | Task 1 migration/model, Task 3 filter, Task 4 resource |
+| `SUPERAPPS_API_KEY` env | Task 1 (`.env.example`, `.env.template`, `deployment/fungsionalpro.env`) |
+| Full filter set incl. `jenjang` | Task 3 service + Task 4 request |
+| Jabatan fungsional fallback | Task 1 `MasterJfDisplay::resolveJabatanFungsional`, Task 4 resource |
+| Jenjang from `jabatan` | Task 1 `MasterJfDisplay`, Task 4 resource |
+| Filter `c_role_level_id` → jabatan LIKE | Task 3 service test |
+| Filter `provinsi` only when FK null | Task 3 service test |
+| Auth ping route for middleware tests | Task 1 `/api/v1/ping`, Task 2 tests |
+| Province hybrid | Task 1 model + test trait, Task 3 filter, Task 4 resource |
+| No JsonResource double-wrap | Task 4 `MasterJfIndexResource::$wrap = null` |
+| Test schema for `reg_provinces` / `province_id` | Task 1 `EnsuresMasterJfApiSchema` (PHPUnit only) |
+| No DB migrations for this feature | Schema policy section — read-only API on existing restore |
 | Aggregations on filtered set | Task 3 |
 | Pagination metadata | Task 3 + Task 4 |
 | Rate limit 60/min | Task 1 route group |
@@ -945,3 +1242,29 @@ Provide:
 ## Out of scope (confirmed)
 
 - OAuth2/JWT, write endpoints, monorepo, regional row scoping, Redis caching
+- **New Laravel migrations** for `master_jf.province_id` or `reg_provinces` — columns/tables already exist in prod/dev restore
+- Refactoring Filament to use `MasterJfDisplay` (optional follow-up; API uses helper first)
+- `province_id` backfill — not needed; hybrid read handles null FK via `provinsi` text
+
+---
+
+## Plan self-review (2026-08-14, revised)
+
+| Check | Result |
+|---|---|
+| Spec coverage | All endpoint, auth, filter, aggregation, and data-source rules mapped to Tasks 1–6 |
+| Placeholder scan | No TBD/TODO steps |
+| Type consistency | `MasterJfAggregateService::paginate()` return shape used consistently in controller + resources |
+| Test ordering | Task 2 uses `/api/v1/ping` (Task 1); full endpoint tests in Task 4 |
+| Schema safety | No migrations; test trait mirrors `MasterJfModelTest` pattern; API is read-only |
+| Implementation | Tasks 1–5 done in working tree; commits deferred per team request |
+
+---
+
+## Manual verification (Task 6)
+
+1. Set `SUPERAPPS_API_KEY` in local `.env`, run `lerd php artisan config:clear`
+2. **Do not migrate** — use existing restored DB
+3. `curl -H "X-Api-Key: …" "http://fungsionalpro.test/api/v1/master-jf?per_page=3"`
+4. Open `/docs/api` for Scramble UI
+5. Run: `lerd php artisan test tests/Feature/Api tests/Feature/Services/MasterJfAggregateServiceTest.php tests/Feature/Http/Middleware/VerifyApiKeyTest.php tests/Unit/Support/MasterJfDisplayTest.php`
