@@ -6,37 +6,44 @@ use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\JenisKepegawaian;
 use App\Filament\Resources\MasterJfResource\Pages;
+use App\Imports\MasterJfImport;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegDepartment;
 use App\Models\RegGrade;
+use App\Models\RegProvince;
+use App\Models\RegRegency;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Forms\Components\FileUpload;
-use Filament\Notifications\Notification;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\MasterJfImport;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MasterJfResource extends Resource
 {
     protected static ?string $model = MasterJf::class;
+
     protected static ?int $navigationSort = 3;
 
     public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
+        $query = parent::getEloquentQuery()->with('agenciable');
+
         if ($user && $user->isSuperAdmin()) {
-            return parent::getEloquentQuery();
+            return $query;
         }
 
         $allowedRoleIds = $user->adminAccesses()->pluck('c_role_id');
-        return parent::getEloquentQuery()->whereIn('c_role_id', $allowedRoleIds);
+
+        return $query->whereIn('c_role_id', $allowedRoleIds);
     }
 
     public static function form(Form $form): Form
@@ -76,12 +83,36 @@ class MasterJfResource extends Resource
                     ->searchable()
                     ->disabled(fn (Forms\Get $get): bool => blank($get('c_role_id')))
                     ->dehydrated(true),
-                Forms\Components\TextInput::make('instansi'),
                 Forms\Components\Select::make('type')
                     ->label('Kluster')
                     ->options(ClientCluster::class)
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn (callable $set) => $set('agency_id', null)),
+                Forms\Components\Select::make('agency_id')
+                    ->label('Instansi')
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->options(function (Forms\Get $get): array {
+                        $type = $get('type');
+                        $value = $type instanceof ClientCluster ? $type->value : $type;
+
+                        return match ($value) {
+                            ClientCluster::Central->value => RegDepartment::query()->orderBy('name')->pluck('name', 'id')->all(),
+                            ClientCluster::LocalProvince->value => RegProvince::query()->orderBy('name')->pluck('name', 'id')->all(),
+                            ClientCluster::LocalRegency->value => RegRegency::query()->orderBy('name')->pluck('name', 'id')->all(),
+                            default => [],
+                        };
+                    })
+                    ->disabled(function (Forms\Get $get): bool {
+                        $type = $get('type');
+                        $value = $type instanceof ClientCluster ? $type->value : $type;
+
+                        return blank($value);
+                    })
+                    ->dehydrated(true),
                 Forms\Components\TextInput::make('unit_kerja')
                     ->label('Unit Kerja'),
                 Forms\Components\TextInput::make('provinsi')
@@ -136,9 +167,10 @@ class MasterJfResource extends Resource
                     ->label('Provinsi')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('instansi')
+                Tables\Columns\TextColumn::make('agenciable.name')
                     ->label('Instansi')
-                    ->searchable()
+                    ->getStateUsing(fn (MasterJf $record) => $record->agenciable?->name ?: $record->instansi)
+                    ->searchable(['instansi'])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Kluster')
@@ -163,10 +195,11 @@ class MasterJfResource extends Resource
                     ->options(function () {
                         $user = auth()->user();
                         $query = CRole::query()->where('active', true)->orderBy('role_name');
-                        if ($user && !$user->isSuperAdmin()) {
+                        if ($user && ! $user->isSuperAdmin()) {
                             $allowedRoleIds = $user->adminAccesses()->pluck('c_role_id');
                             $query->whereIn('id', $allowedRoleIds);
                         }
+
                         return $query->pluck('role_name', 'id')->all();
                     })
                     ->visible(fn () => auth()->user() && auth()->user()->isSuperAdmin())
@@ -203,7 +236,7 @@ class MasterJfResource extends Resource
                             return $query;
                         }
 
-                        return $query->whereRaw('LOWER(jabatan) LIKE ?', ['%' . strtolower($data['value'])]);
+                        return $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($data['value'])]);
                     })
                     ->searchable(),
                 Tables\Filters\SelectFilter::make('instansi')
