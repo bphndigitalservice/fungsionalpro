@@ -27,7 +27,7 @@ Stop treating instansi as only free text. Store the same `agency_type` + `agency
 | Cluster `type` | When morph is set, `type` is derived from the agency model. Unmatched rows keep stored `type` / text fallback. |
 | Filament | Client-style: optional cluster `type`, then `agency_id` select. `instansi` is not a second editor. `unit_kerja` stays text. |
 | Implementation | Mirror Client columns on `master_jf` (Approach 1). Do not extract a shared Agencyable abstraction. Do not use an enum discriminator. |
-| Public API JSON | Instansi items stay `{ name, client_count }`. No new `agency_id` field in this spec. |
+| Public API JSON | **Superseded** by `2026-08-18-master-jf-aggregate-response-design.md`. This spec only persists the morph; it does not define aggregate JSON. |
 | Creating agencies | Never insert missing departments/provinces/regencies from Master JF text. |
 
 ## Schema and relations
@@ -149,15 +149,7 @@ Do not set client echelon from Master JF.
 
 ### Aggregate API
 
-`GET /api/v1/master-jf` response shape unchanged. Instansi list grouping:
-
-1. Linked morph → bucket key `agency_type + agency_id`, `name` = related `name` (if the related row is missing, treat as unmatched and fall through).
-2. Else non-empty `instansi` text → bucket by that string (current behavior).
-3. Else `"unknown"`.
-
-`client_count` is row count in the bucket. Sort by `name` case-insensitive. Two Master JF rows pointing at the same agency count as one instansi even if `instansi` text differs.
-
-Failed resolve and dangling morphs are not HTTP errors.
+JSON field names and unmatched-bucket rules live in `2026-08-18-master-jf-aggregate-response-design.md`. This spec only requires that linked rows can be grouped by the persisted morph. Do not treat aggregate JSON as in-scope here.
 
 ## Error handling
 
@@ -173,7 +165,7 @@ PHPUnit. Factory leaves morph null by default so existing tests stay valid.
 2. Backfill: match sets morph + derived `type` / `province_id`; miss stays null; already-linked skipped; second run idempotent.
 3. Import: new NIP with known name writes morph; existing NIP with unresolvable names keeps previous morph; `instansi` text still stored.
 4. Matching: linked Master JF copies morph onto Client without LIKE lookup; unlinked uses fuzzy path.
-5. Aggregate API: two spellings, same `agency_id`, one instansi row; unlinked groups by `instansi`; empty → `"unknown"`.
+5. Aggregate API grouping of linked morphs is specified in the response-reshape spec; this spec’s tests only need the morph readable on `MasterJf`.
 6. Filament edit: save cluster + `agency_id` persists `agency_type`; clear agency nulls both morph columns. Follow `MasterJfEditFormTest`.
 
 ## Out of scope
@@ -182,6 +174,5 @@ PHPUnit. Factory leaves morph null by default so existing tests stay valid.
 - Creating registry rows from unmatched names
 - Dropping `instansi`, `unit_kerja`, `type`, `provinsi`
 - Refactoring Client forms or extracting a shared Agencyable trait
-- Adding `agency_id` to the public aggregate JSON
+- Aggregate API JSON reshape (see `2026-08-18-master-jf-aggregate-response-design.md`)
 - New Filament filter on the morph
-- Changing OpenAPI field names for instansi items
