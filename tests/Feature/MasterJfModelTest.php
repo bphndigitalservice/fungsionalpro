@@ -13,33 +13,23 @@ use App\Models\RegDepartment;
 use App\Models\RegGrade;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
+use Tests\Concerns\EnsuresMasterJfApiSchema;
+use Tests\Concerns\EnsuresWilayahApiSchema;
 use Tests\TestCase;
 
 class MasterJfModelTest extends TestCase
 {
+    use EnsuresMasterJfApiSchema;
+    use EnsuresWilayahApiSchema;
     use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        if (! Schema::hasTable('reg_provinces')) {
-            Schema::create('reg_provinces', function (Blueprint $table) {
-                $table->integer('id')->primary();
-                $table->string('name');
-            });
-        }
-
-        if (! Schema::hasTable('reg_regencies')) {
-            Schema::create('reg_regencies', function (Blueprint $table) {
-                $table->integer('id')->primary();
-                $table->integer('province_id');
-                $table->string('name');
-            });
-        }
+        $this->ensureWilayahApiSchema();
+        $this->ensureMasterJfApiSchema();
     }
 
     public function test_it_persists_status_kepegawaian_via_factory(): void
@@ -256,5 +246,54 @@ class MasterJfModelTest extends TestCase
         $this->assertTrue($department->masterJfs->contains($byDept));
         $this->assertTrue($province->masterJfs->contains($byProv));
         $this->assertTrue($regency->masterJfs->contains($byReg));
+    }
+
+    public function test_import_writes_agency_morph_when_instansi_matches(): void
+    {
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        (new MasterJfImport)->model([
+            'nip' => '777777777777777777',
+            'nama' => 'Imported Morph',
+            'instansi' => 'Kementerian Hukum',
+            'unit_kerjakanwil' => '',
+            'status' => 'Aktif',
+            'status_kepegawaian' => 'PNS',
+        ]);
+
+        $this->assertDatabaseHas('master_jf', [
+            'nip' => '777777777777777777',
+            'instansi' => 'Kementerian Hukum',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+            'type' => 'central',
+        ]);
+    }
+
+    public function test_import_keeps_existing_morph_when_names_do_not_resolve(): void
+    {
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        $row = MasterJf::factory()->create([
+            'nip' => '888888888888888888',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+            'type' => ClientCluster::Central,
+        ]);
+
+        (new MasterJfImport)->model([
+            'nip' => '888888888888888888',
+            'nama' => 'After Import',
+            'instansi' => 'Nama Yang Tidak Ada',
+            'unit_kerjakanwil' => 'Unit X',
+            'status' => 'Aktif',
+            'status_kepegawaian' => 'PNS',
+        ]);
+
+        $row->refresh();
+        $this->assertSame('After Import', $row->nama);
+        $this->assertSame('Nama Yang Tidak Ada', $row->instansi);
+        $this->assertSame(RegDepartment::class, $row->agency_type);
+        $this->assertSame($department->id, $row->agency_id);
     }
 }

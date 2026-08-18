@@ -3,11 +3,14 @@
 namespace App\Imports;
 
 use App\Models\MasterJf;
+use App\Services\ClientMatchingService;
+use App\Support\MasterJfAgencyResolver;
 use App\Support\MasterJfEnumMapper;
 use App\Support\RegGradeResolver;
+use Exception;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Exception;
 
 class MasterJfImport implements ToModel, WithHeadingRow
 {
@@ -19,13 +22,13 @@ class MasterJfImport implements ToModel, WithHeadingRow
 
         if (empty($row['nip'])) {
             throw new Exception(
-                'Import gagal: terdapat data tanpa NIP pada baris data. Periksa kembali file. Nama: ' . ($row['nama'] ?? '-')
+                'Import gagal: terdapat data tanpa NIP pada baris data. Periksa kembali file. Nama: '.($row['nama'] ?? '-')
             );
         }
 
         $instansi = $row['instansi'] ?? null;
         $unitKerja = $row['unit_kerja'] ?? $row['unit_kerjakanwil'] ?? null;
-        [$type, $model] = \App\Services\ClientMatchingService::determineAgencyInfo($instansi ?? '', $unitKerja ?? '');
+        [$type] = ClientMatchingService::determineAgencyInfo($instansi ?? '', $unitKerja ?? '');
 
         $jabatan = $row['jabatan'] ?? null;
         $cRoleId = null;
@@ -37,24 +40,38 @@ class MasterJfImport implements ToModel, WithHeadingRow
             }
         }
 
+        $resolved = MasterJfAgencyResolver::resolve($instansi, $unitKerja);
+
+        $values = [
+            'nama' => $row['nama'] ?? null,
+            'reg_grade_id' => RegGradeResolver::resolveId($row['golruang'] ?? null),
+            'jabatan' => $jabatan,
+            'c_role_id' => $cRoleId,
+            'unit_kerja' => $unitKerja,
+            'instansi' => $instansi,
+            'pengangkatan' => $row['pengangkatan'] ?? null,
+            'status' => MasterJfEnumMapper::status($row['status'] ?? null),
+            'status_kepegawaian' => MasterJfEnumMapper::statusKepegawaian($row['status_kepegawaian'] ?? null),
+            'type' => $type,
+            'provinsi' => $row['provinsi'] ?? null,
+        ];
+
+        if (Schema::hasColumn('master_jf', 'divisi')) {
+            $values['divisi'] = $row['divisi'] ?? null;
+        }
+
+        if ($resolved !== null) {
+            $values['agency_type'] = $resolved['agency_type'];
+            $values['agency_id'] = $resolved['agency_id'];
+            $values['type'] = $resolved['type']->value;
+            if (array_key_exists('province_id', $resolved)) {
+                $values['province_id'] = $resolved['province_id'];
+            }
+        }
+
         return MasterJf::updateOrCreate(
-            [
-                'nip' => $row['nip'],
-            ],
-            [
-                'nama'               => $row['nama'] ?? null,
-                'reg_grade_id'       => RegGradeResolver::resolveId($row['golruang'] ?? null),
-                'jabatan'            => $jabatan,
-                'c_role_id'          => $cRoleId,
-                'unit_kerja'         => $unitKerja,
-                'instansi'           => $instansi,
-                'pengangkatan'       => $row['pengangkatan'] ?? null,
-                'status'             => MasterJfEnumMapper::status($row['status'] ?? null),
-                'status_kepegawaian' => MasterJfEnumMapper::statusKepegawaian($row['status_kepegawaian'] ?? null),
-                'type'               => $type,
-                'provinsi'           => $row['provinsi'] ?? null,
-                'divisi'             => $row['divisi'] ?? null,
-            ]
+            ['nip' => $row['nip']],
+            $values,
         );
     }
 }
