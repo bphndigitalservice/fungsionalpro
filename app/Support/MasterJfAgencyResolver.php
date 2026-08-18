@@ -3,10 +3,12 @@
 namespace App\Support;
 
 use App\Enums\ClientCluster;
+use App\Models\MasterJf;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
 use App\Services\ClientMatchingService;
+use Illuminate\Support\Facades\DB;
 
 final class MasterJfAgencyResolver
 {
@@ -60,5 +62,33 @@ final class MasterJfAgencyResolver
         }
 
         return $payload;
+    }
+
+    public static function backfillMasterJf(): void
+    {
+        MasterJf::query()
+            ->whereNull('agency_id')
+            ->orderBy('id')
+            ->chunkById(200, function ($rows): void {
+                foreach ($rows as $row) {
+                    $resolved = self::resolve($row->instansi, $row->unit_kerja);
+                    if ($resolved === null) {
+                        continue;
+                    }
+
+                    $updates = [
+                        'agency_type' => $resolved['agency_type'],
+                        'agency_id' => $resolved['agency_id'],
+                        'type' => $resolved['type']->value,
+                    ];
+                    if (array_key_exists('province_id', $resolved)) {
+                        $updates['province_id'] = $resolved['province_id'];
+                    }
+
+                    DB::table('master_jf')
+                        ->where('id', $row->id)
+                        ->update($updates);
+                }
+            });
     }
 }
