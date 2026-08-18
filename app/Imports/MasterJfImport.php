@@ -14,6 +14,8 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class MasterJfImport implements ToModel, WithHeadingRow
 {
+    private static ?bool $masterJfHasDivisi = null;
+
     public function model(array $row)
     {
         if (empty(array_filter($row))) {
@@ -56,7 +58,7 @@ class MasterJfImport implements ToModel, WithHeadingRow
             'provinsi' => $row['provinsi'] ?? null,
         ];
 
-        if (Schema::hasColumn('master_jf', 'divisi')) {
+        if (self::masterJfHasDivisiColumn()) {
             $values['divisi'] = $row['divisi'] ?? null;
         }
 
@@ -73,5 +75,10 @@ class MasterJfImport implements ToModel, WithHeadingRow
             ['nip' => $row['nip']],
             $values,
         );
+    }
+
+    private static function masterJfHasDivisiColumn(): bool
+    {
+        return self::$masterJfHasDivisi ??= Schema::hasColumn('master_jf', 'divisi');
     }
 }
