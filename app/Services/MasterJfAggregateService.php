@@ -8,6 +8,7 @@ use App\Enums\JenisKepegawaian;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Support\MasterJfAgencyApiMapper;
 use App\Support\MasterJfClusterResolver;
 use App\Support\MasterJfDisplay;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,9 @@ use Illuminate\Support\Collection;
 
 class MasterJfAggregateService
 {
-    /** @return array{data: list<array<string, mixed>>} */
+    /**
+     * @return array{data: list<array{c_role_id: int, c_role_label: string, cluster: string, cluster_label: string, aggregate: array, data: list<array{agency_type: ?string, agency_id: ?int, name: string, client_count: int}>}>}
+     */
     public function aggregate(array $filters): array
     {
         $baseQuery = $this->buildFilteredQuery($filters);
@@ -37,18 +40,28 @@ class MasterJfAggregateService
                 'agency_type',
                 'agency_id',
             ])
-            ->with(['cRole:id,role_name', 'agenciable'])
+            ->with(['cRole:id,role_name'])
             ->get();
 
-        /** @var array<string, array{jf_type_id: int, jf_label: string, cluster_id: string, cluster_label: string, rows: Collection<int, MasterJf>}> $segments */
+        $loadable = $rows->filter(function (MasterJf $row): bool {
+            return MasterJfAgencyApiMapper::shortType(
+                is_string($row->agency_type) ? $row->agency_type : null,
+            ) !== null && $row->agency_id !== null;
+        });
+
+        if ($loadable->isNotEmpty()) {
+            $loadable->load('agenciable');
+        }
+
+        /** @var array<string, array{c_role_id: int, c_role_label: string, cluster: string, cluster_label: string, rows: Collection<int, MasterJf>}> $segments */
         $segments = [];
 
         foreach ($rows as $row) {
-            [$clusterId, $clusterLabel] = MasterJfClusterResolver::resolveLabels(
+            $clusterId = MasterJfClusterResolver::resolve(
                 $row->type,
                 $row->instansi,
                 $row->unit_kerja,
-            );
+            )->value;
 
             if ($clusterFilter !== null && $clusterId !== $clusterFilter) {
                 continue;
@@ -62,21 +75,21 @@ class MasterJfAggregateService
                 continue;
             }
 
-            [$jfTypeId, $jfLabel] = $this->resolveJfType(
+            [$cRoleId, $cRoleLabel] = $this->resolveJfType(
                 $row->c_role_id,
                 $row->cRole?->role_name ?? MasterJfDisplay::inferRoleNameFromJabatan($row->jabatan),
                 $rolesById,
                 $rolesByName,
             );
 
-            $key = $jfTypeId.':'.$clusterId;
+            $key = $cRoleId.':'.$clusterId;
 
             if (! isset($segments[$key])) {
                 $segments[$key] = [
-                    'jf_type_id' => $jfTypeId,
-                    'jf_label' => $jfLabel,
-                    'cluster_id' => $clusterId,
-                    'cluster_label' => $clusterLabel,
+                    'c_role_id' => $cRoleId,
+                    'c_role_label' => $cRoleLabel,
+                    'cluster' => $clusterId,
+                    'cluster_label' => MasterJfAgencyApiMapper::clusterLabel($clusterId),
                     'rows' => collect(),
                 ];
             }
@@ -88,9 +101,9 @@ class MasterJfAggregateService
 
         foreach ($segments as $segment) {
             $groups[] = [
-                'jf_type_id' => $segment['jf_type_id'],
-                'jf_label' => $segment['jf_label'],
-                'cluster_id' => $segment['cluster_id'],
+                'c_role_id' => $segment['c_role_id'],
+                'c_role_label' => $segment['c_role_label'],
+                'cluster' => $segment['cluster'],
                 'cluster_label' => $segment['cluster_label'],
                 'aggregate' => $this->computeSliceAggregationsFromCollection($segment['rows']),
                 'data' => $this->buildInstansiListFromCollection($segment['rows']),
@@ -98,8 +111,8 @@ class MasterJfAggregateService
         }
 
         usort($groups, function (array $a, array $b): int {
-            return [$a['jf_type_id'], $this->clusterSortOrder($a['cluster_id'])]
-                <=> [$b['jf_type_id'], $this->clusterSortOrder($b['cluster_id'])];
+            return [$a['c_role_id'], $this->clusterSortOrder($a['cluster'])]
+                <=> [$b['c_role_id'], $this->clusterSortOrder($b['cluster'])];
         });
 
         return ['data' => $groups];
@@ -240,37 +253,57 @@ class MasterJfAggregateService
         ];
     }
 
-    /** @param  Collection<int, MasterJf>  $rows
-     * @return list<array{name: string, client_count: int}>
+    /**
+     * @param  Collection<int, MasterJf>  $rows
+     * @return list<array{agency_type: ?string, agency_id: ?int, name: string, client_count: int}>
      */
     protected function buildInstansiListFromCollection(Collection $rows): array
     {
-        $counts = [];
-        $labels = [];
+        $buckets = [];
+        $unknownCount = 0;
 
         foreach ($rows as $row) {
-            $related = $row->agenciable;
-            if ($row->agency_type && $row->agency_id && $related) {
-                $key = $row->agency_type.':'.$row->agency_id;
-                $labels[$key] = (string) $related->name;
-            } else {
-                $name = trim((string) ($row->instansi ?? ''));
-                $key = $name === '' ? 'unknown' : 'text:'.$name;
-                $labels[$key] = $name === '' ? 'unknown' : $name;
+            $shortType = MasterJfAgencyApiMapper::shortType(
+                is_string($row->agency_type) ? $row->agency_type : null,
+            );
+            $agencyId = $row->agency_id;
+
+            if ($shortType === null || $agencyId === null) {
+                $unknownCount++;
+
+                continue;
             }
 
-            $counts[$key] = ($counts[$key] ?? 0) + 1;
+            $related = $row->agenciable;
+            if ($related === null) {
+                $unknownCount++;
+
+                continue;
+            }
+
+            $key = $shortType.':'.$agencyId;
+            if (! isset($buckets[$key])) {
+                $buckets[$key] = [
+                    'agency_type' => $shortType,
+                    'agency_id' => (int) $agencyId,
+                    'name' => (string) $related->name,
+                    'client_count' => 0,
+                ];
+            }
+            $buckets[$key]['client_count']++;
         }
 
-        $instansi = [];
-        foreach ($counts as $key => $clientCount) {
+        $instansi = array_values($buckets);
+        usort($instansi, fn (array $a, array $b): int => strcasecmp($a['name'], $b['name']));
+
+        if ($unknownCount > 0) {
             $instansi[] = [
-                'name' => $labels[$key],
-                'client_count' => $clientCount,
+                'agency_type' => null,
+                'agency_id' => null,
+                'name' => 'unknown',
+                'client_count' => $unknownCount,
             ];
         }
-
-        usort($instansi, fn (array $a, array $b): int => strcasecmp($a['name'], $b['name']));
 
         return $instansi;
     }
