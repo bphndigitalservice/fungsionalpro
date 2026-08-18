@@ -145,9 +145,10 @@ class MasterJfAggregateServiceTest extends TestCase
         $this->assertSame(1, $result['data'][0]['aggregate']['total_jf']);
     }
 
-    public function test_instansi_items_have_name_and_client_count_only(): void
+    public function test_instansi_items_expose_morph_fields_without_nested_aggregate(): void
     {
         $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $dept = RegDepartment::create(['name' => 'Kementerian Hukum']);
 
         MasterJf::factory()->create([
             'c_role_id' => $role->id,
@@ -155,6 +156,8 @@ class MasterJfAggregateServiceTest extends TestCase
             'type' => ClientCluster::Central,
             'instansi' => 'KEMENTERIAN HUKUM',
             'jabatan' => 'Analis Hukum Ahli Muda',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $dept->id,
         ]);
         MasterJf::factory()->create([
             'c_role_id' => $role->id,
@@ -162,33 +165,48 @@ class MasterJfAggregateServiceTest extends TestCase
             'type' => ClientCluster::Central,
             'instansi' => 'KEMENTERIAN HUKUM',
             'jabatan' => 'Analis Hukum Ahli Utama',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $dept->id,
         ]);
         MasterJf::factory()->create([
             'c_role_id' => $role->id,
             'type' => ClientCluster::Central,
             'instansi' => 'KEMENTERIAN AGAMA',
             'jabatan' => 'Analis Hukum Ahli Pertama',
+            'agency_type' => null,
+            'agency_id' => null,
         ]);
 
         $result = app(MasterJfAggregateService::class)->aggregate([]);
 
         $this->assertCount(1, $result['data']);
         $this->assertSame(3, $result['data'][0]['aggregate']['total_jf']);
-        $this->assertArrayNotHasKey('aggregate', $result['data'][0]['data'][0]);
+
+        $linked = $result['data'][0]['data'][0];
+        $this->assertSame(['agency_type', 'agency_id', 'name', 'client_count'], array_keys($linked));
+        $this->assertSame('department', $linked['agency_type']);
+        $this->assertSame($dept->id, $linked['agency_id']);
+        $this->assertSame('Kementerian Hukum', $linked['name']);
+        $this->assertSame(2, $linked['client_count']);
+        $this->assertArrayNotHasKey('aggregate', $linked);
     }
 
-    public function test_empty_instansi_groups_as_unknown(): void
+    public function test_row_with_no_morph_lands_in_unknown_regardless_of_instansi_text(): void
     {
         MasterJf::factory()->create([
-            'instansi' => '',
+            'instansi' => 'KEMENTERIAN HUKUM',
             'type' => ClientCluster::Central,
             'jabatan' => 'Analis Hukum Ahli Muda',
+            'agency_type' => null,
+            'agency_id' => null,
         ]);
 
         $result = app(MasterJfAggregateService::class)->aggregate([]);
 
         $unknown = collect($result['data'][0]['data'])->firstWhere('name', 'unknown');
         $this->assertNotNull($unknown);
+        $this->assertNull($unknown['agency_type']);
+        $this->assertNull($unknown['agency_id']);
         $this->assertSame(1, $unknown['client_count']);
         $this->assertArrayNotHasKey('aggregate', $unknown);
     }

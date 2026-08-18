@@ -55,7 +55,7 @@ Master JF aggregate API for superapps integration.
 
 **Authentication:** send header `X-Api-Key` with the value of `SUPERAPPS_API_KEY`.
 
-**Response:** grouped by jenis JF × cluster. Each group has `aggregate` (card metrics) and `data[]` instansi list (`name`, `client_count`).
+**Response:** grouped by jenis JF × cluster. Each group has `aggregate` (card metrics) and `data[]` instansi list (`agency_type`, `agency_id`, `name`, `client_count`).
 
 **Primary filters:** `province_id`/`provinsi` (daerah), `c_role_id` (jenis JF), `type` (effective cluster).
 DESC,

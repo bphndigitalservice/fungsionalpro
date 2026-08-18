@@ -1,18 +1,24 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "FungsionalPro",
+        "title": "Laravel",
         "version": "1.0.0",
-        "description": "Master JF aggregate API for superapps integration.\n\n**Authentication:** send header `X-Api-Key` with the value of `SUPERAPPS_API_KEY`.\n\n**Response:** grouped by jenis JF \u00d7 cluster. Each group has `aggregate` (card metrics) and `data[]` instansi list (`name`, `client_count`).\n\n**Primary filters:** `province_id`/`provinsi` (daerah), `c_role_id` (jenis JF), `type` (effective cluster)."
+        "description": "Master JF aggregate API for superapps integration.\n\n**Authentication:** send header `X-Api-Key` with the value of `SUPERAPPS_API_KEY`.\n\n**Response:** grouped by jenis JF \u00d7 cluster. Each group has `aggregate` (card metrics) and `data[]` instansi list (`agency_type`, `agency_id`, `name`, `client_count`).\n\n**Primary filters:** `province_id`/`provinsi` (daerah), `c_role_id` (jenis JF), `type` (effective cluster)."
     },
     "servers": [
         {
-            "url": "http://fungsionalpro.test/api"
+            "url": "https://localhost/api"
         }
     ],
     "tags": [
         {
             "name": "Master JF"
+        },
+        {
+            "name": "Referensi"
+        },
+        {
+            "name": "Wilayah"
         }
     ],
     "security": [
@@ -24,7 +30,7 @@
         "/v1/master-jf": {
             "get": {
                 "operationId": "masterJf.index",
-                "description": "Returns grouped aggregations of Jabatan Fungsional data for superapps dashboards.\n\nEach group represents one **jenis JF \u00d7 cluster** combination and includes:\n- group-level `aggregate` (card metrics)\n- `data[]` instansi list with `name` and `client_count` only\n\n**Primary filters (superapps UX):**\n- `province_id` / `provinsi` \u2014 daerah (hybrid; Pemda only unless `type=central`)\n- `c_role_id` \u2014 jenis JF (e.g. 1=Analis Hukum, 2=Penyuluh Hukum)\n- `type` \u2014 effective cluster (`central`, `local_province`, `local_regency`)\n\nWhen `type=central`, daerah filters are ignored. When daerah is set without `type=central`, K/L rows are excluded.\n\nAuthenticate with header `X-Api-Key`.",
+                "description": "Returns grouped aggregations of Jabatan Fungsional data for superapps dashboards.\n\nEach group represents one **jenis JF \u00d7 cluster** combination and includes:\n- group-level `aggregate` (card metrics)\n- `data[]` instansi list with `agency_type`, `agency_id`, `name`, and `client_count`\n\n**Primary filters (superapps UX):**\n- `province_id` / `provinsi` \u2014 daerah (hybrid; Pemda only unless `type=central`)\n- `c_role_id` \u2014 jenis JF (e.g. 1=Analis Hukum, 2=Penyuluh Hukum)\n- `type` \u2014 effective cluster (`central`, `local_province`, `local_regency`)\n\nWhen `type=central`, daerah filters are ignored. When daerah is set without `type=central`, K/L rows are excluded.\n\nAuthenticate with header `X-Api-Key`.",
                 "summary": "Master JF aggregations by type and cluster",
                 "tags": [
                     "Master JF"
@@ -132,10 +138,10 @@
                                         {
                                             "data": [
                                                 {
-                                                    "jf_type_id": 1,
-                                                    "jf_label": "Analis Hukum",
-                                                    "cluster_id": "central",
-                                                    "cluster_label": "Kementerian Lembaga",
+                                                    "c_role_id": 1,
+                                                    "c_role_label": "Analis Hukum",
+                                                    "cluster": "local_province",
+                                                    "cluster_label": "Pemerintah Daerah Provinsi",
                                                     "aggregate": {
                                                         "total_jf": 120,
                                                         "by_jenjang": {
@@ -161,8 +167,16 @@
                                                     },
                                                     "data": [
                                                         {
-                                                            "name": "Kementerian Hukum",
-                                                            "client_count": 46
+                                                            "agency_type": "province",
+                                                            "agency_id": 51,
+                                                            "name": "Bali",
+                                                            "client_count": 45
+                                                        },
+                                                        {
+                                                            "agency_type": null,
+                                                            "agency_id": null,
+                                                            "name": "unknown",
+                                                            "client_count": 3
                                                         }
                                                     ]
                                                 }
@@ -170,6 +184,351 @@
                                         }
                                     ],
                                     "$ref": "#/components/schemas/MasterJfIndexResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/c-roles": {
+            "get": {
+                "operationId": "cRoles.index",
+                "description": "Returns active `c_roles` ordered by id. Use `id` as `c_role_id` on Master JF. Authenticate with header `X-Api-Key`.",
+                "summary": "List jabatan fungsional types",
+                "tags": [
+                    "Referensi"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Active JF type list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "id": 1,
+                                                    "name": "Analis Hukum"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "name": "Penyuluh Hukum"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CRoleResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/c-role-levels": {
+            "get": {
+                "operationId": "cRoleLevels.index",
+                "description": "Returns jabatan fungsional levels (jenjang) ordered by id.\n\nOptional filter: `c_role_id` (`c_roles.id`).\n\nUse `id` as `c_role_level_id` or `name` as `jenjang` on Master JF.\n\nAuthenticate with header `X-Api-Key`.",
+                "summary": "List jenjang",
+                "tags": [
+                    "Referensi"
+                ],
+                "parameters": [
+                    {
+                        "name": "c_role_id",
+                        "in": "query",
+                        "description": "Filter jenjang by `c_roles.id`.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Jenjang list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "id": 1,
+                                                    "c_role_id": 1,
+                                                    "name": "Ahli Pertama"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CRoleLevelResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reg-grades": {
+            "get": {
+                "operationId": "regGrades.index",
+                "description": "Returns all `reg_grades` ordered by id. Use `id` as `reg_grade_id` on Master JF. `name` is the display code (`clean_name`). Authenticate with header `X-Api-Key`.",
+                "summary": "List golongan/ruang",
+                "tags": [
+                    "Referensi"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Golongan/ruang list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "id": 13,
+                                                    "name": "IVa",
+                                                    "grade_name": "Pembina",
+                                                    "grade_code": "IVa"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegGradeResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reg-provinces": {
+            "get": {
+                "operationId": "regProvinces.index",
+                "description": "Returns all provinces ordered by id. Authenticate with header `X-Api-Key`.",
+                "summary": "List provinces",
+                "tags": [
+                    "Wilayah"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Province list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "id": 11,
+                                                    "name": "ACEH"
+                                                },
+                                                {
+                                                    "id": 51,
+                                                    "name": "BALI"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegProvinceResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reg-regencies": {
+            "get": {
+                "operationId": "regRegencies.index",
+                "description": "Returns kabupaten/kota ordered by id.\n\nOptional filter: `province_id` (`reg_provinces.id`).\n\nAuthenticate with header `X-Api-Key`.",
+                "summary": "List regencies",
+                "tags": [
+                    "Wilayah"
+                ],
+                "parameters": [
+                    {
+                        "name": "province_id",
+                        "in": "query",
+                        "description": "Filter kabupaten/kota by `reg_provinces.id`.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 11
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Regency list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "id": 1101,
+                                                    "province_id": 11,
+                                                    "name": "KABUPATEN SIMEULUE"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegRegencyResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
                                 }
                             }
                         }
@@ -232,6 +591,42 @@
             }
         },
         "schemas": {
+            "CRoleLevelResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "c_role_id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "c_role_id",
+                    "name"
+                ],
+                "title": "CRoleLevelResource"
+            },
+            "CRoleResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "CRoleResource"
+            },
             "ClientCluster": {
                 "type": "string",
                 "enum": [
@@ -265,13 +660,13 @@
             "MasterJfGroupResource": {
                 "type": "object",
                 "properties": {
-                    "jf_type_id": {
+                    "c_role_id": {
                         "type": "integer"
                     },
-                    "jf_label": {
+                    "c_role_label": {
                         "type": "string"
                     },
-                    "cluster_id": {
+                    "cluster": {
                         "type": "string",
                         "description": "Effective cluster: `central`, `local_province`, or `local_regency`."
                     },
@@ -289,9 +684,9 @@
                     }
                 },
                 "required": [
-                    "jf_type_id",
-                    "jf_label",
-                    "cluster_id",
+                    "c_role_id",
+                    "c_role_label",
+                    "cluster",
                     "cluster_label",
                     "aggregate",
                     "data"
@@ -316,6 +711,15 @@
             "MasterJfInstansiItemResource": {
                 "type": "object",
                 "properties": {
+                    "agency_type": {
+                        "type": "string"
+                    },
+                    "agency_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "name": {
                         "type": "string"
                     },
@@ -324,6 +728,8 @@
                     }
                 },
                 "required": [
+                    "agency_type",
+                    "agency_id",
                     "name",
                     "client_count"
                 ],
@@ -368,6 +774,66 @@
                     "by_pengangkatan"
                 ],
                 "title": "MasterJfSliceAggregateResource"
+            },
+            "RegGradeResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "grade_name": {
+                        "type": "string"
+                    },
+                    "grade_code": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "grade_name",
+                    "grade_code"
+                ],
+                "title": "RegGradeResource"
+            },
+            "RegProvinceResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "RegProvinceResource"
+            },
+            "RegRegencyResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "province_id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "province_id",
+                    "name"
+                ],
+                "title": "RegRegencyResource"
             }
         },
         "responses": {
