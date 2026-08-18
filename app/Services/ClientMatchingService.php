@@ -2,14 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\MasterJf;
+use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
+use App\Models\MasterJf;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
 use App\Support\RegGradeResolver;
+use Illuminate\Database\Eloquent\Model;
 
 class ClientMatchingService
 {
@@ -17,7 +19,7 @@ class ClientMatchingService
     {
         $master = MasterJf::where('nip', $nip)->first();
 
-        if ($master && !empty($master->nama)) {
+        if ($master && ! empty($master->nama)) {
             $master->clean_name = $master->nama;
             $master->academic_title = null;
 
@@ -90,50 +92,30 @@ class ClientMatchingService
         $client->type = $agencyType;
         $client->agency_type = $agencyModel;
 
-        // Need to lookup agency_id
-        $cleanUnitKerja = self::cleanAgencyName($rawUnitKerja);
-        $cleanInstansi = self::cleanAgencyName($rawInstansi);
-
-        $agency = $agencyModel::where('name', '=', $cleanUnitKerja)->first();
-        if (! $agency && $cleanInstansi) {
-            $agency = $agencyModel::where('name', '=', $cleanInstansi)->first();
-        }
-        if (! $agency && $cleanUnitKerja) {
-            $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanUnitKerja . '%')->first();
-        }
-        if (! $agency && $cleanInstansi) {
-            $agency = $agencyModel::where('name', 'LIKE', '%' . $cleanInstansi . '%')->first();
-        }
+        $agency = self::findAgency($agencyModel, $rawInstansi, $rawUnitKerja);
 
         if ($agency) {
             $client->agency_id = $agency->id;
         }
 
-        if ($master->status instanceof \App\Enums\ClientStatus) {
+        if ($master->status instanceof ClientStatus) {
             $client->status = $master->status;
         } else {
             $rawStatus = strtolower((string) ($master->status ?? ''));
             $client->status = match (true) {
-                str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active')
-                => \App\Enums\ClientStatus::Active,
+                str_contains($rawStatus, 'aktif') || str_contains($rawStatus, 'active') => ClientStatus::Active,
 
-                str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign')
-                => \App\Enums\ClientStatus::NonActive_Resign,
+                str_contains($rawStatus, 'undur') || str_contains($rawStatus, 'resign') => ClientStatus::NonActive_Resign,
 
-                str_contains($rawStatus, 'sementara') || str_contains($rawStatus, 'suspend') || str_contains($rawStatus, 'skors')
-                => \App\Enums\ClientStatus::NonActive_Suspended,
+                str_contains($rawStatus, 'sementara') || str_contains($rawStatus, 'suspend') || str_contains($rawStatus, 'skors') => ClientStatus::NonActive_Suspended,
 
-                str_contains($rawStatus, 'ctln')
-                => \App\Enums\ClientStatus::NonActive_CTLN,
+                str_contains($rawStatus, 'ctln') => ClientStatus::NonActive_CTLN,
 
-                str_contains($rawStatus, 'belajar') || str_contains($rawStatus, 'study')
-                => \App\Enums\ClientStatus::NonActive_StudyLeave,
+                str_contains($rawStatus, 'belajar') || str_contains($rawStatus, 'study') => ClientStatus::NonActive_StudyLeave,
 
-                str_contains($rawStatus, 'luar jabatan') || str_contains($rawStatus, 'external')
-                => \App\Enums\ClientStatus::NonActive_ExternalAssignment,
+                str_contains($rawStatus, 'luar jabatan') || str_contains($rawStatus, 'external') => ClientStatus::NonActive_ExternalAssignment,
 
-                str_contains($rawStatus, 'tidak memenuhi') || str_contains($rawStatus, 'requirement')
-                => \App\Enums\ClientStatus::NonActive_DoesntMeetRoleRequirement,
+                str_contains($rawStatus, 'tidak memenuhi') || str_contains($rawStatus, 'requirement') => ClientStatus::NonActive_DoesntMeetRoleRequirement,
 
                 default => null,
             };
@@ -153,6 +135,25 @@ class ClientMatchingService
         } else {
             $client->assignation_type = null;
         }
+    }
+
+    public static function findAgency(string $modelClass, string $instansi, string $unitKerja): ?Model
+    {
+        $cleanUnitKerja = self::cleanAgencyName($unitKerja);
+        $cleanInstansi = self::cleanAgencyName($instansi);
+
+        $agency = $modelClass::where('name', '=', $cleanUnitKerja)->first();
+        if (! $agency && $cleanInstansi !== '') {
+            $agency = $modelClass::where('name', '=', $cleanInstansi)->first();
+        }
+        if (! $agency && $cleanUnitKerja !== '') {
+            $agency = $modelClass::where('name', 'LIKE', '%'.$cleanUnitKerja.'%')->first();
+        }
+        if (! $agency && $cleanInstansi !== '') {
+            $agency = $modelClass::where('name', 'LIKE', '%'.$cleanInstansi.'%')->first();
+        }
+
+        return $agency;
     }
 
     public static function determineAgencyInfo(string $instansi, string $unitKerja): array
@@ -196,7 +197,7 @@ class ClientMatchingService
         }
 
         // 4. RegDepartment check
-        if (RegDepartment::whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($instansi) . '%'])->exists()) {
+        if (RegDepartment::whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($instansi).'%'])->exists()) {
             return ['central', RegDepartment::class];
         }
 
@@ -217,15 +218,17 @@ class ClientMatchingService
     }
 
     public function getGenderFromNip(string $nip): ?string
-        {
-            if (strlen($nip) < 15) return null;
-
-            $genderDigit = $nip[14];
-
-            return match ($genderDigit) {
-                '1' => 'male',
-                '2' => 'female',
-                default => null,
-            };
+    {
+        if (strlen($nip) < 15) {
+            return null;
         }
+
+        $genderDigit = $nip[14];
+
+        return match ($genderDigit) {
+            '1' => 'male',
+            '2' => 'female',
+            default => null,
+        };
     }
+}
