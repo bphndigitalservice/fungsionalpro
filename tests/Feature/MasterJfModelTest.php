@@ -9,10 +9,13 @@ use App\Imports\MasterJfImport;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegDepartment;
 use App\Models\RegGrade;
+use App\Models\RegProvince;
+use App\Models\RegRegency;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Tests\TestCase;
 
 class MasterJfModelTest extends TestCase
@@ -26,6 +29,14 @@ class MasterJfModelTest extends TestCase
         if (! Schema::hasTable('reg_provinces')) {
             Schema::create('reg_provinces', function (Blueprint $table) {
                 $table->integer('id')->primary();
+                $table->string('name');
+            });
+        }
+
+        if (! Schema::hasTable('reg_regencies')) {
+            Schema::create('reg_regencies', function (Blueprint $table) {
+                $table->integer('id')->primary();
+                $table->integer('province_id');
                 $table->string('name');
             });
         }
@@ -214,5 +225,36 @@ class MasterJfModelTest extends TestCase
         $fresh = $row->fresh();
         $this->assertTrue($fresh->grade->is($grade));
         $this->assertTrue($fresh->cRoleLevel->is($level));
+    }
+
+    public function test_it_resolves_agenciable_for_department_province_and_regency(): void
+    {
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+        $province = RegProvince::query()->create(['id' => 51, 'name' => 'BALI']);
+        $regency = RegRegency::query()->create([
+            'id' => 5103,
+            'province_id' => 51,
+            'name' => 'KABUPATEN BADUNG',
+        ]);
+
+        $byDept = MasterJf::factory()->create([
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+        ]);
+        $byProv = MasterJf::factory()->create([
+            'agency_type' => RegProvince::class,
+            'agency_id' => $province->id,
+        ]);
+        $byReg = MasterJf::factory()->create([
+            'agency_type' => RegRegency::class,
+            'agency_id' => $regency->id,
+        ]);
+
+        $this->assertTrue($byDept->fresh()->agenciable->is($department));
+        $this->assertTrue($byProv->fresh()->agenciable->is($province));
+        $this->assertTrue($byReg->fresh()->agenciable->is($regency));
+        $this->assertTrue($department->masterJfs->contains($byDept));
+        $this->assertTrue($province->masterJfs->contains($byProv));
+        $this->assertTrue($regency->masterJfs->contains($byReg));
     }
 }
