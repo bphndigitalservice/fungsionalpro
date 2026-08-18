@@ -167,10 +167,10 @@ class MasterJfResource extends Resource
                     ->label('Provinsi')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('agenciable.name')
+                Tables\Columns\TextColumn::make('instansi')
                     ->label('Instansi')
                     ->getStateUsing(fn (MasterJf $record) => $record->agenciable?->name ?: $record->instansi)
-                    ->searchable(['instansi'])
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Kluster')

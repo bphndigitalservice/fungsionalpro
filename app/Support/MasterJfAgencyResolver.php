@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 
 final class MasterJfAgencyResolver
 {
+    /** @var array<string, array<string, mixed>|null> */
+    private static array $cache = [];
+
     /**
      * @return array{
      *     agency_type: class-string,
@@ -24,16 +27,21 @@ final class MasterJfAgencyResolver
     {
         $instansi = trim((string) $instansi);
         $unitKerja = trim((string) $unitKerja);
+        $cacheKey = $instansi.'|'.$unitKerja;
+
+        if (array_key_exists($cacheKey, self::$cache)) {
+            return self::$cache[$cacheKey];
+        }
 
         if ($instansi === '' && $unitKerja === '') {
-            return null;
+            return self::$cache[$cacheKey] = null;
         }
 
         [, $modelClass] = ClientMatchingService::determineAgencyInfo($instansi, $unitKerja);
         $agency = ClientMatchingService::findAgency($modelClass, $instansi, $unitKerja);
 
         if ($agency === null) {
-            return null;
+            return self::$cache[$cacheKey] = null;
         }
 
         $type = match ($modelClass) {
@@ -44,7 +52,7 @@ final class MasterJfAgencyResolver
         };
 
         if ($type === null) {
-            return null;
+            return self::$cache[$cacheKey] = null;
         }
 
         $payload = [
@@ -61,7 +69,7 @@ final class MasterJfAgencyResolver
             $payload['province_id'] = (int) $agency->province_id;
         }
 
-        return $payload;
+        return self::$cache[$cacheKey] = $payload;
     }
 
     public static function backfillMasterJf(): void

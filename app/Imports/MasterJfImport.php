@@ -8,14 +8,11 @@ use App\Support\MasterJfAgencyResolver;
 use App\Support\MasterJfEnumMapper;
 use App\Support\RegGradeResolver;
 use Exception;
-use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class MasterJfImport implements ToModel, WithHeadingRow
 {
-    private static ?bool $masterJfHasDivisi = null;
-
     public function model(array $row)
     {
         if (empty(array_filter($row))) {
@@ -58,10 +55,6 @@ class MasterJfImport implements ToModel, WithHeadingRow
             'provinsi' => $row['provinsi'] ?? null,
         ];
 
-        if (self::masterJfHasDivisiColumn()) {
-            $values['divisi'] = $row['divisi'] ?? null;
-        }
-
         if ($resolved !== null) {
             $values['agency_type'] = $resolved['agency_type'];
             $values['agency_id'] = $resolved['agency_id'];
@@ -75,10 +68,5 @@ class MasterJfImport implements ToModel, WithHeadingRow
             ['nip' => $row['nip']],
             $values,
         );
-    }
-
-    private static function masterJfHasDivisiColumn(): bool
-    {
-        return self::$masterJfHasDivisi ??= Schema::hasColumn('master_jf', 'divisi');
     }
 }

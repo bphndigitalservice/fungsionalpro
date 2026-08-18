@@ -63,6 +63,32 @@ class MasterJfListFiltersTest extends TestCase
             ->assertCanNotSeeTableRecords([$b]);
     }
 
+    public function test_instansi_column_search_finds_unlinked_record_by_text(): void
+    {
+        Role::findOrCreate(SystemRole::SuperAdmin->value, 'web');
+        /** @var User $user */
+        $user = User::factory()->create();
+        $user->assignRole(SystemRole::SuperAdmin->value);
+        $this->actingAs($user);
+
+        $matching = MasterJf::factory()->create([
+            'instansi' => 'Badan Pembinaan Hukum Nasional',
+            'agency_type' => null,
+            'agency_id' => null,
+        ]);
+        $other = MasterJf::factory()->create([
+            'instansi' => 'Sekretariat Jenderal',
+            'agency_type' => null,
+            'agency_id' => null,
+        ]);
+
+        Livewire::test(ListMasterJfs::class)
+            ->searchTable('Pembinaan Hukum')
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$matching])
+            ->assertCanNotSeeTableRecords([$other]);
+    }
+
     public function test_c_role_filter_limits_visible_table_records(): void
     {
         $this->actingAsAdmin();
