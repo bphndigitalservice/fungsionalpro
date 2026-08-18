@@ -10,9 +10,9 @@ class MasterJfGroupResource extends JsonResource
 {
     /**
      * @return array{
-     *     jf_type_id: int,
-     *     jf_label: string,
-     *     cluster_id: string,
+     *     c_role_id: int,
+     *     c_role_label: string,
+     *     cluster: string,
      *     cluster_label: string,
      *     aggregate: MasterJfSliceAggregateResource,
      *     data: \Illuminate\Http\Resources\Json\AnonymousResourceCollection
@@ -21,9 +21,9 @@ class MasterJfGroupResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'jf_type_id' => (int) $this->resource['jf_type_id'],
-            'jf_label' => (string) $this->resource['jf_label'],
-            'cluster_id' => (string) $this->resource['cluster_id'],
+            'c_role_id' => (int) $this->resource['c_role_id'],
+            'c_role_label' => (string) $this->resource['c_role_label'],
+            'cluster' => (string) $this->resource['cluster'],
             'cluster_label' => (string) $this->resource['cluster_label'],
             'aggregate' => new MasterJfSliceAggregateResource($this->resource['aggregate']),
             'data' => MasterJfInstansiItemResource::collection(
