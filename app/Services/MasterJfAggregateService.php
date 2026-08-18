@@ -34,8 +34,10 @@ class MasterJfAggregateService
                 'status',
                 'status_kepegawaian',
                 'pengangkatan',
+                'agency_type',
+                'agency_id',
             ])
-            ->with('cRole:id,role_name')
+            ->with(['cRole:id,role_name', 'agenciable'])
             ->get();
 
         /** @var array<string, array{jf_type_id: int, jf_label: string, cluster_id: string, cluster_label: string, rows: Collection<int, MasterJf>}> $segments */
@@ -244,21 +246,26 @@ class MasterJfAggregateService
     protected function buildInstansiListFromCollection(Collection $rows): array
     {
         $counts = [];
+        $labels = [];
 
         foreach ($rows as $row) {
-            $name = trim((string) ($row->instansi ?? ''));
-            if ($name === '') {
-                $name = 'unknown';
+            $related = $row->agenciable;
+            if ($row->agency_type && $row->agency_id && $related) {
+                $key = $row->agency_type.':'.$row->agency_id;
+                $labels[$key] = (string) $related->name;
+            } else {
+                $name = trim((string) ($row->instansi ?? ''));
+                $key = $name === '' ? 'unknown' : 'text:'.$name;
+                $labels[$key] = $name === '' ? 'unknown' : $name;
             }
 
-            $counts[$name] = ($counts[$name] ?? 0) + 1;
+            $counts[$key] = ($counts[$key] ?? 0) + 1;
         }
 
         $instansi = [];
-
-        foreach ($counts as $name => $clientCount) {
+        foreach ($counts as $key => $clientCount) {
             $instansi[] = [
-                'name' => $name,
+                'name' => $labels[$key],
                 'client_count' => $clientCount,
             ];
         }
