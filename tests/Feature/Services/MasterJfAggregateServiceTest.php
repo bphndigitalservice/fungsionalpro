@@ -7,6 +7,7 @@ use App\Enums\ClientStatus;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegDepartment;
 use App\Models\RegProvince;
 use App\Services\MasterJfAggregateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -339,5 +340,59 @@ class MasterJfAggregateServiceTest extends TestCase
         $clusters = array_column($result['data'], 'cluster_id');
         $this->assertContains(ClientCluster::LocalRegency->value, $clusters);
         $this->assertContains(ClientCluster::Central->value, $clusters);
+    }
+
+    public function test_it_groups_instansi_by_agency_morph_not_text_spelling(): void
+    {
+        $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENKUM spelling A',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+        ]);
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENKUM spelling B',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+        ]);
+
+        $result = app(MasterJfAggregateService::class)->aggregate([]);
+
+        $this->assertCount(1, $result['data'][0]['data']);
+        $this->assertSame('Kementerian Hukum', $result['data'][0]['data'][0]['name']);
+        $this->assertSame(2, $result['data'][0]['data'][0]['client_count']);
+        $this->assertArrayNotHasKey('agency_id', $result['data'][0]['data'][0]);
+    }
+
+    public function test_it_falls_back_to_instansi_text_and_unknown_when_unlinked(): void
+    {
+        $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'type' => ClientCluster::Central,
+            'instansi' => 'Free Text Instansi',
+            'agency_type' => null,
+            'agency_id' => null,
+        ]);
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'type' => ClientCluster::Central,
+            'instansi' => '',
+            'agency_type' => null,
+            'agency_id' => null,
+        ]);
+
+        $result = app(MasterJfAggregateService::class)->aggregate([]);
+        $names = array_column($result['data'][0]['data'], 'name');
+        sort($names);
+
+        $this->assertSame(['Free Text Instansi', 'unknown'], $names);
     }
 }
