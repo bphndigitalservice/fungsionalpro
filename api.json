@@ -416,6 +416,67 @@
                 }
             }
         },
+        "/v1/reg-departments": {
+            "get": {
+                "operationId": "regDepartments.index",
+                "description": "Returns all kementerian/lembaga ordered by id. Authenticate with header `X-Api-Key`.",
+                "summary": "List departments (K/L)",
+                "tags": [
+                    "Referensi"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Department list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "examples": [
+                                        {
+                                            "data": [
+                                                {
+                                                    "id": 1,
+                                                    "name": "Kementerian Hukum"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegDepartmentResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing or invalid X-Api-Key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/reg-provinces": {
             "get": {
                 "operationId": "regProvinces.index",
@@ -774,6 +835,22 @@
                     "by_pengangkatan"
                 ],
                 "title": "MasterJfSliceAggregateResource"
+            },
+            "RegDepartmentResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "RegDepartmentResource"
             },
             "RegGradeResource": {
                 "type": "object",
