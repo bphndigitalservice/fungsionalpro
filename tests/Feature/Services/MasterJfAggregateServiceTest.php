@@ -9,7 +9,6 @@ use App\Models\CRoleLevel;
 use App\Models\MasterJf;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
-use App\Models\RegRegency;
 use App\Services\MasterJfAggregateService;
 use App\Support\MasterJfAgencyApiMapper;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -442,6 +441,25 @@ class MasterJfAggregateServiceTest extends TestCase
 
         $this->assertSame('unknown', $result['data'][0]['data'][0]['name']);
         $this->assertNull($result['data'][0]['data'][0]['agency_type']);
+        $this->assertSame(1, $result['data'][0]['data'][0]['client_count']);
+    }
+
+    public function test_unknown_agency_fqcn_counts_as_unknown_without_throwing(): void
+    {
+        $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'type' => ClientCluster::Central,
+            'jabatan' => 'Analis Hukum Ahli Muda',
+            'agency_type' => 'App\\Models\\DoesNotExistAgency',
+            'agency_id' => 42,
+        ]);
+
+        $result = app(MasterJfAggregateService::class)->aggregate([]);
+
+        $this->assertSame('unknown', $result['data'][0]['data'][0]['name']);
+        $this->assertNull($result['data'][0]['data'][0]['agency_type']);
+        $this->assertNull($result['data'][0]['data'][0]['agency_id']);
         $this->assertSame(1, $result['data'][0]['data'][0]['client_count']);
     }
 

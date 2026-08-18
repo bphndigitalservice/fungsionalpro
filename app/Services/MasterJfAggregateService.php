@@ -40,8 +40,18 @@ class MasterJfAggregateService
                 'agency_type',
                 'agency_id',
             ])
-            ->with(['cRole:id,role_name', 'agenciable'])
+            ->with(['cRole:id,role_name'])
             ->get();
+
+        $loadable = $rows->filter(function (MasterJf $row): bool {
+            return MasterJfAgencyApiMapper::shortType(
+                is_string($row->agency_type) ? $row->agency_type : null,
+            ) !== null && $row->agency_id !== null;
+        });
+
+        if ($loadable->isNotEmpty()) {
+            $loadable->load('agenciable');
+        }
 
         /** @var array<string, array{c_role_id: int, c_role_label: string, cluster: string, cluster_label: string, rows: Collection<int, MasterJf>}> $segments */
         $segments = [];
@@ -257,9 +267,15 @@ class MasterJfAggregateService
                 is_string($row->agency_type) ? $row->agency_type : null,
             );
             $agencyId = $row->agency_id;
-            $related = $row->agenciable;
 
-            if ($shortType === null || $agencyId === null || $related === null) {
+            if ($shortType === null || $agencyId === null) {
+                $unknownCount++;
+
+                continue;
+            }
+
+            $related = $row->agenciable;
+            if ($related === null) {
                 $unknownCount++;
 
                 continue;
