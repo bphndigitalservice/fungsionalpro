@@ -84,18 +84,25 @@ class ClientMatchingService
             }
         }
 
-        $rawInstansi = $master->instansi ?? '';
-        $rawUnitKerja = $master->unit_kerja ?? '';
+        if ($master->agency_type && $master->agency_id) {
+            $client->agency_type = $master->agency_type;
+            $client->agency_id = $master->agency_id;
+            $client->type = $master->type instanceof \App\Enums\ClientCluster
+                ? $master->type
+                : \App\Enums\ClientCluster::tryFrom((string) $master->type);
+        } else {
+            $rawInstansi = $master->instansi ?? '';
+            $rawUnitKerja = $master->unit_kerja ?? '';
 
-        [$agencyType, $agencyModel] = self::determineAgencyInfo($rawInstansi, $rawUnitKerja);
+            [$agencyType, $agencyModel] = self::determineAgencyInfo($rawInstansi, $rawUnitKerja);
 
-        $client->type = $agencyType;
-        $client->agency_type = $agencyModel;
+            $client->type = $agencyType;
+            $client->agency_type = $agencyModel;
 
-        $agency = self::findAgency($agencyModel, $rawInstansi, $rawUnitKerja);
-
-        if ($agency) {
-            $client->agency_id = $agency->id;
+            $agency = self::findAgency($agencyModel, $rawInstansi, $rawUnitKerja);
+            if ($agency) {
+                $client->agency_id = $agency->id;
+            }
         }
 
         if ($master->status instanceof ClientStatus) {
