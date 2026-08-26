@@ -14,6 +14,9 @@ return [
         'client_profile' => [
             'verify_required' => 'Please complete and verify your Identitas first',
         ],
+        'dashboard' => [
+            'verify_identity_required' => 'Please complete your Identitas and wait for it to be verified',
+        ],
     ],
     'table' => [
         'client' => [

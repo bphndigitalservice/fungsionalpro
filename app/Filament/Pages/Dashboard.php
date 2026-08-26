@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Concerns\Filament\ClientMenuAccess;
 use App\Enums\SystemRole;
 use App\Filament\Widgets\PointOverview;
 use App\Filament\Widgets\ClientsByRoleChart;
@@ -21,12 +22,13 @@ class Dashboard extends BaseDashboard
     public function mount(): void
     {
         $user = Auth::user();
-        if ($user && $user->hasSystemRole(SystemRole::Client)) {
-            $client = Client::where('user_id', $user->id)->first();
-            if ($client && $client->identity?->photo === null) {
+
+        if ($user && ClientMenuAccess::isClientWithoutSuperAdmin($user)) {
+            $client = Client::current() ?? Client::where('user_id', $user->id)->first();
+
+            if ($client && ! ClientMenuAccess::clientProfileIsVerified($client)) {
                 Notification::make()
-                    ->title('Perhatian')
-                    ->body('Lengkapi Pengisian Identitas Terlebih Dahulu')
+                    ->title(__('labels.page.dashboard.verify_identity_required'))
                     ->warning()
                     ->persistent()
                     ->send();
