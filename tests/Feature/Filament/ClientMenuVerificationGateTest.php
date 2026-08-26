@@ -78,6 +78,13 @@ class ClientMenuVerificationGateTest extends TestCase
         $this->assertFalse(ClientEducationResource::shouldRegisterNavigation());
     }
 
+    public function test_unverified_client_can_still_access_identitas_navigation(): void
+    {
+        $this->actingAsClient(Verified::Unverified);
+
+        $this->assertTrue(ClientProfilePage::shouldRegisterNavigation());
+    }
+
     public function test_verified_client_with_photo_can_register_allowlist_nav(): void
     {
         $this->actingAsClient(Verified::Verified, withPhoto: true);
