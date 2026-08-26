@@ -23,6 +23,15 @@ class ClientBasicIdentityPage extends BaseClientProfilePage
     use RedirectsLockedClientMenuAccess;
     use RequiresSuperAdminForClientMenu;
 
+    public function authorizeAccess(): void
+    {
+        if ($this->redirectIfClientMenuLocked(static::canAccess())) {
+            return;
+        }
+
+        parent::authorizeAccess();
+    }
+
     public function getTitle(): string|Htmlable
     {
         return __('Informasi Dasar');

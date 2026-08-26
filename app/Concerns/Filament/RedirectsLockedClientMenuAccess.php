@@ -4,6 +4,9 @@ namespace App\Concerns\Filament;
 
 use App\Filament\Pages\Client\ClientProfilePage;
 use Filament\Notifications\Notification;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\RedirectResponse;
+use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
 trait RedirectsLockedClientMenuAccess
 {
@@ -14,6 +17,11 @@ trait RedirectsLockedClientMenuAccess
         }
 
         abort_unless(static::getResource()::canAccess(), 403);
+    }
+
+    public function hydrateCanAuthorizeResourceAccess(): void
+    {
+        $this->mountCanAuthorizeResourceAccess();
     }
 
     public function authorizeAccess(): void
@@ -44,6 +52,11 @@ trait RedirectsLockedClientMenuAccess
         abort_unless($allowed, 403);
     }
 
+    public function hydrateCanAuthorizeAccess(): void
+    {
+        $this->mountCanAuthorizeAccess();
+    }
+
     protected function redirectIfClientMenuLocked(bool $allowed): bool
     {
         if ($allowed || ! ClientMenuAccess::isClientWithoutSuperAdmin()) {
@@ -55,7 +68,13 @@ trait RedirectsLockedClientMenuAccess
             ->title(__('labels.page.client_profile.verify_required'))
             ->send();
 
-        $this->redirect(ClientProfilePage::getUrl());
+        $url = ClientProfilePage::getUrl();
+
+        $this->redirect($url);
+
+        if (! app(HandleRequests::class)->isLivewireRequest()) {
+            throw new HttpResponseException(new RedirectResponse($url));
+        }
 
         return true;
     }

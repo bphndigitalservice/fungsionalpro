@@ -19,8 +19,10 @@ use App\Models\Client;
 use App\Models\CRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class ClientMenuVerificationGateTest extends TestCase
@@ -130,5 +132,51 @@ class ClientMenuVerificationGateTest extends TestCase
 
         Livewire::test(ListClientPositions::class)
             ->assertRedirect(ClientProfilePage::getUrl());
+    }
+
+    public function test_subsequent_livewire_request_redirects_locked_client_instead_of_403(): void
+    {
+        $this->actingAsClient(Verified::Verified, withPhoto: true);
+
+        $component = Livewire::test(ListClientActivities::class);
+
+        Client::current()->forceFill([
+            'is_verified' => Verified::Unverified,
+            'verified_at' => null,
+        ])->save();
+
+        auth()->user()->unsetRelation('client');
+
+        $this->assertFalse(ClientActivityResource::canAccess());
+
+        try {
+            $component->instance()->hydrateCanAuthorizeResourceAccess();
+
+            $this->fail('Expected hydrate lock to redirect instead of continuing');
+        } catch (HttpResponseException $exception) {
+            $this->assertTrue($exception->getResponse()->isRedirect(ClientProfilePage::getUrl()));
+        } catch (HttpException $exception) {
+            $this->fail('Hydrate still aborted with HTTP '.$exception->getStatusCode().' instead of redirecting');
+        }
+    }
+
+    public function test_basic_identity_save_authorization_still_requires_client_permissions(): void
+    {
+        $super = User::factory()->create();
+        $super->assignRole(SystemRole::SuperAdmin->value);
+        $this->actingAs($super);
+
+        $this->assertFalse($super->can('create_client'));
+        $this->assertFalse($super->can('update_client'));
+
+        try {
+            Livewire::test(ClientBasicIdentityPage::class)
+                ->instance()
+                ->authorizeAccess();
+
+            $this->fail('Expected 403 when SuperAdmin lacks create_client/update_client');
+        } catch (HttpException $exception) {
+            $this->assertSame(403, $exception->getStatusCode());
+        }
     }
 }

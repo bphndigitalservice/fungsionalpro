@@ -13,13 +13,15 @@ class ViewClientCompetence extends ViewRecord
     use AuthorizesOwnClientRecord {
         RedirectsLockedClientMenuAccess::authorizeAccess insteadof AuthorizesOwnClientRecord;
         AuthorizesOwnClientRecord::authorizeAccess as authorizeOwnClientRecord;
-        RedirectsLockedClientMenuAccess::authorizeAccess as redirectLockedAuthorizeAccess;
     }
     use RedirectsLockedClientMenuAccess;
 
     public function authorizeAccess(): void
     {
-        $this->redirectLockedAuthorizeAccess();
+        if ($this->redirectIfClientMenuLocked(static::getResource()::canAccess())) {
+            return;
+        }
+
         $this->authorizeOwnClientRecord();
     }
 
