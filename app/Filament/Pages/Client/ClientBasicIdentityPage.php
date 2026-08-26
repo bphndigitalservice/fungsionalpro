@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Client;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Concerns\Filament\RequiresSuperAdminForClientMenu;
 use App\Enums\ClientCluster;
 use App\Filament\Resources\ClientResource;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\Support\Htmlable;
  */
 class ClientBasicIdentityPage extends BaseClientProfilePage
 {
+    use RedirectsLockedClientMenuAccess;
     use RequiresSuperAdminForClientMenu;
 
     public function getTitle(): string|Htmlable

@@ -10,6 +10,11 @@ return [
         'references_regency' => 'Kota / Kabupaten',
         'references_department' => 'Kementerian & Lembaga',
     ],
+    'page' => [
+        'client_profile' => [
+            'verify_required' => 'Please complete and verify your Identitas first',
+        ],
+    ],
     'table' => [
         'client' => [
             'id' => 'ID',

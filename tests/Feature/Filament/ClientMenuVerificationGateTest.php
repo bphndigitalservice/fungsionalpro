@@ -6,16 +6,20 @@ use App\Enums\ClientCluster;
 use App\Enums\SystemRole;
 use App\Enums\Verified;
 use App\Filament\Pages\Client\ClientBasicIdentityPage;
+use App\Filament\Pages\Client\ClientProfilePage;
 use App\Filament\Resources\ClientActivityResource;
+use App\Filament\Resources\ClientActivityResource\Pages\ListClientActivities;
 use App\Filament\Resources\ClientCompetenceResource;
 use App\Filament\Resources\ClientDossierResource;
 use App\Filament\Resources\ClientEducationResource;
 use App\Filament\Resources\ClientGradeResource;
 use App\Filament\Resources\ClientPositionResource;
+use App\Filament\Resources\ClientPositionResource\Pages\ListClientPositions;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -110,5 +114,21 @@ class ClientMenuVerificationGateTest extends TestCase
         $this->assertTrue(ClientGradeResource::shouldRegisterNavigation());
         $this->assertTrue(ClientDossierResource::shouldRegisterNavigation());
         $this->assertTrue(ClientBasicIdentityPage::shouldRegisterNavigation());
+    }
+
+    public function test_unverified_client_is_redirected_from_activity_list_to_identitas(): void
+    {
+        $this->actingAsClient(Verified::Unverified);
+
+        Livewire::test(ListClientActivities::class)
+            ->assertRedirect(ClientProfilePage::getUrl());
+    }
+
+    public function test_client_is_redirected_from_position_list_to_identitas(): void
+    {
+        $this->actingAsClient(Verified::Verified);
+
+        Livewire::test(ListClientPositions::class)
+            ->assertRedirect(ClientProfilePage::getUrl());
     }
 }

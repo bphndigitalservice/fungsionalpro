@@ -2,13 +2,15 @@
 
 namespace App\Filament\Resources\ClientGradeResource\Pages;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientGradeResource;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Models\Client;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateClientGrade extends CreateRecord
 {
+    use RedirectsLockedClientMenuAccess;
+
     protected static string $resource = ClientGradeResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -32,4 +34,3 @@ class CreateClientGrade extends CreateRecord
         ];
     }
 }
-
