@@ -5,12 +5,15 @@ namespace Tests\Feature\Filament;
 use App\Enums\ClientCluster;
 use App\Enums\SystemRole;
 use App\Enums\Verified;
+use App\Filament\Pages\Client\Point\ClientPointCreate;
+use App\Filament\Pages\Client\Point\ClientPointList;
 use App\Filament\Pages\Dashboard;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -89,5 +92,54 @@ class AngkaKreditVerificationGateTest extends TestCase
         $titles = collect($notifications)->pluck('title')->all();
 
         $this->assertNotContains(__('labels.page.dashboard.verify_identity_required'), $titles);
+    }
+
+    public function test_unverified_client_cannot_register_angka_kredit_nav(): void
+    {
+        $this->actingAsClient(Verified::Unverified, withPhoto: true);
+        $this->grantPointPagePermissions();
+
+        $this->assertFalse(ClientPointList::shouldRegisterNavigation());
+        $this->assertFalse(ClientPointCreate::shouldRegisterNavigation());
+    }
+
+    public function test_verified_client_with_photo_can_register_angka_kredit_nav(): void
+    {
+        $this->actingAsClient(Verified::Verified, withPhoto: true);
+        $this->grantPointPagePermissions();
+
+        $this->assertTrue(ClientPointList::shouldRegisterNavigation());
+        $this->assertTrue(ClientPointCreate::shouldRegisterNavigation());
+    }
+
+    public function test_verified_client_without_photo_cannot_register_angka_kredit_nav(): void
+    {
+        $this->actingAsClient(Verified::Verified, withPhoto: false);
+        $this->grantPointPagePermissions();
+
+        $this->assertFalse(ClientPointList::shouldRegisterNavigation());
+    }
+
+    public function test_unverified_client_is_redirected_from_point_list_to_dashboard(): void
+    {
+        $this->actingAsClient(Verified::Unverified, withPhoto: true);
+        $this->grantPointPagePermissions();
+
+        Livewire::test(ClientPointList::class)
+            ->assertRedirect(Dashboard::getUrl());
+    }
+
+    protected function grantPointPagePermissions(): void
+    {
+        $user = auth()->user();
+        $role = Role::findByName(SystemRole::Client->value, 'web');
+
+        foreach (['page_ClientPointList', 'page_ClientPointCreate', 'page_ClientPointEdit'] as $permission) {
+            Permission::findOrCreate($permission, 'web');
+            $role->givePermissionTo($permission);
+        }
+
+        $user->unsetRelation('roles');
+        $user->unsetRelation('permissions');
     }
 }
