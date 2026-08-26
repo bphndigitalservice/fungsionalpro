@@ -2,24 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use App\Concerns\Filament\RequiresSuperAdminForClientMenu;
 use App\Filament\Resources\ClientGradeResource\Pages;
-use App\Filament\Resources\ClientGradeResource\RelationManagers;
-use App\Models\Client;
 use App\Models\ClientGrade;
-use App\Enums\CRoleAssignation;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Hugomyb\FilamentMediaAction\Tables\Actions\MediaAction;
 
 class ClientGradeResource extends Resource
 {
+    use RequiresSuperAdminForClientMenu;
+
     protected static ?string $model = ClientGrade::class;
 
     protected static ?string $navigationLabel = 'Riwayat Pangkat/Golongan';
@@ -31,9 +29,9 @@ class ClientGradeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('reg_grade_id')
-                        ->label('Pangkat/Golongan')
-                        ->relationship('grade', 'grade_code')
-                        ->required(),
+                    ->label('Pangkat/Golongan')
+                    ->relationship('grade', 'grade_code')
+                    ->required(),
                 Forms\Components\DatePicker::make('effective_date')
                     ->label('TMT Pangkat/Golongan')
                     ->required(),
@@ -42,15 +40,15 @@ class ClientGradeResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('decree_file')
-                            ->disk('s3')
-                            ->label('File SK Pangkat/Golongan')
-                            ->required()
-                            ->maxFiles(1)
-                            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-                            ->maxSize(config('fungsional-pro.max_upload_file_size'))
-                            ->directory('decree_file')
-                            ->visibility('private')
-                            ->downloadable(),
+                    ->disk('s3')
+                    ->label('File SK Pangkat/Golongan')
+                    ->required()
+                    ->maxFiles(1)
+                    ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                    ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                    ->directory('decree_file')
+                    ->visibility('private')
+                    ->downloadable(),
             ]);
     }
 
@@ -76,7 +74,7 @@ class ClientGradeResource extends Resource
             ])
             ->actions([
                 MediaAction::make()
-                    ->media(fn(Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
+                    ->media(fn (Model $record) => Storage::temporaryUrl($record->decree_file, now()->addMinutes(10)))
                     ->label('SK Pangkat/Golongan'),
                 Tables\Actions\EditAction::make(),
             ])
@@ -109,14 +107,8 @@ class ClientGradeResource extends Resource
         return __('labels.nav.client_menu');
     }
 
-
     public static function getRoutePath(): string
     {
         return '/c/grades';
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return Client::current() !== null;
     }
 }
