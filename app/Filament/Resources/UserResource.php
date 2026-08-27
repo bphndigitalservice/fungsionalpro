@@ -68,7 +68,6 @@ class UserResource extends Resource
                             ->required(),
                     ]),
                 Forms\Components\Section::make(__('Client'))
-                    ->description(__('NIP dan Jabatan untuk peran client'))
                     ->visible(fn (Get $get): bool => static::rolesIncludeClient($get('roles')))
                     ->schema([
                         Forms\Components\TextInput::make('nip')
