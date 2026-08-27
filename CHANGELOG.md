@@ -1,3 +1,17 @@
+# [0.19.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.18.0...v0.19.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ui:** generate passwords with letters and numbers only ([deb8ea0](https://github.com/bphndigitalservice/fungsionalpro/commit/deb8ea0d0f847ba3ccd6b84dd3e481a5e61c45fe))
+
+
+### Features
+
+* **filament:** sync client on user create/edit when role includes client ([2880d3d](https://github.com/bphndigitalservice/fungsionalpro/commit/2880d3d8304cb4696e0c8eb59be0c4d5c1270b96))
+* **ui:** add generate random password action on user form ([3f78c68](https://github.com/bphndigitalservice/fungsionalpro/commit/3f78c686a12381b094111027876ad63e290d8123))
+* **users:** sync Client on user create/edit when role includes c ([2cbdcdd](https://github.com/bphndigitalservice/fungsionalpro/commit/2cbdcdd9e6eecc95fffa7426d51a74369e0fd8ce))
+
 # [0.18.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.17.0...v0.18.0) (2026-08-27)
 
 
