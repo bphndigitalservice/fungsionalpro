@@ -40,8 +40,8 @@ return [
     'form' => [
         'user' => [
             'heading' => [
-                'general' => 'Umum',
-                'general_description' => 'Name, email, and Password',
+                'general' => 'Credentials',
+                'general_description' => 'Name, email, and password',
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',

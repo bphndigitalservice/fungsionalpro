@@ -100,8 +100,8 @@ return [
     'form' => [
         'user' => [
             'heading' => [
-                'general' => 'Umum',
-                'general_description' => 'Name, email, and Password',
+                'general' => 'Kredensial',
+                'general_description' => 'Nama, email, dan kata sandi',
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',
