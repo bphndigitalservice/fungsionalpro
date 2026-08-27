@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Client\Point;
 
 use App\Concerns\Components\EnsureClientHasCompleteProfile;
+use App\Concerns\Filament\GatesAngkaKreditAccess;
 use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
 use App\Exceptions\ExceedMaxPointSubmission;
@@ -43,6 +44,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
+
 use function Filament\Support\is_app_url;
 
 /**
@@ -52,7 +54,13 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
     use EnsureClientHasCompleteProfile;
-    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
+    use GatesAngkaKreditAccess, HasPageShield {
+        GatesAngkaKreditAccess::canAccess insteadof HasPageShield;
+        GatesAngkaKreditAccess::shouldRegisterNavigation insteadof HasPageShield;
+        GatesAngkaKreditAccess::beforeShieldRedirects insteadof HasPageShield;
+        GatesAngkaKreditAccess::getShieldRedirectPath insteadof HasPageShield;
+    }
+    use HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-client-point-create';
 
@@ -66,22 +74,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         static::canView();
 
-        $client = Client::current();
-        if ($client && $client->identity?->photo === null) {
-            abort(403);
-        }
-
         $this->fillForm();
         $this->previousUrl = url()->previous();
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        $client = Client::current();
-        if ($client) {
-            return $client->identity?->photo !== null;
-        }
-        return true;
     }
 
     public function form(Form $form): Form

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Concerns\Filament\GatesVerifiedClientOwnRecords;
 use App\Enums\EducationLevel;
 use App\Filament\Resources\ClientEducationResource\Pages;
 use App\Models\Client;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientEducationResource extends Resource
 {
-    use ChecksPhotoUpload;
+    use GatesVerifiedClientOwnRecords;
 
     protected static ?string $model = ClientEducation::class;
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use App\Concerns\Filament\GatesAngkaKreditAccess;
 use App\Enums\PointSubmissionStatus;
 use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use App\Models\Client;
@@ -22,13 +23,18 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Storage;
 
 class ClientPointList extends Page implements HasInfolists, HasTable
 {
     use CanUseDatabaseTransactions;
-    use HasPageShield, InteractsWithInfolists;
+    use GatesAngkaKreditAccess, HasPageShield {
+        GatesAngkaKreditAccess::canAccess insteadof HasPageShield;
+        GatesAngkaKreditAccess::shouldRegisterNavigation insteadof HasPageShield;
+        GatesAngkaKreditAccess::beforeShieldRedirects insteadof HasPageShield;
+        GatesAngkaKreditAccess::getShieldRedirectPath insteadof HasPageShield;
+    }
     use HasTabs;
+    use InteractsWithInfolists;
     use InteractsWithTable {
         makeTable as makeBaseTable;
     }
@@ -38,20 +44,6 @@ class ClientPointList extends Page implements HasInfolists, HasTable
     public function mount(): void
     {
         static::canView();
-
-        $client = Client::current();
-        if ($client && $client->identity?->photo === null) {
-            abort(403);
-        }
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        $client = Client::current();
-        if ($client) {
-            return $client->identity?->photo !== null;
-        }
-        return true;
     }
 
     public function table(Table $table): Table

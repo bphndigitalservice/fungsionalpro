@@ -2,12 +2,12 @@
 
 namespace App\Filament\Pages\Client\Point;
 
+use App\Concerns\Filament\GatesAngkaKreditAccess;
 use App\Enums\PointSubmissionStatus;
 use App\Models\Client;
 use App\Models\ClientPointSubmission;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -24,6 +24,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
+
 use function Filament\Support\is_app_url;
 
 /**
@@ -32,11 +33,22 @@ use function Filament\Support\is_app_url;
 class ClientPointEdit extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
-    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
+    use GatesAngkaKreditAccess, HasPageShield {
+        GatesAngkaKreditAccess::canAccess insteadof HasPageShield;
+        GatesAngkaKreditAccess::shouldRegisterNavigation insteadof HasPageShield;
+        GatesAngkaKreditAccess::beforeShieldRedirects insteadof HasPageShield;
+        GatesAngkaKreditAccess::getShieldRedirectPath insteadof HasPageShield;
+    }
+    use HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-point-edit';
 
     protected static bool $shouldRegisterNavigation = false;
+
+    public static function shouldRegisterNavigation(array $parameters = []): bool
+    {
+        return false;
+    }
 
     public ClientPointSubmission $record;
 
@@ -61,7 +73,7 @@ class ClientPointEdit extends Page implements HasForms, HasInfolists
     {
         $record = ClientPointSubmission::where('id', $id)->first();
         if (is_null($record)) {
-            throw new ModelNotFoundException();
+            throw new ModelNotFoundException;
         }
 
         return $record;

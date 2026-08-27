@@ -23,6 +23,10 @@ return [
             'title' => 'Identitas',
             'save_draft' => 'Simpan Draft',
             'draft_saved' => 'Draft berhasil disimpan',
+            'verify_required' => 'Lengkapi dan verifikasi Identitas terlebih dahulu',
+        ],
+        'dashboard' => [
+            'verify_identity_required' => 'Lengkapi Identitas dan Tunggu Identitas anda di verifikasi',
         ],
         'client_point_list' => [
             'nav' => 'Riwayat',
