@@ -116,7 +116,7 @@ class UserResource extends Resource
                                     ->icon('heroicon-m-key')
                                     ->tooltip(__('Generate password'))
                                     ->action(function (Set $set): void {
-                                        $password = Str::password(12);
+                                        $password = Str::password(12, letters: true, numbers: true, symbols: false);
 
                                         $set('password', $password);
 
