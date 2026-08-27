@@ -10,10 +10,13 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 use Spatie\Permission\Models\Role;
 use Tapp\FilamentInvite\Tables\InviteAction;
@@ -102,11 +105,29 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('password')
                             ->label(__('labels.form.user.fields.password'))
                             ->password()
+                            ->revealable()
                             ->required(fn (string $context): bool => $context == 'create')
                             ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                             ->dehydrated(fn ($state) => filled($state))
                             ->minLength(8)
-                            ->autocomplete(false),
+                            ->autocomplete(false)
+                            ->suffixAction(
+                                Forms\Components\Actions\Action::make('generatePassword')
+                                    ->icon('heroicon-m-key')
+                                    ->tooltip(__('Generate password'))
+                                    ->action(function (Set $set): void {
+                                        $password = Str::password(12);
+
+                                        $set('password', $password);
+
+                                        Notification::make()
+                                            ->title(__('Password generated'))
+                                            ->body($password)
+                                            ->success()
+                                            ->persistent()
+                                            ->send();
+                                    })
+                            ),
                     ]),
                 Forms\Components\Section::make(__('labels.form.user.heading.verification'))
                     ->description(__('labels.form.user.heading.verification_descritpion'))
