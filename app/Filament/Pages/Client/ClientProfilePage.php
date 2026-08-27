@@ -4,12 +4,9 @@ namespace App\Filament\Pages\Client;
 
 use App\Concerns\Client\CanUseProfileNote;
 use App\Enums\ClientCluster;
-use App\Enums\Verified;
 use App\Events\ClientProfileUpdated;
 use App\Filament\Resources\ClientResource;
 use App\Models\Client;
-use App\Models\ClientGrade;
-use App\Models\ClientPosition;
 use App\Models\RegDepartment;
 use App\Models\RegDepartmentEchelon1;
 use App\Models\RegProvince;
@@ -413,6 +410,6 @@ class ClientProfilePage extends Page implements HasForms, HasInfolists
 
     public static function shouldRegisterNavigation(): bool
     {
-        return true;
+        return auth()->user()?->isActiveClient() ?? false;
     }
 }

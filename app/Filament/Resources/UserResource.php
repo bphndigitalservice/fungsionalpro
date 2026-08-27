@@ -2,27 +2,93 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\SystemRole;
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\Client;
+use App\Models\CRole;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Unique;
+use Spatie\Permission\Models\Role;
 use Tapp\FilamentInvite\Tables\InviteAction;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
+    public static function rolesIncludeClient(?array $roleIds): bool
+    {
+        if (blank($roleIds)) {
+            return false;
+        }
+
+        return Role::query()
+            ->where('name', SystemRole::Client->value)
+            ->whereIn('id', $roleIds)
+            ->exists();
+    }
+
+    public static function syncClientForUser(User $user, array $clientData): void
+    {
+        $user->loadMissing('roles');
+
+        if (! $user->hasSystemRole(SystemRole::Client)) {
+            return;
+        }
+
+        Client::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'nip' => $clientData['nip'] ?? null,
+                'c_role_id' => $clientData['c_role_id'] ?? null,
+            ]
+        );
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\Section::make(__('labels.form.user.heading.role'))
+                    ->description(__('labels.form.user.heading.role_description'))
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Select::make('roles')
+                            ->label(__('labels.form.user.fields.role'))
+                            ->multiple()
+                            ->relationship('roles', 'name')
+                            ->preload(true)
+                            ->live()
+                            ->required(),
+                    ]),
+                Forms\Components\Section::make(__('Client'))
+                    ->description(__('NIP dan Jabatan untuk peran client'))
+                    ->visible(fn (Get $get): bool => static::rolesIncludeClient($get('roles')))
+                    ->schema([
+                        Forms\Components\TextInput::make('nip')
+                            ->label('NIP')
+                            ->required(fn (Get $get): bool => static::rolesIncludeClient($get('roles')))
+                            ->maxLength(255)
+                            ->unique(
+                                table: Client::class,
+                                column: 'nip',
+                                ignorable: fn (?User $record): ?Client => $record?->client,
+                                modifyRuleUsing: fn (Unique $rule) => $rule,
+                            ),
+                        Forms\Components\Select::make('c_role_id')
+                            ->label('Jabatan Fungsional')
+                            ->options(fn () => CRole::query()->orderBy('role_name')->pluck('role_name', 'id'))
+                            ->searchable()
+                            ->required(fn (Get $get): bool => static::rolesIncludeClient($get('roles'))),
+                    ]),
                 Forms\Components\Section::make(__('labels.form.user.heading.general'))
                     ->collapsible()
-                    ->collapsed()
                     ->description(__('labels.form.user.heading.general_description'))
                     ->schema([
                         Forms\Components\TextInput::make('name')
@@ -32,7 +98,8 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('email')
                             ->email()
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true),
                         Forms\Components\TextInput::make('password')
                             ->label(__('labels.form.user.fields.password'))
                             ->password()
@@ -42,18 +109,8 @@ class UserResource extends Resource
                             ->minLength(8)
                             ->autocomplete(false),
                     ]),
-                Forms\Components\Section::make(__('labels.form.user.heading.role'))
-                    ->description(__('labels.form.user.heading.role_description'))
-                    ->collapsible()
-                    ->schema([
-                        Forms\Components\Select::make('roles')
-                            ->label(__('labels.form.user.fields.role'))
-                            ->multiple()
-                            ->relationship('roles', 'name')
-                            ->preload(true),
-                    ]),
                 Forms\Components\Section::make(__('labels.form.user.heading.verification'))
-                    ->description(__('labels.form.user.heading.verification_description'))
+                    ->description(__('labels.form.user.heading.verification_descritpion'))
                     ->collapsible()
                     ->schema([
                         Forms\Components\DateTimePicker::make('email_verified_at')->label(__('labels.form.user.fields.verification')),
@@ -82,7 +139,7 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(2)
+            ->defaultPaginationPageOption(10)
             ->filters([
                 //
             ])
