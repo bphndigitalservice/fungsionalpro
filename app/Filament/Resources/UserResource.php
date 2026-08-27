@@ -11,7 +11,6 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -116,16 +115,7 @@ class UserResource extends Resource
                                     ->icon('heroicon-m-key')
                                     ->tooltip(__('Generate password'))
                                     ->action(function (Set $set): void {
-                                        $password = Str::password(12, letters: true, numbers: true, symbols: false);
-
-                                        $set('password', $password);
-
-                                        Notification::make()
-                                            ->title(__('Password generated'))
-                                            ->body($password)
-                                            ->success()
-                                            ->persistent()
-                                            ->send();
+                                        $set('password', Str::password(12, letters: true, numbers: true, symbols: false));
                                     })
                             ),
                     ]),
