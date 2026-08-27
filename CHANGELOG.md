@@ -1,3 +1,20 @@
+# [0.18.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.17.0...v0.18.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **filament:** halt locked-client redirects and keep Identitas save auth ([5c6e3f3](https://github.com/bphndigitalservice/fungsionalpro/commit/5c6e3f3d63c58bec20a2a5118ac2b2cfe55e6d25))
+
+
+### Features
+
+* **filament:** add client menu access helpers ([1828621](https://github.com/bphndigitalservice/fungsionalpro/commit/1828621889bc81479e10052a3f533a8401a51db8))
+* **filament:** gate angka kredit on verification and redirect to dashboard ([ce6bf6e](https://github.com/bphndigitalservice/fungsionalpro/commit/ce6bf6e259b6a8db9510b2486fa8697fb9b1d057))
+* **filament:** gate client allowlist menus on verification ([619973b](https://github.com/bphndigitalservice/fungsionalpro/commit/619973b336eb1d399ffc9d61d34e69f0fd23b681))
+* **filament:** redirect locked clients to identitas ([13cb0d0](https://github.com/bphndigitalservice/fungsionalpro/commit/13cb0d07cd2cd74381f47393157171e08973c643))
+* **filament:** restrict extra profil saya menus to superadmin ([7173fa6](https://github.com/bphndigitalservice/fungsionalpro/commit/7173fa632278691bb97d506954a6f5d01929db6c))
+* **filament:** show persistent verify notice on dashboard for unverified clients ([5e1e864](https://github.com/bphndigitalservice/fungsionalpro/commit/5e1e864be699f0ec3955bb5ad9cb212e36ab4d4b))
+
 # [0.17.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.16.0...v0.17.0) (2026-08-18)
 
 
