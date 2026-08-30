@@ -21,5 +21,11 @@ trait EnsuresMasterJfApiSchema
                 $table->unsignedInteger('province_id')->nullable();
             });
         }
+
+        if (Schema::hasTable('master_jf') && ! Schema::hasColumn('master_jf', 'agency_id')) {
+            Schema::table('master_jf', function (Blueprint $table) {
+                $table->nullableMorphs('agency');
+            });
+        }
     }
 }

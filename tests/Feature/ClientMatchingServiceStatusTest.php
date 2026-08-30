@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegDepartment;
 use App\Models\RegGrade;
 use App\Services\ClientMatchingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -88,5 +90,47 @@ class ClientMatchingServiceStatusTest extends TestCase
         app(ClientMatchingService::class)->applyMasterData($client, $master);
 
         $this->assertSame($grade->id, $client->reg_grade_id);
+    }
+
+    public function test_apply_master_data_copies_linked_agency_morph(): void
+    {
+        CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        $master = MasterJf::factory()->create([
+            'jabatan' => 'Analis Hukum Ahli Pertama',
+            'instansi' => 'spelling that would not match',
+            'unit_kerja' => 'nope',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+            'type' => ClientCluster::Central,
+        ]);
+
+        $client = new Client;
+        app(ClientMatchingService::class)->applyMasterData($client, $master);
+
+        $this->assertSame(ClientCluster::Central, $client->type);
+        $this->assertSame(RegDepartment::class, $client->agency_type);
+        $this->assertSame($department->id, $client->agency_id);
+    }
+
+    public function test_apply_master_data_uses_fuzzy_lookup_when_morph_missing(): void
+    {
+        CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+
+        $master = MasterJf::factory()->create([
+            'jabatan' => 'Analis Hukum Ahli Pertama',
+            'instansi' => 'Kementerian Hukum',
+            'unit_kerja' => '',
+            'agency_type' => null,
+            'agency_id' => null,
+        ]);
+
+        $client = new Client;
+        app(ClientMatchingService::class)->applyMasterData($client, $master);
+
+        $this->assertSame(RegDepartment::class, $client->agency_type);
+        $this->assertSame($department->id, $client->agency_id);
     }
 }

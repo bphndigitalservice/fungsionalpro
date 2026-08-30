@@ -2,27 +2,37 @@
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\ClientCluster;
 use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages\EditMasterJf;
 use App\Models\CRole;
 use App\Models\CRoleLevel;
 use App\Models\MasterJf;
+use App\Models\RegDepartment;
 use App\Models\RegGrade;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
+use Tests\Concerns\EnsuresWilayahApiSchema;
 use Tests\TestCase;
 
 class MasterJfEditFormTest extends TestCase
 {
+    use EnsuresWilayahApiSchema;
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->ensureWilayahApiSchema();
+    }
 
     protected function actingAsAdmin(): User
     {
-        Role::findOrCreate(SystemRole::Admin->value, 'web');
+        Role::findOrCreate(SystemRole::SuperAdmin->value, 'web');
         $user = User::factory()->create();
-        $user->assignRole(SystemRole::Admin->value);
+        $user->assignRole(SystemRole::SuperAdmin->value);
         $this->actingAs($user);
 
         return $user;
@@ -108,6 +118,62 @@ class MasterJfEditFormTest extends TestCase
             'id' => $record->id,
             'c_role_id' => null,
             'c_role_level_id' => null,
+        ]);
+    }
+
+    public function test_edit_saves_agency_morph_from_cluster_and_agency_id(): void
+    {
+        $this->actingAsAdmin();
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+        $record = MasterJf::factory()->create([
+            'type' => null,
+            'agency_type' => null,
+            'agency_id' => null,
+        ]);
+
+        Livewire::test(EditMasterJf::class, ['record' => $record->getRouteKey()])
+            ->fillForm([
+                'nama' => $record->nama,
+                'nip' => $record->nip,
+                'type' => ClientCluster::Central->value,
+                'agency_id' => $department->id,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('master_jf', [
+            'id' => $record->id,
+            'type' => 'central',
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+        ]);
+    }
+
+    public function test_edit_clears_agency_morph_when_agency_id_cleared(): void
+    {
+        $this->actingAsAdmin();
+        $department = RegDepartment::create(['name' => 'Kementerian Hukum']);
+        $record = MasterJf::factory()->create([
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $department->id,
+        ]);
+
+        Livewire::test(EditMasterJf::class, ['record' => $record->getRouteKey()])
+            ->fillForm([
+                'nama' => $record->nama,
+                'nip' => $record->nip,
+                'type' => ClientCluster::Central->value,
+                'agency_id' => null,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('master_jf', [
+            'id' => $record->id,
+            'type' => 'central',
+            'agency_type' => null,
+            'agency_id' => null,
         ]);
     }
 }

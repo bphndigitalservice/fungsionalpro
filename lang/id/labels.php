@@ -23,6 +23,10 @@ return [
             'title' => 'Identitas',
             'save_draft' => 'Simpan Draft',
             'draft_saved' => 'Draft berhasil disimpan',
+            'verify_required' => 'Lengkapi dan verifikasi Identitas terlebih dahulu',
+        ],
+        'dashboard' => [
+            'verify_identity_required' => 'Lengkapi Identitas dan Tunggu Identitas anda di verifikasi',
         ],
         'client_point_list' => [
             'nav' => 'Riwayat',
@@ -96,8 +100,8 @@ return [
     'form' => [
         'user' => [
             'heading' => [
-                'general' => 'Umum',
-                'general_description' => 'Name, email, and Password',
+                'general' => 'Kredensial',
+                'general_description' => 'Nama, email, dan kata sandi',
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',

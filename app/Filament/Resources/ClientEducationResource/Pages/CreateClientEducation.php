@@ -2,19 +2,19 @@
 
 namespace App\Filament\Resources\ClientEducationResource\Pages;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientEducationResource;
 use App\Models\Client;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CreateClientEducation extends CreateRecord
 {
+    use RedirectsLockedClientMenuAccess;
+
     protected static string $resource = ClientEducationResource::class;
 
-    /**
-     * @return string|\Illuminate\Contracts\Support\Htmlable
-     */
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('labels.page.client_education_create.title');
     }

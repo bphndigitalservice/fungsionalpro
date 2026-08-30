@@ -9,11 +9,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class MasterJfInstansiItemResource extends JsonResource
 {
     /**
-     * @return array{name: string, client_count: int}
+     * @return array{agency_type: ?string, agency_id: ?int, name: string, client_count: int}
      */
     public function toArray(Request $request): array
     {
         return [
+            'agency_type' => $this->resource['agency_type'],
+            'agency_id' => $this->resource['agency_id'] === null
+                ? null
+                : (int) $this->resource['agency_id'],
             'name' => (string) $this->resource['name'],
             'client_count' => (int) $this->resource['client_count'],
         ];

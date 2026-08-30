@@ -23,7 +23,7 @@ Returns grouped aggregations of Jabatan Fungsional data for superapps dashboards
 
 Each group represents one **jenis JF × cluster** combination and includes:
 - group-level `aggregate` (card metrics)
-- `data[]` instansi list with `name` and `client_count` only
+- `data[]` instansi list with `agency_type`, `agency_id`, `name`, and `client_count`
 
 **Primary filters (superapps UX):**
 - `province_id` / `provinsi` — daerah (hybrid; Pemda only unless `type=central`)
@@ -40,10 +40,10 @@ DESC,
         description: 'Grouped aggregations. `aggregate` exists only on each group/card — not on instansi items.',
         examples: [[
             'data' => [[
-                'jf_type_id' => 1,
-                'jf_label' => 'Analis Hukum',
-                'cluster_id' => 'central',
-                'cluster_label' => 'Kementerian Lembaga',
+                'c_role_id' => 1,
+                'c_role_label' => 'Analis Hukum',
+                'cluster' => 'local_province',
+                'cluster_label' => 'Pemerintah Daerah Provinsi',
                 'aggregate' => [
                     'total_jf' => 120,
                     'by_jenjang' => [
@@ -57,10 +57,20 @@ DESC,
                     'by_status_kepegawaian' => ['PNS' => 80, 'PPPK' => 20, 'unknown' => 20],
                     'by_pengangkatan' => ['Penyetaraan' => 15, 'unknown' => 105],
                 ],
-                'data' => [[
-                    'name' => 'Kementerian Hukum',
-                    'client_count' => 46,
-                ]],
+                'data' => [
+                    [
+                        'agency_type' => 'province',
+                        'agency_id' => 51,
+                        'name' => 'Bali',
+                        'client_count' => 45,
+                    ],
+                    [
+                        'agency_type' => null,
+                        'agency_id' => null,
+                        'name' => 'unknown',
+                        'client_count' => 3,
+                    ],
+                ],
             ]],
         ]],
     )]

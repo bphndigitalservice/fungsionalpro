@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Concerns\Filament\GatesVerifiedClientOwnRecords;
 use App\Filament\Exports\ClientActivityExporter;
 use App\Filament\Resources\ClientActivityResource\Pages;
 use App\Filament\Resources\ClientActivityResource\RelationManagers;
@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientActivityResource extends Resource
 {
-    use ChecksPhotoUpload;
+    use GatesVerifiedClientOwnRecords;
 
     protected static ?string $model = ClientActivity::class;
 

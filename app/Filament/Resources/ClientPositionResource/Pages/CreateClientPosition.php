@@ -2,18 +2,21 @@
 
 namespace App\Filament\Resources\ClientPositionResource\Pages;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientPositionResource;
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Models\Client;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateClientPosition extends CreateRecord
 {
+    use RedirectsLockedClientMenuAccess;
+
     protected static string $resource = ClientPositionResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['client_id'] = Client::current()->id;
+
         return $data;
     }
 

@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Concerns\Filament\RequiresSuperAdminForClientMenu;
 use App\Filament\Resources\ClientDossierResource\Pages;
-use App\Filament\Resources\ClientDossierResource\RelationManagers;
-use App\Models\Client;
 use App\Models\ClientDossier;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ClientDossierResource extends Resource
 {
+    use RequiresSuperAdminForClientMenu;
+
     protected static ?string $model = ClientDossier::class;
 
     public static function form(Form $form): Form
@@ -44,33 +45,32 @@ class ClientDossierResource extends Resource
             ]);
     }
 
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-            Tables\Columns\TextColumn::make('documentType.type')
-                ->label('Jenis Dokumen')
-                ->searchable()
-                ->sortable(),
+                Tables\Columns\TextColumn::make('documentType.type')
+                    ->label('Jenis Dokumen')
+                    ->searchable()
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('doc_number')
-                ->label('Nomor Dokumen')
-                ->searchable()
-                ->wrap(),
+                Tables\Columns\TextColumn::make('doc_number')
+                    ->label('Nomor Dokumen')
+                    ->searchable()
+                    ->wrap(),
 
-            Tables\Columns\TextColumn::make('doc_date')
-                ->label('Tanggal')
-                ->date()
-                ->sortable(),
+                Tables\Columns\TextColumn::make('doc_date')
+                    ->label('Tanggal')
+                    ->date()
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('note')
-                ->label('Catatan')
-                ->limit(50)
-                ->wrap(),
+                Tables\Columns\TextColumn::make('note')
+                    ->label('Catatan')
+                    ->limit(50)
+                    ->wrap(),
             ])
             ->filters([
-                
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -123,10 +123,5 @@ class ClientDossierResource extends Resource
     public static function getRoutePath(): string
     {
         return '/c/dossier';
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return Client::current() !== null;
     }
 }

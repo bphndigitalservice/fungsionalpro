@@ -16,7 +16,7 @@ final class MasterJfOpenApiDocumentTransformer
         $openApi->secure(SecurityScheme::apiKey('header', 'X-Api-Key'));
 
         self::fixAggregateBreakdownTypes($openApi);
-        self::annotateClusterId($openApi);
+        self::annotateCluster($openApi);
     }
 
     private static function fixAggregateBreakdownTypes(OpenApi $openApi): void
@@ -36,7 +36,7 @@ final class MasterJfOpenApiDocumentTransformer
         }
     }
 
-    private static function annotateClusterId(OpenApi $openApi): void
+    private static function annotateCluster(OpenApi $openApi): void
     {
         $schema = $openApi->components->schemas['MasterJfGroupResource'] ?? null;
 
@@ -44,10 +44,10 @@ final class MasterJfOpenApiDocumentTransformer
             return;
         }
 
-        if ($schema->type->hasProperty('cluster_id')) {
-            $clusterId = $schema->type->getProperty('cluster_id');
-            if ($clusterId instanceof StringType) {
-                $clusterId->setDescription('Effective cluster: `central`, `local_province`, or `local_regency`.');
+        if ($schema->type->hasProperty('cluster')) {
+            $cluster = $schema->type->getProperty('cluster');
+            if ($cluster instanceof StringType) {
+                $cluster->setDescription('Effective cluster: `central`, `local_province`, or `local_regency`.');
             }
         }
     }

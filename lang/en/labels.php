@@ -10,6 +10,14 @@ return [
         'references_regency' => 'Kota / Kabupaten',
         'references_department' => 'Kementerian & Lembaga',
     ],
+    'page' => [
+        'client_profile' => [
+            'verify_required' => 'Please complete and verify your Identitas first',
+        ],
+        'dashboard' => [
+            'verify_identity_required' => 'Please complete your Identitas and wait for it to be verified',
+        ],
+    ],
     'table' => [
         'client' => [
             'id' => 'ID',
@@ -32,8 +40,8 @@ return [
     'form' => [
         'user' => [
             'heading' => [
-                'general' => 'Umum',
-                'general_description' => 'Name, email, and Password',
+                'general' => 'Credentials',
+                'general_description' => 'Name, email, and password',
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',

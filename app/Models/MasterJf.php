@@ -8,6 +8,7 @@ use App\Enums\JenisKepegawaian;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MasterJf extends Model
 {
@@ -30,6 +31,8 @@ class MasterJf extends Model
         'status_kepegawaian',
         'provinsi',
         'province_id',
+        'agency_type',
+        'agency_id',
     ];
 
     protected $casts = [
@@ -56,6 +59,11 @@ class MasterJf extends Model
     public function province(): BelongsTo
     {
         return $this->belongsTo(RegProvince::class, 'province_id');
+    }
+
+    public function agenciable(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'agency_type', 'agency_id');
     }
 
     /** @return array<string, string> */

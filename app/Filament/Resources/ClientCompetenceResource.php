@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Concerns\Filament\GatesVerifiedClientOwnRecords;
 use App\Enums\TrainingType;
 use App\Enums\TrainingCompletionStatus;
 use App\Filament\Resources\ClientCompetenceResource\Pages;
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientCompetenceResource extends Resource
 {
-    use ChecksPhotoUpload;
+    use GatesVerifiedClientOwnRecords;
 
     protected static ?string $model = ClientCompetence::class;
     protected static ?string $navigationLabel = 'Diklat/Pelatihan';
