@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MasterJfResource\Pages;
 
 use App\Filament\Resources\MasterJfResource;
+use App\Support\MasterJfAgencyForm;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -15,5 +16,10 @@ class EditMasterJf extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return MasterJfAgencyForm::mutate($data);
     }
 }

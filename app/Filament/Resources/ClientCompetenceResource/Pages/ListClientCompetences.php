@@ -2,14 +2,16 @@
 
 namespace App\Filament\Resources\ClientCompetenceResource\Pages;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientCompetenceResource;
-use App\Models\Client;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ListClientCompetences extends ListRecords
 {
+    use RedirectsLockedClientMenuAccess;
+
     protected static string $resource = ClientCompetenceResource::class;
 
     protected function getHeaderActions(): array
@@ -19,17 +21,8 @@ class ListClientCompetences extends ListRecords
         ];
     }
 
-
-
-    protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
-    {
-        return parent::getTableQuery()->where('client_id', Client::current()?->id ?? 0);
-    }
-
     public function getTitle(): string|Htmlable
     {
-        return "Diklat/Pelatihan";
+        return 'Diklat/Pelatihan';
     }
-
-
 }

@@ -215,6 +215,7 @@ class ClientResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(ClientExporter::class)
+                    ->modifyQueryUsing(fn (Builder $query) => $query)
                     ->color('success')
                     ->button()
                     ->icon('heroicon-m-arrow-down-tray'),
@@ -232,6 +233,11 @@ class ClientResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return app(\App\Services\ClientAccessService::class)->scopedQuery(auth()->user());
     }
 
     public static function getRelations(): array
@@ -447,7 +453,7 @@ class ClientResource extends Resource
 
                             Forms\Components\TextInput::make('academic_title')
                                 ->label(__('Gelar Belakang'))
-                                ->hint('e.g: S.H, M.H')
+                                ->hint('e.g: S.H., M.H.')
                                 ->required(),
                         ])
                         ->columns(2),
@@ -458,6 +464,7 @@ class ClientResource extends Resource
                                 ->options(Gender::class)
                                 ->inline()
                                 ->required(),
+
                             Forms\Components\TextInput::make('phone_number')
                                 ->label(__('labels.form.client.fields.phone_number'))
                                 ->required(),
@@ -475,6 +482,8 @@ class ClientResource extends Resource
                         ->image()
                         ->visibility('private')
                         ->downloadable()
+                        ->openable()
+                        ->previewable()
                         ->avatar()
                         ->required(),
                 ])
@@ -490,11 +499,11 @@ class ClientResource extends Resource
                     Forms\Components\Group::make()
                         ->schema([
                             Forms\Components\Select::make('level')
-                                ->label(__('labels.form.client.fields.education_level'))
+                                ->label(__('Jenjang Pendidikan'))
                                 ->options(EducationLevel::class)
                                 ->required(),
                             Forms\Components\TextInput::make('university_name')
-                                ->label(__('labels.form.client.fields.university_name'))
+                                ->label(__('Universitas'))
                                 ->required(),
                         ])
                         ->columns(2),
@@ -506,19 +515,9 @@ class ClientResource extends Resource
                             Forms\Components\TextInput::make('academic_title')
                                 ->label(__('labels.form.client.fields.academic_title'))
                                 ->required(false)->hidden(true),
-                        ])
-                        ->columns(2),
-
-                    Forms\Components\Group::make()
-                        ->schema([
-                            Forms\Components\TextInput::make('gpa')
-                                ->label(__('labels.form.client.fields.gpa'))
-                                ->numeric()
-                                ->maxValue(4)
-                                ->required(),
                             Forms\Components\FileUpload::make('certificate')
                                 ->disk('s3')
-                                ->label(__('labels.form.client.fields.certificate'))
+                                ->label(__('Ijazah'))
                                 ->required()
                                 ->maxFiles(1)
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
@@ -526,8 +525,11 @@ class ClientResource extends Resource
                                 ->directory('education_certificate')
                                 ->visibility('private')
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
-                        ])->columns(2),
+                        ])
+                        ->columns(2),
                 ])
                 ->relationship('education'),
         ];
@@ -550,6 +552,8 @@ class ClientResource extends Resource
                                 ->visibility(static::storageVisibility())
                                 ->directory('employee-cards')
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
@@ -566,6 +570,8 @@ class ClientResource extends Resource
                                 ->directory('sk-cpns')
                                 ->visibility(static::storageVisibility())
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                             Forms\Components\DatePicker::make('sk_pns_tmt')
@@ -576,6 +582,8 @@ class ClientResource extends Resource
                                 ->visibility(static::storageVisibility())
                                 ->directory('sk-pns')
                                 ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->maxFiles(1)
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
@@ -598,6 +606,9 @@ class ClientResource extends Resource
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->directory('sk-jf')
                                 ->maxFiles(1)
+                                ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),
@@ -618,6 +629,9 @@ class ClientResource extends Resource
                                 ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
                                 ->directory('sk-grade')
                                 ->maxFiles(1)
+                                ->downloadable()
+                                ->openable()
+                                ->previewable()
                                 ->maxSize(config('fungsional-pro.max_upload_file_size'))
                                 ->helperText('Format file: PDF | Ukuran maksimal: 750 KB'),
                         ]),

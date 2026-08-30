@@ -8,7 +8,9 @@
 .env
 .env.backup
 .env.production
+docker-compose.dev.env
 !.env.template
+!.env.example
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml

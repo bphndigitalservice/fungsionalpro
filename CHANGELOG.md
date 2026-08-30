@@ -1,3 +1,234 @@
+# [0.19.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.18.0...v0.19.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ui:** generate passwords with letters and numbers only ([deb8ea0](https://github.com/bphndigitalservice/fungsionalpro/commit/deb8ea0d0f847ba3ccd6b84dd3e481a5e61c45fe))
+
+
+### Features
+
+* **filament:** sync client on user create/edit when role includes client ([2880d3d](https://github.com/bphndigitalservice/fungsionalpro/commit/2880d3d8304cb4696e0c8eb59be0c4d5c1270b96))
+* **ui:** add generate random password action on user form ([3f78c68](https://github.com/bphndigitalservice/fungsionalpro/commit/3f78c686a12381b094111027876ad63e290d8123))
+* **users:** sync Client on user create/edit when role includes c ([2cbdcdd](https://github.com/bphndigitalservice/fungsionalpro/commit/2cbdcdd9e6eecc95fffa7426d51a74369e0fd8ce))
+
+# [0.18.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.17.0...v0.18.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **filament:** halt locked-client redirects and keep Identitas save auth ([5c6e3f3](https://github.com/bphndigitalservice/fungsionalpro/commit/5c6e3f3d63c58bec20a2a5118ac2b2cfe55e6d25))
+
+
+### Features
+
+* **filament:** add client menu access helpers ([1828621](https://github.com/bphndigitalservice/fungsionalpro/commit/1828621889bc81479e10052a3f533a8401a51db8))
+* **filament:** gate angka kredit on verification and redirect to dashboard ([ce6bf6e](https://github.com/bphndigitalservice/fungsionalpro/commit/ce6bf6e259b6a8db9510b2486fa8697fb9b1d057))
+* **filament:** gate client allowlist menus on verification ([619973b](https://github.com/bphndigitalservice/fungsionalpro/commit/619973b336eb1d399ffc9d61d34e69f0fd23b681))
+* **filament:** redirect locked clients to identitas ([13cb0d0](https://github.com/bphndigitalservice/fungsionalpro/commit/13cb0d07cd2cd74381f47393157171e08973c643))
+* **filament:** restrict extra profil saya menus to superadmin ([7173fa6](https://github.com/bphndigitalservice/fungsionalpro/commit/7173fa632278691bb97d506954a6f5d01929db6c))
+* **filament:** show persistent verify notice on dashboard for unverified clients ([5e1e864](https://github.com/bphndigitalservice/fungsionalpro/commit/5e1e864be699f0ec3955bb5ad9cb212e36ab4d4b))
+
+# [0.17.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.16.0...v0.17.0) (2026-08-18)
+
+
+### Bug Fixes
+
+* **api:** skip Master JF morph load for unknown agency types ([8b11ef4](https://github.com/bphndigitalservice/fungsionalpro/commit/8b11ef4bfb2de47ffe58ce61718696b495159f67))
+* **master-jf:** cache import divisi schema check ([aeccd40](https://github.com/bphndigitalservice/fungsionalpro/commit/aeccd40dbb6f7630d233a130edbcc63016fef8c6))
+* **master-jf:** stabilize agency morph handling ([33088ba](https://github.com/bphndigitalservice/fungsionalpro/commit/33088baacc35df65ba40c0a577f80b33204b8885))
+
+
+### Features
+
+* **api:** add CRole, CRoleLevel, RegProvince, and RegRegency controllers with corresponding resources and requests ([efd8252](https://github.com/bphndigitalservice/fungsionalpro/commit/efd82525eece506baebb4f8479aba1d689cf93b9))
+* **api:** add endpoint to list departments with RegDepartmentController ([a8d27bb](https://github.com/bphndigitalservice/fungsionalpro/commit/a8d27bb159d28483915ba9f2bfc7d799daded3eb))
+* **api:** add RegGradeController and RegGradeResource for managing grade data ([4526700](https://github.com/bphndigitalservice/fungsionalpro/commit/4526700cdea593e58f11cfde566741f8693ce8da))
+* **api:** group Master JF instansi by agency morph ([c0f19db](https://github.com/bphndigitalservice/fungsionalpro/commit/c0f19dba0d0d9192a8b1fa24a8e6156c5f2cacf7))
+* **api:** group Master JF instansi by agency morph ([60094d0](https://github.com/bphndigitalservice/fungsionalpro/commit/60094d0aa29db14d0d7bd86d98bef2ed0dcf6058))
+* **api:** map Master JF agency FQCN and cluster labels for JSON ([a3be15d](https://github.com/bphndigitalservice/fungsionalpro/commit/a3be15d7747e27131b92cede598984e35e417e83))
+* **api:** reshape Master JF JSON resources for morph instansi ([1c5e818](https://github.com/bphndigitalservice/fungsionalpro/commit/1c5e8184f72640a66d723d8bfe1ab881ed80edb0))
+* **filament:** select Master JF instansi via agency morph ([09e1cd7](https://github.com/bphndigitalservice/fungsionalpro/commit/09e1cd76f900275342cea62521fdb965f6e277fb))
+* **master-jf:** add nullable agency morph columns and relations ([dd581d5](https://github.com/bphndigitalservice/fungsionalpro/commit/dd581d5765b13045b4294dfc5d1966cf6a526aca))
+* **master-jf:** backfill agency morph from instansi text ([a605b71](https://github.com/bphndigitalservice/fungsionalpro/commit/a605b7152d73c5775c2e6d13c023a6a6d947f2cd))
+* **master-jf:** persist agency morph on import without wiping links ([8404c6d](https://github.com/bphndigitalservice/fungsionalpro/commit/8404c6d98e76e1ae0d42981925f6e594740bb5b6))
+* **master-jf:** resolve agency morph from instansi text ([03dec9b](https://github.com/bphndigitalservice/fungsionalpro/commit/03dec9b2f144398b39577f5f6d7f5dffc2d883d2))
+* **matching:** copy Master JF agency morph onto client ([52a9676](https://github.com/bphndigitalservice/fungsionalpro/commit/52a967626ae44238f3704ec28114f19c19156bef))
+
+# [0.16.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.2...v0.16.0) (2026-08-14)
+
+
+### Features
+
+* **api:** refine master-jf aggregations with effective cluster and OpenAPI docs ([ce707c0](https://github.com/bphndigitalservice/fungsionalpro/commit/ce707c068ed8a8c3f1e486141b7f083e81c3dd1b))
+
+## [0.15.2](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.1...v0.15.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* **deploy:** pass SUPERAPPS_API_KEY into app and worker containers ([9e26beb](https://github.com/bphndigitalservice/fungsionalpro/commit/9e26beb070cdff043dca7ec9d9c527264e2e90bb))
+
+## [0.15.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.15.0...v0.15.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **security:** resolve Trivy HIGH vulnerabilities in Docker image ([8964184](https://github.com/bphndigitalservice/fungsionalpro/commit/8964184e28c83e1599d8a52d016bc08970d38fc1))
+
+# [0.15.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.14.0...v0.15.0) (2026-08-14)
+
+
+### Features
+
+* **api:** add Master JF aggregate endpoint for superapps integration ([9801d3d](https://github.com/bphndigitalservice/fungsionalpro/commit/9801d3d4be630d81288d4ac8ef0fb3b988c174d8))
+
+# [0.14.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.13.0...v0.14.0) (2026-08-13)
+
+
+### Features
+
+* add Verifikator BPHN global scope for verifier access without regional entity ([c439005](https://github.com/bphndigitalservice/fungsionalpro/commit/c4390054fc08bd341d567411411d7b2864a03ee0))
+* add Verifikator BPHN global scope for verifier access without regional entity ([e3d8d17](https://github.com/bphndigitalservice/fungsionalpro/commit/e3d8d17e410dcb3b285f8a63fff7cbe0c54a642a))
+
+# [0.13.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.12.0...v0.13.0) (2026-08-13)
+
+
+### Features
+
+* add admin access region rules by system role ([4ae4c02](https://github.com/bphndigitalservice/fungsionalpro/commit/4ae4c0210c90a77485fb3d6a37c1d811d8c468bd))
+* clear admin access region when user is global admin ([90817a5](https://github.com/bphndigitalservice/fungsionalpro/commit/90817a527ded9c225c33036ed86f94a1bd1cbcce))
+* require admin access region only for admin-instansi ([c910252](https://github.com/bphndigitalservice/fungsionalpro/commit/c9102525c749bb92bf4ce2fab5637dd1dbe64a17))
+
+# [0.12.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.11.0...v0.12.0) (2026-08-12)
+
+
+### Features
+
+* unify Status Verifikasi column styles, icons, and labels across all verification workspaces ([b8bd0fa](https://github.com/bphndigitalservice/fungsionalpro/commit/b8bd0faa66fdf0ebae833366c243712803f48559))
+
+# [0.11.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.1...v0.11.0) (2026-08-12)
+
+
+### Features
+
+* fix notification timezones and URLs, and update identity rejection logic to maintain unverified status while showing as rejected ([831e3f9](https://github.com/bphndigitalservice/fungsionalpro/commit/831e3f9320555c3bc98c1dc8eda472ea18e1e59a))
+
+## [0.10.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.10.0...v0.10.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* unify verification action styles and set default client verification to false ([bcca995](https://github.com/bphndigitalservice/fungsionalpro/commit/bcca99514e7f79148a7eb321b1a42585c74bbaee))
+
+# [0.10.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.9.1...v0.10.0) (2026-08-05)
+
+
+### Features
+
+* add Indonesian localization files ([0193cb3](https://github.com/bphndigitalservice/fungsionalpro/commit/0193cb3c72320a8b603f21b2a4ee76fe1b8b0ca8))
+
+## [0.9.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.9.0...v0.9.1) (2026-08-03)
+
+
+### Bug Fixes
+
+* **email:** resolve issue preventing verification emails on registration ([60d4fe0](https://github.com/bphndigitalservice/fungsionalpro/commit/60d4fe001027cb9f8a276c3cf343d3496495cd71))
+
+# [0.9.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.8.0...v0.9.0) (2026-07-29)
+
+
+### Bug Fixes
+
+* **master-jf:** dehydrate jenjang when role cleared ([b0df9c4](https://github.com/bphndigitalservice/fungsionalpro/commit/b0df9c485f2442d1c5eaed20b6c734ca8c832766))
+* **master-jf:** prefer exact then longest grade match ([e6675ee](https://github.com/bphndigitalservice/fungsionalpro/commit/e6675eed716db0b3a29c43a4550a5e95e53e8521))
+
+
+### Features
+
+* **master-jf:** add reg_grade and c_role_level FK columns ([ee4b5e5](https://github.com/bphndigitalservice/fungsionalpro/commit/ee4b5e5684798a1be8783b54fa5a7ad698406996))
+* **master-jf:** bind gol ruang and jenjang to FK selects ([8547e38](https://github.com/bphndigitalservice/fungsionalpro/commit/8547e38a994a41ec8b220fb803c43f44a2eded19))
+* **master-jf:** resolve and backfill reg_grade_id from gol_ruang ([1469b89](https://github.com/bphndigitalservice/fungsionalpro/commit/1469b89cb858926df48712b60525f82d22bfce0e))
+* **master-jf:** resolve import golruang to reg_grade_id ([d44ae06](https://github.com/bphndigitalservice/fungsionalpro/commit/d44ae0673c819cc69c4238aa86fa5906a237697d))
+* **master-jf:** switch list filter and grade widget to FKs ([7ea844d](https://github.com/bphndigitalservice/fungsionalpro/commit/7ea844d773f6d42fa5b034a4c0f07524a34c674d))
+* **matching:** prefer Master JF grade and level FKs ([b22e3ac](https://github.com/bphndigitalservice/fungsionalpro/commit/b22e3ac036edf8cecb088a21c6059ddda3bcad55))
+
+# [0.8.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.7.0...v0.8.0) (2026-07-28)
+
+
+### Features
+
+* **master-jf:** add enum label/value mapper ([030dc69](https://github.com/bphndigitalservice/fungsionalpro/commit/030dc69701de8c1287b14bbf19e82023e8123e1d))
+* **master-jf:** add JenisKepegawaian enum ([1a7d6a5](https://github.com/bphndigitalservice/fungsionalpro/commit/1a7d6a5888663450e75f169c54dcea81f9b064c1))
+* **master-jf:** cast type/status/kepegawaian to enums ([a427574](https://github.com/bphndigitalservice/fungsionalpro/commit/a42757434846580a8d3e6499d1b43f5e913b5be0))
+* **master-jf:** drive status widgets from enums ([7790416](https://github.com/bphndigitalservice/fungsionalpro/commit/77904162ab1954d3b7de05c144f02a07dd67438b))
+* **master-jf:** migrate status/type/kepegawaian to enum values ([b309027](https://github.com/bphndigitalservice/fungsionalpro/commit/b30902710ab0a8b1b3c40275cd90346f89df0fc1))
+* **master-jf:** normalize import status via enum mapper ([e9eef0d](https://github.com/bphndigitalservice/fungsionalpro/commit/e9eef0defb879cb633fcac2bbe1a54dcf74f6340))
+* **master-jf:** use Client enums for Kluster/Status filters ([cdd71b0](https://github.com/bphndigitalservice/fungsionalpro/commit/cdd71b059962e7d7e013b6997a5f14466efbc1d0))
+* **matching:** assign ClientStatus directly from Master JF ([0bf1316](https://github.com/bphndigitalservice/fungsionalpro/commit/0bf1316ba17481e138fae281833759113f73bce1))
+
+# [0.7.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.6.0...v0.7.0) (2026-07-28)
+
+
+### Features
+
+* **branding:** update brand component with new styles and logo format ([6939416](https://github.com/bphndigitalservice/fungsionalpro/commit/6939416fb2cc04ac7a27f6f65d2900e10e11b56c))
+
+# [0.6.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.5.1...v0.6.0) (2026-07-28)
+
+
+### Features
+
+* **branding:** add custom brand name and logo to Filament admin panel ([992465a](https://github.com/bphndigitalservice/fungsionalpro/commit/992465afaaa2a149a7cfb6e8f661a4bfd8e52642))
+
+## [0.5.1](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.5.0...v0.5.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **master-jf:** drop filter-keyed widget remount; assert via widget data ([cb93b93](https://github.com/bphndigitalservice/fungsionalpro/commit/cb93b93d00904d0b20eddbcf1d8bc777c7fc98ed))
+* **master-jf:** ensure proper widget data handling for filter-keyed remounts ([9d5c804](https://github.com/bphndigitalservice/fungsionalpro/commit/9d5c80464ffcf4a5b7dc63b982e20cc5ede685fb))
+* **master-jf:** expose table filters to header stats widgets ([015d520](https://github.com/bphndigitalservice/fungsionalpro/commit/015d52089e4bddf30bf50f2a1eb361074f87bb3a))
+
+# [0.5.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.4.0...v0.5.0) (2026-07-28)
+
+
+### Features
+
+* **master-jf:** enhance Master JF resource with sortable columns and active CRole filter ([2078dc0](https://github.com/bphndigitalservice/fungsionalpro/commit/2078dc050635e3b9dd001ffa4fc9111fdc668a8b))
+
+# [0.4.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.3.0...v0.4.0) (2026-07-28)
+
+
+### Features
+
+* **master-jf:** add CRole form field, column, and list filter ([1a758e2](https://github.com/bphndigitalservice/fungsionalpro/commit/1a758e28dfed398148f605e4459f351eef7c3002))
+* **master-jf:** add nullable c_role_id FK and relation ([0e22e3f](https://github.com/bphndigitalservice/fungsionalpro/commit/0e22e3f67b27efd1c0cedcb7052dd3c52eb880a2))
+
+# [0.3.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.4...v0.3.0) (2026-07-28)
+
+
+### Bug Fixes
+
+* **master-jf:** clear table sort before stats groupBy ([70aa0a1](https://github.com/bphndigitalservice/fungsionalpro/commit/70aa0a1af511726bf7f7ee8e49cb942a9598a4e2))
+* **test:** set APP_KEY in phpunit for Filament feature tests ([02f7579](https://github.com/bphndigitalservice/fungsionalpro/commit/02f75795c2a9c6afe9105722e5951ab311aaae12))
+
+
+### Features
+
+* **deployment:** update docker compose and environment ([728a251](https://github.com/bphndigitalservice/fungsionalpro/commit/728a251cde678bee51fd4188f4b4b110530fdfe4))
+* **master-jf:** add filter-aware total stats widget and collapse toggle ([35a03d3](https://github.com/bphndigitalservice/fungsionalpro/commit/35a03d3746b7ecdb3b0264f79ef1d990de6e8fce))
+* **master-jf:** add list filters and status_kepegawaian column ([d649ece](https://github.com/bphndigitalservice/fungsionalpro/commit/d649ece82434a9a74666e8c5c4329cab2e8abe54))
+* **master-jf:** add status_kepegawaian fillable, options helpers, factory ([5e3b5af](https://github.com/bphndigitalservice/fungsionalpro/commit/5e3b5af1947eafc200fd727f7eb7a1182b3d9421))
+* **master-jf:** add status, kepegawaian, and gol_ruang stats widgets ([f40d32b](https://github.com/bphndigitalservice/fungsionalpro/commit/f40d32b90b3a1b55ae679c28de8dc2f23d320052))
+
+## [0.2.4](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.3...v0.2.4) (2026-07-28)
+
+
+### Bug Fixes
+
+* **perf:** enhance docker configuration and optimize php settings for performance ([bb01301](https://github.com/bphndigitalservice/fungsionalpro/commit/bb0130198adfa8f72416cdae27d2b01d5aef9f21))
+
 ## [0.2.3](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.2.2...v0.2.3) (2026-07-20)
 
 

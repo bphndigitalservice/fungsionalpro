@@ -228,15 +228,18 @@ class Register extends BaseRegister
             $this->form->model($user)->saveRelationships();
             $this->callHook('afterRegister');
 
+            $this->sendEmailVerificationNotification($user);
+
             Filament::auth()->login($user);
             session()->regenerate();
 
-            return app(RegistrationResponse::class);
+            return app(\Filament\Http\Responses\Auth\Contracts\RegistrationResponse::class);
         } catch (ValidationException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             Log::error('Registration failed', [
-                'exception' => $exception,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             Notification::make()

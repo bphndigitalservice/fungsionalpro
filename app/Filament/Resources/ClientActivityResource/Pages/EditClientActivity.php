@@ -3,13 +3,27 @@
 namespace App\Filament\Resources\ClientActivityResource\Pages;
 
 use App\Concerns\Filament\AuthorizesOwnClientRecord;
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientActivityResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditClientActivity extends EditRecord
 {
-    use AuthorizesOwnClientRecord;
+    use AuthorizesOwnClientRecord {
+        RedirectsLockedClientMenuAccess::authorizeAccess insteadof AuthorizesOwnClientRecord;
+        AuthorizesOwnClientRecord::authorizeAccess as authorizeOwnClientRecord;
+    }
+    use RedirectsLockedClientMenuAccess;
+
+    public function authorizeAccess(): void
+    {
+        if ($this->redirectIfClientMenuLocked(static::getResource()::canAccess())) {
+            return;
+        }
+
+        $this->authorizeOwnClientRecord();
+    }
 
     protected static string $resource = ClientActivityResource::class;
 

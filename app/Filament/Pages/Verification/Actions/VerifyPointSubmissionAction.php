@@ -9,6 +9,10 @@ use App\Filament\Pages\Client\Point\Actions\ViewPointSubmission;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Actions\StaticAction;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Components\Field;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
@@ -31,22 +35,48 @@ class VerifyPointSubmissionAction extends Action
     {
         parent::setUp();
 
-        $this->label(__('labels.table.verification.point.actions.accept'));
-        $this->icon('heroicon-o-check');
+        $this->label(fn (Model $record) => in_array($record->status, [\App\Enums\PointSubmissionStatus::Verified, \App\Enums\PointSubmissionStatus::ShouldRevise]) ? __('Lihat') : __('Periksa'));
+        $this->icon(fn (Model $record) => in_array($record->status, [\App\Enums\PointSubmissionStatus::Verified, \App\Enums\PointSubmissionStatus::ShouldRevise]) ? 'heroicon-o-eye' : 'heroicon-o-check');
+        $this->color(fn (Model $record) => in_array($record->status, [\App\Enums\PointSubmissionStatus::Verified, \App\Enums\PointSubmissionStatus::ShouldRevise]) ? 'gray' : 'primary');
+        $this->link();
 
         $this->modalHeading(__('labels.table.verification.point.modal_heading'));
 
-        $this->modalSubmitAction(fn (StaticAction $action) => $action->label(__('Save')));
+        $this->modalSubmitAction(fn (StaticAction $action, Model $record) => $action
+            ->label(__('Save'))
+            ->hidden(in_array($record->status, [\App\Enums\PointSubmissionStatus::Verified, \App\Enums\PointSubmissionStatus::ShouldRevise]))
+        );
         $this->modalCancelAction(fn (StaticAction $action) => $action->label(__('Close')));
 
         $this->form([
-            ...ViewPointSubmission::getFormSubmissionView(true),
+            Group::make(
+                collect(ViewPointSubmission::getFormSubmissionView(true))
+                    ->map(function (Component $component) {
+                        if ($component instanceof Field) {
+                            $component->required(false);
+                        }
+
+                        if ($component instanceof \Filament\Forms\Components\FileUpload) {
+                            $component->openable()->previewable()->extraAttributes([
+                                'onclick' => "const links = this.querySelectorAll('a'); links.forEach(link => link.setAttribute('target', '_blank'));",
+                                'onmouseover' => "const links = this.querySelectorAll('a'); links.forEach(link => link.setAttribute('target', '_blank'));"
+                            ]);
+                        }
+
+                        return $component;
+                    })
+                    ->toArray()
+            )
+                ->dehydrated(false)
+                ->disabled(),
             ToggleButtons::make('is_verified')
                 ->live()
+                ->disabled(fn (Model $record) => in_array($record->status, [\App\Enums\PointSubmissionStatus::Verified, \App\Enums\PointSubmissionStatus::ShouldRevise]))
                 ->required()
                 ->options(Acceptance::class)
                 ->inline(),
             Textarea::make('verifier_note')
+                ->disabled(fn (Model $record) => in_array($record->status, [\App\Enums\PointSubmissionStatus::Verified, \App\Enums\PointSubmissionStatus::ShouldRevise]))
                 ->required(fn (Get $get) => $get('is_verified') == Acceptance::Reject->value),
         ]);
 
@@ -67,18 +97,20 @@ class VerifyPointSubmissionAction extends Action
         $this->action(function (): void {
             $this->process(function (array $data, Model $record) {
 
-                $status = $data['is_verified'] instanceof Acceptance 
-                    ? $data['is_verified'] 
+                $status = $data['is_verified'] instanceof Acceptance
+                    ? $data['is_verified']
                     : Acceptance::from($data['is_verified']);
 
                 $record->verify(
-                    $status === Acceptance::Accept, 
+                    $status === Acceptance::Accept,
                     $data['verifier_note']
                 );
             });
 
             $this->success();
         });
+
+        $this->extraModalFooterActions([]);
     }
 
     public function mutateRecordDataUsing(?Closure $callback): static

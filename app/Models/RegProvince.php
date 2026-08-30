@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class RegProvince extends Model
 {
     protected $guarded = ['id'];
-
 
     use HasFactory;
 
@@ -24,6 +24,11 @@ class RegProvince extends Model
     public function agency(): MorphOne
     {
         return $this->morphOne(Client::class, 'agency');
+    }
+
+    public function masterJfs(): MorphMany
+    {
+        return $this->morphMany(MasterJf::class, 'agency');
     }
 
     public function echelon1s(): HasMany
