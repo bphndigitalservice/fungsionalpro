@@ -2,31 +2,34 @@
 
 namespace App\Filament\Pages\Authx;
 
+use App\Enums\SystemRole;
+use App\Models\CalonJf;
 use App\Models\Client;
-use App\Models\CRole;
 use App\Models\MasterJf;
 use App\Models\RegDepartment;
 use App\Models\RegProvince;
 use App\Models\RegRegency;
 use App\Models\User;
-use Filament\Actions\Action;
+use App\Rules\UniqueNip;
+use App\Services\ClientMatchingService;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Http\Responses\Auth\Contracts\RegistrationResponse;
 use Filament\Notifications\Notification;
-use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Pages\Auth\Register as BaseRegister;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class Register extends BaseRegister
 {
@@ -39,7 +42,7 @@ class Register extends BaseRegister
                         TextInput::make('nip')
                             ->label('NIP')
                             ->required()
-                            ->unique('clients', 'nip')
+                            ->rule(new UniqueNip)
                             ->suffixAction(
                                 FormAction::make('Cari')
                                     ->button()
@@ -55,10 +58,13 @@ class Register extends BaseRegister
                                         }
 
                                         $nip = $get('nip');
-                                        if (!$nip) return;
+                                        if (! $nip) {
+                                            return;
+                                        }
 
                                         $set('name', null);
                                         $set('c_role_id', null);
+                                        $set('c_role_locked', false);
                                         $set('agency_type', null);
                                         $set('agency_id', null);
                                         $set('email', null);
@@ -75,6 +81,17 @@ class Register extends BaseRegister
                                             $set('search_message', 'Anda sudah memiliki akun. Silahkan login');
                                             $set('search_message_type', 'danger');
                                             $set('client_found', true);
+
+                                            return;
+                                        }
+
+                                        $calon = CalonJf::where('nip', $nip)->with('user')->first();
+                                        if ($calon) {
+                                            $set('email', $calon->user?->email);
+                                            $set('search_message', 'Anda sudah memiliki akun. Silahkan login');
+                                            $set('search_message_type', 'danger');
+                                            $set('client_found', true);
+
                                             return;
                                         }
 
@@ -84,26 +101,28 @@ class Register extends BaseRegister
 
                                             if (str_contains(strtolower($masterJf->jabatan), 'analis')) {
                                                 $set('c_role_id', 1);
+                                                $set('c_role_locked', true);
                                             } elseif (str_contains(strtolower($masterJf->jabatan), 'penyuluh')) {
                                                 $set('c_role_id', 2);
+                                                $set('c_role_locked', true);
                                             }
 
-                                            [$type, $model] = \App\Services\ClientMatchingService::determineAgencyInfo($masterJf->instansi ?? '', $masterJf->unit_kerja ?? '');
+                                            [$type, $model] = ClientMatchingService::determineAgencyInfo($masterJf->instansi ?? '', $masterJf->unit_kerja ?? '');
                                             $set('agency_type', $type);
 
                                             // Need to lookup agency_id
-                                            $cleanUnitKerja = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->unit_kerja ?? '');
-                                            $cleanInstansi = \App\Services\ClientMatchingService::cleanAgencyName($masterJf->instansi ?? '');
+                                            $cleanUnitKerja = ClientMatchingService::cleanAgencyName($masterJf->unit_kerja ?? '');
+                                            $cleanInstansi = ClientMatchingService::cleanAgencyName($masterJf->instansi ?? '');
 
                                             $agency = $model::where('name', '=', $cleanUnitKerja)->first();
-                                            if (!$agency && $cleanInstansi) {
+                                            if (! $agency && $cleanInstansi) {
                                                 $agency = $model::where('name', '=', $cleanInstansi)->first();
                                             }
-                                            if (!$agency && $cleanUnitKerja) {
-                                                $agency = $model::where('name', 'LIKE', "%" . $cleanUnitKerja . "%")->first();
+                                            if (! $agency && $cleanUnitKerja) {
+                                                $agency = $model::where('name', 'LIKE', '%'.$cleanUnitKerja.'%')->first();
                                             }
-                                            if (!$agency && $cleanInstansi) {
-                                                $agency = $model::where('name', 'LIKE', "%" . $cleanInstansi . "%")->first();
+                                            if (! $agency && $cleanInstansi) {
+                                                $agency = $model::where('name', 'LIKE', '%'.$cleanInstansi.'%')->first();
                                             }
 
                                             if ($agency) {
@@ -122,17 +141,18 @@ class Register extends BaseRegister
                         Hidden::make('search_message'),
                         Hidden::make('search_message_type'),
                         Hidden::make('client_found')->default(false),
+                        Hidden::make('c_role_locked')->default(false),
                         Placeholder::make('search_message_display')
                             ->label(false)
-                            ->content(fn(Get $get) => new \Illuminate\Support\HtmlString(
-                                '<span style="' . match($get('search_message_type')) {
+                            ->content(fn (Get $get) => new HtmlString(
+                                '<span style="'.match ($get('search_message_type')) {
                                     'danger' => 'color: #dc2626; font-weight: 500;',  // Red
                                     'success' => 'color: #16a34a; font-weight: 500;', // Green
                                     'warning' => 'color: #ea580c; font-weight: 500;', // Amber / Dark Orange
                                     default => 'color: #4b5563;',                    // Gray
-                                } . '">' . e($get('search_message')) . '</span>'
+                                }.'">'.e($get('search_message')).'</span>'
                             ))
-                            ->visible(fn(Get $get) => $get('search_message') !== null),
+                            ->visible(fn (Get $get) => $get('search_message') !== null),
 
                         TextInput::make('name')
                             ->label('Nama Lengkap')
@@ -140,13 +160,15 @@ class Register extends BaseRegister
                             ->disabled(fn (Get $get) => $get('client_found')),
 
                         Select::make('c_role_id')
-                            ->label('Jabatan Fungsional')
+                            ->label('Jabatan saat ini')
                             ->options([
                                 1 => 'Analis Hukum',
                                 2 => 'Penyuluh Hukum',
+                                'none' => 'Bukan Keduanya',
                             ])
                             ->required()
-                            ->disabled(fn (Get $get) => $get('c_role_id') !== null || $get('client_found'))
+                            ->live()
+                            ->disabled(fn (Get $get) => $get('c_role_locked') || $get('client_found'))
                             ->dehydrated(),
 
                         Select::make('agency_type')
@@ -157,14 +179,16 @@ class Register extends BaseRegister
                                 'local_regency' => 'Kab/Kota',
                             ])
                             ->live()
-                            ->required()
+                            ->required(fn (Get $get) => $get('c_role_id') !== 'none')
+                            ->visible(fn (Get $get) => $get('c_role_id') !== 'none')
                             ->disabled(fn (Get $get) => $get('client_found')),
 
                         Select::make('agency_id')
                             ->label('Instansi')
                             ->placeholder(fn (Get $get) => $get('agency_type') ? 'Pilih Instansi' : 'Pilih Tingkat Instansi Terlebih Dahulu')
                             ->searchable()
-                            ->required()
+                            ->required(fn (Get $get) => $get('c_role_id') !== 'none')
+                            ->visible(fn (Get $get) => $get('c_role_id') !== 'none')
                             ->options(function (Get $get) {
                                 $type = $get('agency_type');
 
@@ -233,7 +257,7 @@ class Register extends BaseRegister
             Filament::auth()->login($user);
             session()->regenerate();
 
-            return app(\Filament\Http\Responses\Auth\Contracts\RegistrationResponse::class);
+            return app(RegistrationResponse::class);
         } catch (ValidationException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -254,26 +278,39 @@ class Register extends BaseRegister
 
     protected function handleRegistration(array $data): User
     {
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-        ]);
+        return DB::transaction(function () use ($data): User {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+            ]);
 
-        // Using your SystemRole enum dynamically to assign the 'client' role
-        $user->assignRole(\App\Enums\SystemRole::Client->value);
+            if (($data['c_role_id'] ?? null) === 'none') {
+                Role::findOrCreate(SystemRole::CalonJf->value, 'web');
+                $user->assignRole(SystemRole::CalonJf->value);
 
-        Client::create([
-            'user_id' => $user->id,
-            //'name' => $data['name'],
-            'nip' => $data['nip'],
-            'c_role_id' => $data['c_role_id'],
-            'agency_id' => $data['agency_id'],
-            'type' => $data['agency_type'],
-            'agency_type' => $this->getAgencyModel($data['agency_type']),
-        ]);
+                CalonJf::create([
+                    'user_id' => $user->id,
+                    'nip' => $data['nip'],
+                    'nama' => $data['name'],
+                ]);
 
-        return $user;
+                return $user;
+            }
+
+            $user->assignRole(SystemRole::Client->value);
+
+            Client::create([
+                'user_id' => $user->id,
+                'nip' => $data['nip'],
+                'c_role_id' => $data['c_role_id'],
+                'agency_id' => $data['agency_id'],
+                'type' => $data['agency_type'],
+                'agency_type' => $this->getAgencyModel($data['agency_type']),
+            ]);
+
+            return $user;
+        });
     }
 
     protected function getAgencyModel(string $type): string

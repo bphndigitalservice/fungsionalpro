@@ -6,6 +6,7 @@ return [
         'client_menu' => 'Profil Saya',
         'client_profile' => 'Informasi Dasar',
         'client_point' => 'Angka Kredit',
+        'ukom' => 'Pengajuan Ukom',
         'client_point_submission_bag' => 'Rule-set',
         'system' => 'Sistem',
         'regional_access' => 'Akses Verifikator',
@@ -27,6 +28,24 @@ return [
         ],
         'dashboard' => [
             'verify_identity_required' => 'Lengkapi Identitas dan Tunggu Identitas anda di verifikasi',
+        ],
+        'pengajuan_ukom' => [
+            'nav' => 'Pengajuan Ukom',
+            'title' => 'Pengajuan Ukom',
+            'verify_required' => 'Lengkapi identitas dan tunggu verifikasi untuk daftar ukom',
+            'submit' => 'Kirim',
+            'submit_confirm' => 'Apakah Anda yakin akan mengirim pengajuan? Pengajuan hanya dapat dilakukan 1x hingga pengajuan diterima/ditolak',
+        ],
+        'riwayat_pengajuan_ukom' => [
+            'nav' => 'Riwayat Pengajuan',
+            'title' => 'Riwayat Pengajuan Ukom',
+            'empty' => 'Belum ada pengajuan Ukom.',
+        ],
+        'ukom_verification' => [
+            'nav' => 'Verifikasi Pengajuan Ukom',
+            'forward' => 'Teruskan ke Instansi pembina',
+            'forward_confirm' => 'Jika pengajuan ini diverifikasi, berkas akan diteruskan ke Instansi Pembina untuk verifikasi akhir.',
+            'forwarded' => 'Pengajuan diteruskan ke Instansi Pembina.',
         ],
         'client_point_list' => [
             'nav' => 'Riwayat',
