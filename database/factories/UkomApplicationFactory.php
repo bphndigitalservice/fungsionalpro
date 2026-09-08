@@ -51,4 +51,40 @@ class UkomApplicationFactory extends Factory
     {
         return $this->state(['status' => UkomApplicationStatus::Rejected]);
     }
+
+    public function rejectedAtInstansi(): static
+    {
+        return $this->state(fn () => [
+            'status' => UkomApplicationStatus::Rejected,
+            'rejection_reason' => 'Ditolak instansi',
+            'instansi_reviewed_by' => User::factory(),
+            'instansi_reviewed_at' => now(),
+            'admin_reviewed_by' => null,
+            'admin_reviewed_at' => null,
+        ]);
+    }
+
+    public function acceptedByPembina(): static
+    {
+        return $this->state(fn () => [
+            'status' => UkomApplicationStatus::Accepted,
+            'instansi_reviewed_by' => User::factory(),
+            'instansi_reviewed_at' => now()->subDay(),
+            'admin_reviewed_by' => User::factory(),
+            'admin_reviewed_at' => now(),
+            'rejection_reason' => null,
+        ]);
+    }
+
+    public function rejectedByPembina(): static
+    {
+        return $this->state(fn () => [
+            'status' => UkomApplicationStatus::Rejected,
+            'rejection_reason' => 'Ditolak pembina',
+            'instansi_reviewed_by' => User::factory(),
+            'instansi_reviewed_at' => now()->subDay(),
+            'admin_reviewed_by' => User::factory(),
+            'admin_reviewed_at' => now(),
+        ]);
+    }
 }

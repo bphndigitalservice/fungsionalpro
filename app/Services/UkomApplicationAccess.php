@@ -35,7 +35,10 @@ final class UkomApplicationAccess
         }
 
         if ($user->hasSystemRole(SystemRole::Admin) && ! $this->isInstansiOnly($user)) {
-            return $query;
+            return $query->where(function (Builder $reached): void {
+                $reached->where('status', UkomApplicationStatus::PendingAdmin->value)
+                    ->orWhereNotNull('admin_reviewed_at');
+            });
         }
 
         if ($user->hasSystemRole(SystemRole::AdminInstansi)) {
@@ -95,5 +98,41 @@ final class UkomApplicationAccess
     {
         return $user->hasSystemRole(SystemRole::AdminInstansi)
             && ! $user->hasSystemRole(SystemRole::Admin);
+    }
+
+    public function applyNewTabFilter(Builder $query, User $user): Builder
+    {
+        if ($user->isSuperAdmin()) {
+            return $query->whereIn('status', [
+                UkomApplicationStatus::PendingInstansi->value,
+                UkomApplicationStatus::PendingAdmin->value,
+            ]);
+        }
+
+        if ($this->isInstansiOnly($user)) {
+            return $query->where('status', UkomApplicationStatus::PendingInstansi->value);
+        }
+
+        return $query->where('status', UkomApplicationStatus::PendingAdmin->value);
+    }
+
+    public function applyProcessedTabFilter(Builder $query, User $user): Builder
+    {
+        if ($user->isSuperAdmin()) {
+            return $query->whereIn('status', [
+                UkomApplicationStatus::Accepted->value,
+                UkomApplicationStatus::Rejected->value,
+            ]);
+        }
+
+        if ($this->isInstansiOnly($user)) {
+            return $query->whereIn('status', [
+                UkomApplicationStatus::PendingAdmin->value,
+                UkomApplicationStatus::Accepted->value,
+                UkomApplicationStatus::Rejected->value,
+            ]);
+        }
+
+        return $query->whereNotNull('admin_reviewed_at');
     }
 }

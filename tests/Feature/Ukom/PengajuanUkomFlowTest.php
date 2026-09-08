@@ -269,7 +269,7 @@ class PengajuanUkomFlowTest extends TestCase
     public function test_verification_table_shows_instansi_and_submitted_at(): void
     {
         $calon = $this->makeCalonUser();
-        $application = UkomApplication::factory()->pendingInstansi()->create([
+        $application = UkomApplication::factory()->pendingAdmin()->create([
             'user_id' => $calon->id,
             'target_c_role_id' => $this->ah->id,
             'type' => ClientCluster::Central,
@@ -291,7 +291,7 @@ class PengajuanUkomFlowTest extends TestCase
     public function test_verification_view_opens_berkas_with_icon(): void
     {
         $calon = $this->makeCalonUser();
-        $application = UkomApplication::factory()->pendingInstansi()->create([
+        $application = UkomApplication::factory()->pendingAdmin()->create([
             'user_id' => $calon->id,
             'target_c_role_id' => $this->ah->id,
             'type' => ClientCluster::Central,
@@ -313,6 +313,180 @@ class PengajuanUkomFlowTest extends TestCase
             ->assertSuccessful()
             ->assertSee('Berkas')
             ->assertSee('Buka berkas');
+    }
+
+    public function test_pembina_scoped_query_hides_undelivered_and_instansi_rejects(): void
+    {
+        $calon = $this->makeCalonUser();
+        $base = [
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ];
+
+        $pendingInstansi = UkomApplication::factory()->pendingInstansi()->create($base);
+        $pendingAdmin = UkomApplication::factory()->pendingAdmin()->create($base);
+        $instansiReject = UkomApplication::factory()->rejectedAtInstansi()->create($base);
+        $accepted = UkomApplication::factory()->acceptedByPembina()->create($base);
+        $pembinaReject = UkomApplication::factory()->rejectedByPembina()->create($base);
+
+        $pembina = User::factory()->create();
+        $pembina->assignRole(SystemRole::Admin->value);
+
+        $ids = app(UkomApplicationAccess::class)
+            ->scopedQuery($pembina)
+            ->pluck('id')
+            ->all();
+
+        $this->assertNotContains($pendingInstansi->id, $ids);
+        $this->assertNotContains($instansiReject->id, $ids);
+        $this->assertContains($pendingAdmin->id, $ids);
+        $this->assertContains($accepted->id, $ids);
+        $this->assertContains($pembinaReject->id, $ids);
+    }
+
+    public function test_super_admin_scoped_query_sees_pending_instansi(): void
+    {
+        $calon = $this->makeCalonUser();
+        $pendingInstansi = UkomApplication::factory()->pendingInstansi()->create([
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ]);
+
+        $super = User::factory()->create();
+        $super->assignRole(SystemRole::SuperAdmin->value);
+
+        $this->assertTrue(
+            app(UkomApplicationAccess::class)
+                ->scopedQuery($super)
+                ->whereKey($pendingInstansi->id)
+                ->exists()
+        );
+    }
+
+    public function test_dual_role_follows_pembina_visibility(): void
+    {
+        $calon = $this->makeCalonUser();
+        $pendingInstansi = UkomApplication::factory()->pendingInstansi()->create([
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ]);
+
+        $both = User::factory()->create();
+        $both->assignRole([SystemRole::Admin->value, SystemRole::AdminInstansi->value]);
+        AdminAccess::create([
+            'user_id' => $both->id,
+            'c_role_id' => $this->ah->id,
+            'entity_type' => RegDepartment::class,
+            'entity_id' => $this->department->id,
+        ]);
+
+        $this->assertFalse(
+            app(UkomApplicationAccess::class)
+                ->scopedQuery($both)
+                ->whereKey($pendingInstansi->id)
+                ->exists()
+        );
+    }
+
+    public function test_pembina_list_tabs_separate_new_and_processed(): void
+    {
+        $calon = $this->makeCalonUser();
+        $base = [
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ];
+
+        $newRow = UkomApplication::factory()->pendingAdmin()->create($base);
+        $processedAccepted = UkomApplication::factory()->acceptedByPembina()->create($base);
+        $processedRejected = UkomApplication::factory()->rejectedByPembina()->create($base);
+        $hidden = UkomApplication::factory()->pendingInstansi()->create($base);
+
+        $pembina = User::factory()->create();
+        $pembina->assignRole(SystemRole::Admin->value);
+        $this->actingAs($pembina);
+
+        Livewire::test(ListUkomApplications::class)
+            ->assertSet('activeTab', 'new')
+            ->assertCanSeeTableRecords([$newRow])
+            ->assertCanNotSeeTableRecords([$processedAccepted, $processedRejected, $hidden])
+            ->set('activeTab', 'processed')
+            ->assertCanSeeTableRecords([$processedAccepted, $processedRejected])
+            ->assertCanNotSeeTableRecords([$newRow, $hidden])
+            ->set('activeTab', 'all')
+            ->assertCanSeeTableRecords([$newRow, $processedAccepted, $processedRejected])
+            ->assertCanNotSeeTableRecords([$hidden]);
+    }
+
+    public function test_admin_instansi_list_new_tab_shows_pending_instansi_only(): void
+    {
+        $calon = $this->makeCalonUser();
+        $base = [
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ];
+
+        $newRow = UkomApplication::factory()->pendingInstansi()->create($base);
+        $forwarded = UkomApplication::factory()->pendingAdmin()->create(array_merge($base, [
+            'instansi_reviewed_at' => now(),
+        ]));
+
+        $instansi = User::factory()->create();
+        $instansi->assignRole(SystemRole::AdminInstansi->value);
+        AdminAccess::create([
+            'user_id' => $instansi->id,
+            'c_role_id' => $this->ah->id,
+            'entity_type' => RegDepartment::class,
+            'entity_id' => $this->department->id,
+        ]);
+        $this->actingAs($instansi);
+
+        Livewire::test(ListUkomApplications::class)
+            ->assertSet('activeTab', 'new')
+            ->assertCanSeeTableRecords([$newRow])
+            ->assertCanNotSeeTableRecords([$forwarded])
+            ->set('activeTab', 'processed')
+            ->assertCanSeeTableRecords([$forwarded])
+            ->assertCanNotSeeTableRecords([$newRow]);
+    }
+
+    public function test_super_admin_new_tab_includes_pending_instansi_and_pending_admin(): void
+    {
+        $calon = $this->makeCalonUser();
+        $base = [
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ];
+
+        $pendingInstansi = UkomApplication::factory()->pendingInstansi()->create($base);
+        $pendingAdmin = UkomApplication::factory()->pendingAdmin()->create($base);
+        $accepted = UkomApplication::factory()->acceptedByPembina()->create($base);
+
+        $super = User::factory()->create();
+        $super->assignRole(SystemRole::SuperAdmin->value);
+        $this->actingAs($super);
+
+        Livewire::test(ListUkomApplications::class)
+            ->assertSet('activeTab', 'new')
+            ->assertCanSeeTableRecords([$pendingInstansi, $pendingAdmin])
+            ->assertCanNotSeeTableRecords([$accepted])
+            ->set('activeTab', 'processed')
+            ->assertCanSeeTableRecords([$accepted])
+            ->assertCanNotSeeTableRecords([$pendingInstansi, $pendingAdmin]);
     }
 
     private function actingAsCalon(): User
