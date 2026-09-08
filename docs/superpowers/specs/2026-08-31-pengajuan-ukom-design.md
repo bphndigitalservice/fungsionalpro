@@ -175,7 +175,7 @@ One Filament resource/menu. Drafts are not listed.
 | Actor | Sees | Acts on | Actions |
 |---|---|---|---|
 | `admin-instansi` | Applications whose **instansi snapshot** matches `AdminAccess` entity **and** `target_c_role_id` matches that access `c_role_id` | `pending_instansi` only | **Teruskan** → `pending_admin`; **Tolak** → `rejected` (alasan required). After forward: view-only |
-| `admin` | All instansi (still via `AdminAccess` jabatan rows with null region, as today) | `pending_admin` only | **Terima** → `accepted`; **Tolak** → `rejected` (alasan required). Cannot skip or perform the instansi step |
+| `admin` | Applications that reached pembina (`pending_admin` or `admin_reviewed_at` set). Does **not** see `pending_instansi` or instansi-only rejects. See [2026-09-08-ukom-verification-tabs-design.md](./2026-09-08-ukom-verification-tabs-design.md). | `pending_admin` only | **Terima** → `accepted`; **Tolak** → `rejected` (alasan required). Cannot skip or perform the instansi step |
 | Both `admin` and `admin-instansi` | Treat as `admin` | `pending_admin` | Same as `admin` |
 | SuperAdmin | All | Same final actions as `admin` | Same as `admin` |
 
