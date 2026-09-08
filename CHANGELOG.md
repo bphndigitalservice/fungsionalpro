@@ -1,3 +1,10 @@
+# [0.22.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.21.0...v0.22.0) (2026-09-08)
+
+
+### Features
+
+* login error message fixing ([4e1604d](https://github.com/bphndigitalservice/fungsionalpro/commit/4e1604d8ab12fc8528875003c629253b6d3b55c3))
+
 # [0.21.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.20.0...v0.21.0) (2026-09-08)
 
 
