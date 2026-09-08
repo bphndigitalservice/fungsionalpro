@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\UkomApplicationResource\Pages;
 
+use App\Filament\Exports\UkomApplicationExporter;
 use App\Filament\Resources\UkomApplicationResource;
 use App\Services\UkomApplicationAccess;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -60,5 +63,40 @@ class ListUkomApplications extends ListRecords
     public function getDefaultActiveTab(): string|int|null
     {
         return 'new';
+    }
+
+    public function table(Table $table): Table
+    {
+        return UkomApplicationResource::table($table)
+            ->headerActions($this->getTableHeaderActions());
+    }
+
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            ExportAction::make()
+                ->label('Ekspor')
+                ->exporter(UkomApplicationExporter::class)
+                ->color('success')
+                ->button()
+                ->icon('heroicon-m-arrow-down-tray')
+                ->modifyQueryUsing(function (Builder $query): Builder {
+                    $query = UkomApplicationResource::applyVerificationFilters(
+                        UkomApplicationResource::getEloquentQuery(),
+                        $this->tableFilters ?? [],
+                    );
+
+                    if (filled($this->tableSearch)) {
+                        $search = '%'.$this->tableSearch.'%';
+
+                        $query->where(function (Builder $q) use ($search): void {
+                            $q->where('nama', 'like', $search)
+                                ->orWhere('nip', 'like', $search);
+                        });
+                    }
+
+                    return $query;
+                }),
+        ];
     }
 }

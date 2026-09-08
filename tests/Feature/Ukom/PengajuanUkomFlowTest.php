@@ -285,6 +285,8 @@ class PengajuanUkomFlowTest extends TestCase
             ->assertCanSeeTableRecords([$application])
             ->assertSee('Instansi')
             ->assertSee('Diajukan Pada')
+            ->assertSee('Diterima/Ditolak pada (Instansi)')
+            ->assertSee('Diterima/Ditolak pada (Instansi pembina)')
             ->assertSee('Kementerian Hukum');
     }
 
@@ -487,6 +489,175 @@ class PengajuanUkomFlowTest extends TestCase
             ->set('activeTab', 'processed')
             ->assertCanSeeTableRecords([$accepted])
             ->assertCanNotSeeTableRecords([$pendingInstansi, $pendingAdmin]);
+    }
+
+    public function test_verification_filters_by_cluster_instansi_and_status(): void
+    {
+        $calon = $this->makeCalonUser();
+        $otherDept = RegDepartment::create(['name' => 'Instansi Lain']);
+
+        $matchPending = UkomApplication::factory()->pendingAdmin()->create([
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ]);
+
+        $otherAgency = UkomApplication::factory()->pendingAdmin()->create([
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $otherDept->id,
+        ]);
+
+        $acceptedSameAgency = UkomApplication::factory()->acceptedByPembina()->create([
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ]);
+
+        $super = User::factory()->create();
+        $super->assignRole(SystemRole::SuperAdmin->value);
+        $this->actingAs($super);
+
+        Livewire::test(ListUkomApplications::class)
+            ->set('activeTab', 'all')
+            ->filterTable('agency_filter', [
+                'type' => ClientCluster::Central->value,
+                'agency_id' => $this->department->id,
+            ])
+            ->assertCanSeeTableRecords([$matchPending, $acceptedSameAgency])
+            ->assertCanNotSeeTableRecords([$otherAgency])
+            ->filterTable('status', UkomApplicationStatus::PendingAdmin->value)
+            ->assertCanSeeTableRecords([$matchPending])
+            ->assertCanNotSeeTableRecords([$acceptedSameAgency, $otherAgency]);
+    }
+
+    public function test_verification_status_filter_options_exclude_draft(): void
+    {
+        $super = User::factory()->create();
+        $super->assignRole(SystemRole::SuperAdmin->value);
+        $this->actingAs($super);
+
+        $options = UkomApplicationResource::statusFilterOptions($super);
+
+        $this->assertArrayNotHasKey(UkomApplicationStatus::Draft->value, $options);
+        $this->assertArrayHasKey(UkomApplicationStatus::PendingInstansi->value, $options);
+        $this->assertArrayHasKey(UkomApplicationStatus::Accepted->value, $options);
+    }
+
+    public function test_pembina_status_filter_excludes_pending_instansi(): void
+    {
+        $pembina = User::factory()->create();
+        $pembina->assignRole(SystemRole::Admin->value);
+        $this->actingAs($pembina);
+
+        $options = UkomApplicationResource::statusFilterOptions($pembina);
+
+        $this->assertArrayNotHasKey(UkomApplicationStatus::Draft->value, $options);
+        $this->assertArrayNotHasKey(UkomApplicationStatus::PendingInstansi->value, $options);
+        $this->assertArrayHasKey(UkomApplicationStatus::PendingAdmin->value, $options);
+        $this->assertArrayHasKey(UkomApplicationStatus::Accepted->value, $options);
+    }
+
+    public function test_admin_instansi_status_filter_includes_pending_instansi(): void
+    {
+        $instansi = User::factory()->create();
+        $instansi->assignRole(SystemRole::AdminInstansi->value);
+        $this->actingAs($instansi);
+
+        $options = UkomApplicationResource::statusFilterOptions($instansi);
+
+        $this->assertArrayHasKey(UkomApplicationStatus::PendingInstansi->value, $options);
+        $this->assertArrayHasKey(UkomApplicationStatus::PendingAdmin->value, $options);
+    }
+
+    public function test_export_query_ignores_tabs_but_keeps_filters(): void
+    {
+        $calon = $this->makeCalonUser();
+        $base = [
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ];
+
+        $newRow = UkomApplication::factory()->pendingAdmin()->create($base);
+        $processed = UkomApplication::factory()->acceptedByPembina()->create($base);
+
+        $super = User::factory()->create();
+        $super->assignRole(SystemRole::SuperAdmin->value);
+        $this->actingAs($super);
+
+        $filterData = [
+            'agency_filter' => [
+                'type' => ClientCluster::Central->value,
+                'agency_id' => $this->department->id,
+            ],
+        ];
+
+        $exportQuery = UkomApplicationResource::applyVerificationFilters(
+            UkomApplicationResource::getEloquentQuery(),
+            $filterData,
+        );
+
+        $ids = $exportQuery->pluck('id')->all();
+
+        $this->assertContains($newRow->id, $ids);
+        $this->assertContains($processed->id, $ids);
+
+        $withStatus = UkomApplicationResource::applyVerificationFilters(
+            UkomApplicationResource::getEloquentQuery(),
+            array_merge($filterData, [
+                'status' => ['value' => UkomApplicationStatus::PendingAdmin->value],
+            ]),
+        )->pluck('id')->all();
+
+        $this->assertContains($newRow->id, $withStatus);
+        $this->assertNotContains($processed->id, $withStatus);
+    }
+
+    public function test_pembina_export_query_excludes_undelivered(): void
+    {
+        $calon = $this->makeCalonUser();
+        $base = [
+            'user_id' => $calon->id,
+            'target_c_role_id' => $this->ah->id,
+            'type' => ClientCluster::Central,
+            'agency_type' => RegDepartment::class,
+            'agency_id' => $this->department->id,
+        ];
+
+        $pendingInstansi = UkomApplication::factory()->pendingInstansi()->create($base);
+        $pendingAdmin = UkomApplication::factory()->pendingAdmin()->create($base);
+
+        $pembina = User::factory()->create();
+        $pembina->assignRole(SystemRole::Admin->value);
+        $this->actingAs($pembina);
+
+        $ids = UkomApplicationResource::applyVerificationFilters(
+            UkomApplicationResource::getEloquentQuery(),
+            [],
+        )->pluck('id')->all();
+
+        $this->assertNotContains($pendingInstansi->id, $ids);
+        $this->assertContains($pendingAdmin->id, $ids);
+    }
+
+    public function test_verification_list_has_export_action(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(SystemRole::Admin->value);
+        $this->actingAs($admin);
+
+        Livewire::test(ListUkomApplications::class)
+            ->assertSuccessful()
+            ->assertSee('Ekspor');
     }
 
     private function actingAsCalon(): User

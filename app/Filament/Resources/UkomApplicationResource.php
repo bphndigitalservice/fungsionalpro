@@ -2,10 +2,16 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ClientCluster;
 use App\Enums\SystemRole;
+use App\Enums\UkomApplicationStatus;
 use App\Filament\Resources\UkomApplicationResource\Pages;
 use App\Infolists\Components\MinioFileEntry;
+use App\Models\RegDepartment;
+use App\Models\RegProvince;
+use App\Models\RegRegency;
 use App\Models\UkomApplication;
+use App\Models\User;
 use App\Services\UkomApplicationAccess;
 use App\Services\UkomApplicationService;
 use Filament\Forms;
@@ -140,14 +146,109 @@ class UkomApplicationResource extends Resource
                     ->label('Diajukan Pada')
                     ->dateTime()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('instansi_decision')
+                    ->label('Diterima/Ditolak pada (Instansi)')
+                    ->getStateUsing(fn (UkomApplication $record) => $record->instansiDecisionDisplay())
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('pembina_decision')
+                    ->label('Diterima/Ditolak pada (Instansi pembina)')
+                    ->getStateUsing(fn (UkomApplication $record) => $record->pembinaDecisionDisplay())
+                    ->placeholder('-'),
             ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                Tables\Filters\Filter::make('agency_filter')
+                    ->form([
+                        Forms\Components\Select::make('type')
+                            ->label('Tingkat Instansi')
+                            ->options(ClientCluster::class)
+                            ->live(),
+                        Forms\Components\Select::make('agency_id')
+                            ->label('Instansi')
+                            ->options(function (Forms\Get $get) {
+                                return match ($get('type')) {
+                                    ClientCluster::Central->value, 'central' => RegDepartment::query()->orderBy('name')->pluck('name', 'id'),
+                                    ClientCluster::LocalProvince->value, 'local_province' => RegProvince::query()->orderBy('name')->pluck('name', 'id'),
+                                    ClientCluster::LocalRegency->value, 'local_regency' => RegRegency::query()->orderBy('name')->pluck('name', 'id'),
+                                    default => [],
+                                };
+                            })
+                            ->searchable(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return static::applyVerificationFilters($query, [
+                            'agency_filter' => $data,
+                        ]);
+                    }),
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(fn (): array => static::statusFilterOptions()),
+            ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 static::forwardAction(),
                 static::acceptAction(),
                 static::rejectAction(),
             ]);
+    }
+
+    public static function statusFilterOptions(?User $user = null): array
+    {
+        $user ??= Auth::user();
+        $access = app(UkomApplicationAccess::class);
+
+        // SuperAdmin and admin-instansi keep pending_instansi; pembina (and dual-role-as-admin) do not.
+        $includePendingInstansi = $user !== null
+            && ($user->isSuperAdmin() || $access->isInstansiOnly($user));
+
+        return collect(UkomApplicationStatus::cases())
+            ->reject(fn (UkomApplicationStatus $status) => $status === UkomApplicationStatus::Draft)
+            ->reject(fn (UkomApplicationStatus $status) => $status === UkomApplicationStatus::PendingInstansi
+                && ! $includePendingInstansi)
+            ->mapWithKeys(fn (UkomApplicationStatus $status) => [
+                $status->value => $status->getLabel(),
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  array{agency_filter?: array{type?: string|null, agency_id?: int|string|null}, status?: array{value?: string|null}|string|null}  $filterData
+     */
+    public static function applyVerificationFilters(Builder $query, array $filterData): Builder
+    {
+        $agency = $filterData['agency_filter'] ?? [];
+        $type = $agency['type'] ?? null;
+        $agencyId = $agency['agency_id'] ?? null;
+
+        if (filled($type)) {
+            $query->where('type', $type);
+        }
+
+        if (filled($agencyId) && filled($type)) {
+            $agencyType = match ($type) {
+                ClientCluster::Central->value, 'central' => RegDepartment::class,
+                ClientCluster::LocalProvince->value, 'local_province' => RegProvince::class,
+                ClientCluster::LocalRegency->value, 'local_regency' => RegRegency::class,
+                default => null,
+            };
+
+            $query->where('agency_id', $agencyId);
+
+            if ($agencyType !== null) {
+                $query->where('agency_type', $agencyType);
+            }
+        }
+
+        $status = $filterData['status']['value'] ?? $filterData['status'] ?? null;
+        if (is_array($status)) {
+            $status = $status['value'] ?? null;
+        }
+
+        if (filled($status)) {
+            $query->where('status', $status);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array
