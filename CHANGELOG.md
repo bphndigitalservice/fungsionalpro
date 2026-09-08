@@ -1,3 +1,10 @@
+# [0.20.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.19.0...v0.20.0) (2026-09-08)
+
+
+### Features
+
+* **ukom:** add verification tabs and restrict pembina list visibility ([7134d3c](https://github.com/bphndigitalservice/fungsionalpro/commit/7134d3c5929b3a93be4ba1383f9763008d35bbd7))
+
 # [0.19.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.18.0...v0.19.0) (2026-08-27)
 
 
