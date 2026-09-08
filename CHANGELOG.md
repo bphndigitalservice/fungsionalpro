@@ -1,3 +1,10 @@
+# [0.21.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.20.0...v0.21.0) (2026-09-08)
+
+
+### Features
+
+* **ukom:** add verification filters, export, and decision date columns ([c066585](https://github.com/bphndigitalservice/fungsionalpro/commit/c066585acf637d5f94d3681ac74914bfd10b38a0))
+
 # [0.20.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.19.0...v0.20.0) (2026-09-08)
 
 
