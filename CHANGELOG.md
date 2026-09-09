@@ -1,3 +1,24 @@
+# [0.22.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.21.0...v0.22.0) (2026-09-08)
+
+
+### Features
+
+* login error message fixing ([4e1604d](https://github.com/bphndigitalservice/fungsionalpro/commit/4e1604d8ab12fc8528875003c629253b6d3b55c3))
+
+# [0.21.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.20.0...v0.21.0) (2026-09-08)
+
+
+### Features
+
+* **ukom:** add verification filters, export, and decision date columns ([c066585](https://github.com/bphndigitalservice/fungsionalpro/commit/c066585acf637d5f94d3681ac74914bfd10b38a0))
+
+# [0.20.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.19.0...v0.20.0) (2026-09-08)
+
+
+### Features
+
+* **ukom:** add verification tabs and restrict pembina list visibility ([7134d3c](https://github.com/bphndigitalservice/fungsionalpro/commit/7134d3c5929b3a93be4ba1383f9763008d35bbd7))
+
 # [0.19.0](https://github.com/bphndigitalservice/fungsionalpro/compare/v0.18.0...v0.19.0) (2026-08-27)
 
 

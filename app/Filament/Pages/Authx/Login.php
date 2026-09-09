@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Authx;
 
+use App\Models\User;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
@@ -23,11 +24,21 @@ class Login extends BaseLogin
 
         $data = $this->form->getState();
 
+        $user = User::query()->where('email', $data['email'])->first();
+
+        if ($user === null) {
+            throw ValidationException::withMessages([
+                'data.email' => __('auth.email_not_found'),
+            ]);
+        }
+
         if (! Filament::auth()->attempt([
             'email' => $data['email'],
             'password' => $data['password'],
         ], $data['remember'] ?? false)) {
-            $this->throwFailureValidationException();
+            throw ValidationException::withMessages([
+                'data.password' => __('auth.password_incorrect'),
+            ]);
         }
 
         $user = Filament::auth()->user();

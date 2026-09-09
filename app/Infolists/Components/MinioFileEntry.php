@@ -2,17 +2,34 @@
 
 namespace App\Infolists\Components;
 
+use Closure;
 use Filament\Infolists\Components\Entry;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 
 class MinioFileEntry extends Entry
 {
     protected string $view = 'infolists.components.minio-file-entry';
 
-    public function downloadUrl(): ?string
+    protected string | Closure | null $disk = null;
+
+    public function disk(string | Closure | null $disk): static
     {
-        return Storage::temporaryUrl($this->getState(), now()->addMinutes(5));
+        $this->disk = $disk;
+
+        return $this;
     }
 
+    public function downloadUrl(): ?string
+    {
+        $path = $this->getState();
+
+        if (blank($path)) {
+            return null;
+        }
+
+        $disk = $this->evaluate($this->disk);
+        $storage = $disk ? Storage::disk($disk) : Storage::disk();
+
+        return $storage->temporaryUrl($path, now()->addMinutes(10));
+    }
 }
