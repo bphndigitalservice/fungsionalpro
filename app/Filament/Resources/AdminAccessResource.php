@@ -8,9 +8,11 @@ use App\Models\AdminAccess;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Models\RegDepartment;
@@ -41,6 +43,43 @@ class AdminAccessResource extends Resource
         return Auth::user()?->hasSystemRole(SystemRole::SuperAdmin) ?? false;
     }
 
+    public static function eligibleUsersQuery(): Builder
+    {
+        return User::role([
+            SystemRole::Admin->value,
+            SystemRole::AdminInstansi->value,
+        ]);
+    }
+
+    public static function selectedUserRequiresRegion(int|string|null $userId): bool
+    {
+        if (blank($userId)) {
+            return false;
+        }
+
+        $user = User::query()->find($userId);
+
+        if ($user === null) {
+            return false;
+        }
+
+        if ($user->hasSystemRole(SystemRole::Admin)) {
+            return false;
+        }
+
+        return $user->hasSystemRole(SystemRole::AdminInstansi);
+    }
+
+    public static function formDataForSelectedUser(array $data): array
+    {
+        if (! static::selectedUserRequiresRegion($data['user_id'] ?? null)) {
+            $data['entity_type'] = null;
+            $data['entity_id'] = null;
+        }
+
+        return $data;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -59,9 +98,14 @@ class AdminAccessResource extends Resource
                                 Forms\Components\Select::make('user_id')
                                     ->label(__('labels.form.user.fields.name'))
                                     ->searchable()
-                                    ->relationship('user', 'name', modifyQueryUsing: fn () => User::role([SystemRole::Admin->value]))
+                                    ->relationship(
+                                        'user',
+                                        'name',
+                                        modifyQueryUsing: fn (): Builder => static::eligibleUsersQuery(),
+                                    )
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->live(),
                             ])->columns(2),
 
                         Forms\Components\Group::make()
@@ -74,7 +118,9 @@ class AdminAccessResource extends Resource
                                             ->titleAttribute('name'),
                                         Forms\Components\MorphToSelect\Type::make(RegRegency::class)
                                             ->titleAttribute('name'),
-                                    ]),
+                                    ])
+                                    ->visible(fn (Get $get): bool => static::selectedUserRequiresRegion($get('user_id')))
+                                    ->required(fn (Get $get): bool => static::selectedUserRequiresRegion($get('user_id'))),
                             ])->columns(2),
                     ]),
             ]);

@@ -2,21 +2,90 @@
 
 namespace App\Models;
 
+use App\Enums\ClientCluster;
+use App\Enums\ClientStatus;
+use App\Enums\JenisKepegawaian;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MasterJf extends Model
 {
+    use HasFactory;
+
     protected $table = 'master_jf';
 
     protected $fillable = [
         'nama',
         'nip',
-        'gol_ruang',
         'jabatan',
+        'c_role_id',
+        'reg_grade_id',
+        'c_role_level_id',
         'unit_kerja',
         'instansi',
         'pengangkatan',
         'status',
         'type',
+        'status_kepegawaian',
+        'provinsi',
+        'province_id',
+        'agency_type',
+        'agency_id',
     ];
+
+    protected $casts = [
+        'type' => ClientCluster::class,
+        'status' => ClientStatus::class,
+        'status_kepegawaian' => JenisKepegawaian::class,
+    ];
+
+    public function cRole(): BelongsTo
+    {
+        return $this->belongsTo(CRole::class);
+    }
+
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(RegGrade::class, 'reg_grade_id');
+    }
+
+    public function cRoleLevel(): BelongsTo
+    {
+        return $this->belongsTo(CRoleLevel::class, 'c_role_level_id');
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(RegProvince::class, 'province_id');
+    }
+
+    public function agenciable(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'agency_type', 'agency_id');
+    }
+
+    /** @return array<string, string> */
+    public static function pengangkatanOptions(): array
+    {
+        return [
+            'CPNS/PPPK' => 'CPNS/PPPK',
+            'Inpassing' => 'Inpassing',
+            'PDJL' => 'PDJL',
+            'Penyetaraan' => 'Penyetaraan',
+        ];
+    }
+
+    /** @return array<string, string> */
+    public static function distinctOptions(string $column): array
+    {
+        return static::query()
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->distinct()
+            ->orderBy($column)
+            ->pluck($column, $column)
+            ->all();
+    }
 }

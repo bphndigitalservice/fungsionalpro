@@ -30,9 +30,9 @@ class ActivityStatusNotification extends Notification
     {
         $isAccepted = $this->status === 'accepted';
         $statusText = $isAccepted ? 'diverifikasi' : 'ditolak';
-        
+
           $bodyText = "Kegiatan '{$this->record->title}' Anda telah {$statusText}.";
-        
+
         if ($this->record->verification_note) {
             $bodyText .= "\nCatatan: {$this->record->verification_note}";
         }
@@ -45,7 +45,7 @@ class ActivityStatusNotification extends Notification
             ->actions([
                 Action::make('view')
                     ->label('Lihat Detail')
-                    ->url(ClientActivityResource::getUrl('index'))
+                    ->url(fn() => ClientActivityResource::getUrl('index', isAbsolute: false))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

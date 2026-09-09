@@ -48,12 +48,7 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
 
                                 TextEntry::make('category')
                                     ->label('Kategori')
-                                    ->badge()
-                                    ->formatStateUsing(fn (?TrainingType $state): string => match ($state?->value) {
-                                        'TECHNICAL_TRAINING' => 'Diklat Teknis',
-                                        'MANAGERIAL_TRAINING' => 'Diklat Manajerial',
-                                        default => $state?->value ?? '-',
-                                    }),
+                                    ->badge(),
 
                                 TextEntry::make('start_period')
                                     ->label('Tanggal Mulai')
@@ -67,6 +62,7 @@ class ClientCompetenceInfolist extends Component implements HasForms, HasInfolis
                                 TextEntry::make('completion_status')
                                     ->label('Predikat Kelulusan/Kinerja')
                                     ->badge()
+                                    ->hidden(fn ($record) => $record?->category === TrainingType::OTHER_TRAINING)
                                     ->color(fn (?TrainingCompletionStatus $state): string => match ($state?->value) {
                                         'PASSED', 'EXCELLENT', 'VERY_SATISFACTORY' => 'success',
                                         'SATISFACTORY' => 'info',

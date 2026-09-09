@@ -23,6 +23,7 @@ class ClientActivity extends Model
 
     protected $casts = [
         'activity_details' => 'array',
+        'is_verified' => \App\Enums\Acceptance::class,
     ];
 
     public function client(): BelongsTo
@@ -38,7 +39,7 @@ class ClientActivity extends Model
     public function verified(): void
     {
         $this->forceFill([
-            'is_verified' => true,
+            'is_verified' => \App\Enums\Acceptance::Accept,
             'verified_at' => now(),
         ])->save();
     }

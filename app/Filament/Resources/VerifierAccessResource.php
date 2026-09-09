@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\VerifierAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,6 +20,12 @@ use Illuminate\Support\Facades\Auth;
 
 class VerifierAccessResource extends Resource
 {
+    public const SCOPE_BPHN = 'bphn';
+
+    public const SCOPE_REGIONAL = 'regional';
+
+    public const BPHN_SCOPE_LABEL = 'Verifikator BPHN';
+
     protected static ?string $model = VerifierAccess::class;
 
     public static function canViewAny(): bool
@@ -62,7 +69,16 @@ class VerifierAccessResource extends Resource
                             ])->columns(2),
                         Forms\Components\Group::make()
                             ->schema([
+                                Forms\Components\Select::make('scope_kind')
+                                    ->label(__('Ruang Regional'))
+                                    ->options([
+                                        self::SCOPE_BPHN => self::BPHN_SCOPE_LABEL,
+                                        self::SCOPE_REGIONAL => __('Verifikator Instansi'),
+                                    ])
+                                    ->required()
+                                    ->live(),
                                 Forms\Components\MorphToSelect::make('accessible')
+                                    ->label(__('Instansi'))
                                     ->types([
                                         Forms\Components\MorphToSelect\Type::make(RegDepartment::class)
                                             ->titleAttribute('name'),
@@ -70,10 +86,41 @@ class VerifierAccessResource extends Resource
                                             ->titleAttribute('name'),
                                         Forms\Components\MorphToSelect\Type::make(RegRegency::class)
                                             ->titleAttribute('name'),
-                                    ]),
+                                    ])
+                                    ->visible(fn (Get $get): bool => $get('scope_kind') === self::SCOPE_REGIONAL)
+                                    ->required(fn (Get $get): bool => $get('scope_kind') === self::SCOPE_REGIONAL),
                             ])->columns(2),
                     ]),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function formDataForRegionalScope(array $data): array
+    {
+        if (($data['scope_kind'] ?? null) === self::SCOPE_BPHN) {
+            $data['entity_type'] = null;
+            $data['entity_id'] = null;
+        }
+
+        unset($data['scope_kind']);
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function formDataBeforeFill(array $data): array
+    {
+        $data['scope_kind'] = blank($data['entity_id'] ?? null)
+            ? self::SCOPE_BPHN
+            : self::SCOPE_REGIONAL;
+
+        return $data;
     }
 
     public static function table(Table $table): Table
@@ -88,6 +135,9 @@ class VerifierAccessResource extends Resource
                     ->label(__('Ruang Jabatan')),
                 Tables\Columns\TextColumn::make('accessible.name')
                     ->label(__('Ruang Regional'))
+                    ->formatStateUsing(fn (?string $state, VerifierAccess $record): string => $record->isBphnGlobalScope()
+                        ? self::BPHN_SCOPE_LABEL
+                        : ($state ?? ''))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

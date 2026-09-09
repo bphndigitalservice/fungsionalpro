@@ -7,15 +7,15 @@ use App\Enums\SystemRole;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Tapp\FilamentInvite\Notifications\SetPassword;
-
-
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
@@ -61,9 +61,24 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasOne(Client::class, 'user_id', 'id');
     }
 
+    public function calonJf(): HasOne
+    {
+        return $this->hasOne(CalonJf::class, 'user_id', 'id');
+    }
+
+    public function ukomApplications(): HasMany
+    {
+        return $this->hasMany(UkomApplication::class);
+    }
+
     public function isActiveClient(): bool
     {
-        return $this->hasSystemRole(SystemRole::Client) && !is_null($this->client);
+        return $this->hasSystemRole(SystemRole::Client) && ! is_null($this->client);
+    }
+
+    public function isActiveCalonJf(): bool
+    {
+        return $this->hasSystemRole(SystemRole::CalonJf) && ! is_null($this->calonJf);
     }
 
     public function isSuperAdmin(): bool
@@ -71,7 +86,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasSystemRole(SystemRole::SuperAdmin);
     }
 
-    public function canAccessPanel(\Filament\Panel $panel): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         return $this->hasAnySystemRole(
             SystemRole::SuperAdmin,
@@ -81,7 +96,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             SystemRole::AdminSdmBphn,
             SystemRole::AdminInstansi,
             SystemRole::Verifier,
-        ) || $this->isActiveClient();
+        ) || $this->isActiveClient() || $this->isActiveCalonJf();
     }
 
     public function hasSystemRole(SystemRole $role): bool
@@ -93,7 +108,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return $this->hasRole(array_map(fn ($r) => $r->value, $roles));
     }
-
 
     public function getResetPasswordUrl(string $token, array $parameters = []): string
     {
@@ -112,9 +126,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         Notification::send($this, new SetPassword($token));
     }
 
-    public function adminAccesses()
+    public function adminAccesses(): HasMany
     {
-        return $this->hasMany(AdminAccess::class);
+        return $this->hasMany(AdminAccess::class, 'user_id', 'id');
     }
-
 }

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Concerns\Filament\GatesVerifiedClientOwnRecords;
 use App\Filament\Exports\ClientActivityExporter;
 use App\Filament\Resources\ClientActivityResource\Pages;
 use App\Filament\Resources\ClientActivityResource\RelationManagers;
@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientActivityResource extends Resource
 {
-    use ChecksPhotoUpload;
+    use GatesVerifiedClientOwnRecords;
 
     protected static ?string $model = ClientActivity::class;
 
@@ -181,7 +181,9 @@ class ClientActivityResource extends Resource
                         ->maxSize(config('fungsional-pro.max_upload_file_size'))
                         ->directory('activity_file')
                         ->visibility('private')
-                        ->downloadable(),
+                        ->downloadable()
+                        ->openable()
+                        ->previewable(),
                 ])
         ];
     }
@@ -341,6 +343,11 @@ class ClientActivityResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('client_id', Client::current()?->id ?? 0);
     }
 
     public static function getRelations(): array
