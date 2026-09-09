@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             GradeSeeder::class,
             RoleSeeder::class,
             RolePermissionSeeder::class,
+            UkomDocumentTypeSeeder::class,
         ]);
     }
 }
