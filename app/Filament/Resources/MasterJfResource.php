@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\ClientCluster;
 use App\Enums\ClientStatus;
 use App\Enums\JenisKepegawaian;
+use App\Enums\SystemRole;
 use App\Filament\Resources\MasterJfResource\Pages;
 use App\Imports\MasterJfImport;
 use App\Models\CRole;
@@ -43,7 +44,25 @@ class MasterJfResource extends Resource
 
         $allowedRoleIds = $user->adminAccesses()->pluck('c_role_id');
 
-        return $query->whereIn('c_role_id', $allowedRoleIds);
+        $query->whereIn('c_role_id', $allowedRoleIds);
+
+        if ($user->hasSystemRole(SystemRole::AdminInstansi) && ! $user->hasSystemRole(SystemRole::Admin)) {
+            $query->whereExists(function ($sub) use ($user): void {
+                $sub->selectRaw('1')
+                    ->from('admin_accesses as aa')
+                    ->whereColumn('aa.c_role_id', 'master_jf.c_role_id')
+                    ->where('aa.user_id', $user->id)
+                    ->where(function ($scope): void {
+                        $scope->whereNull('aa.entity_id')
+                            ->orWhere(function ($entity): void {
+                                $entity->whereColumn('aa.entity_type', 'master_jf.agency_type')
+                                    ->whereColumn('aa.entity_id', 'master_jf.agency_id');
+                            });
+                    });
+            });
+        }
+
+        return $query;
     }
 
     public static function form(Form $form): Form

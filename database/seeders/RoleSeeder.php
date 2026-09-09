@@ -15,6 +15,7 @@ class RoleSeeder extends Seeder
     {
         Role::create(['name' => 'pre-client', 'guard_name' => 'web']);
         Role::create(['name' => SystemRole::Client->value, 'guard_name' => 'web']);
+        Role::create(['name' => SystemRole::CalonJf->value, 'guard_name' => 'web']);
         Role::create(['name' => SystemRole::Admin->value, 'guard_name' => 'web']);
         Role::create(['name' => SystemRole::Verifier->value, 'guard_name' => 'web']);
         Role::create(['name' => SystemRole::AdminRegional->value, 'guard_name' => 'web']);
