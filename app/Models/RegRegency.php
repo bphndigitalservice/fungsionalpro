@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class RegRegency extends Model
@@ -13,7 +14,6 @@ class RegRegency extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
-
 
     public $timestamps = false;
 
@@ -25,6 +25,11 @@ class RegRegency extends Model
     public function agency(): MorphOne
     {
         return $this->morphOne(Client::class, 'agency');
+    }
+
+    public function masterJfs(): MorphMany
+    {
+        return $this->morphMany(MasterJf::class, 'agency');
     }
 
     public function echelon1s(): HasMany

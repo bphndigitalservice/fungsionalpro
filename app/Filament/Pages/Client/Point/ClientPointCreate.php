@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Client\Point;
 
 use App\Concerns\Components\EnsureClientHasCompleteProfile;
+use App\Concerns\Filament\GatesAngkaKreditAccess;
 use App\Enums\PointSubmissionPeriod;
 use App\Enums\PointSubmissionStatus;
 use App\Exceptions\ExceedMaxPointSubmission;
@@ -17,7 +18,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -41,6 +44,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
+
 use function Filament\Support\is_app_url;
 
 /**
@@ -50,7 +54,13 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
 {
     use CanUseDatabaseTransactions;
     use EnsureClientHasCompleteProfile;
-    use HasPageShield, HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
+    use GatesAngkaKreditAccess, HasPageShield {
+        GatesAngkaKreditAccess::canAccess insteadof HasPageShield;
+        GatesAngkaKreditAccess::shouldRegisterNavigation insteadof HasPageShield;
+        GatesAngkaKreditAccess::beforeShieldRedirects insteadof HasPageShield;
+        GatesAngkaKreditAccess::getShieldRedirectPath insteadof HasPageShield;
+    }
+    use HasUnsavedDataChangesAlert, InteractsWithFormActions, InteractsWithForms, InteractsWithInfolists;
 
     protected static string $view = 'filament.pages.client-client-point-create';
 
@@ -64,22 +74,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         static::canView();
 
-        $client = Client::current();
-        if ($client && $client->identity?->photo === null) {
-            abort(403);
-        }
-
         $this->fillForm();
         $this->previousUrl = url()->previous();
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        $client = Client::current();
-        if ($client) {
-            return $client->identity?->photo !== null;
-        }
-        return true;
     }
 
     public function form(Form $form): Form
@@ -266,6 +262,12 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
                         ->label(__('Nilai Angka Kredit Hasil Konversi'))
                         ->numeric()
                         ->required(fn (Get $get) => static::isStartFrom2023($get)),
+
+                    Placeholder::make('disclaimer')
+                        ->hiddenLabel()
+                        ->content('Jika nomor konversi SKP lebih dari satu, pisahkan setiap nomor konversi dengan tanda koma (,). Contoh: PHN.5-KP.10.02-1683, PHN.5-KP.09.02-1684, PHN.5-KP.11.02-1685, dan seterusnya.')
+                        ->extraAttributes(['class' => 'text-gray-500 text-sm'])
+                        ->columnSpanFull(),
                 ])->hidden(fn (Get $get) => ! static::isStartFrom2023($get));
     }
 
@@ -327,6 +329,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->disk('s3')
             ->label(__('labels.form.client.fields.pak_file'))
             ->downloadable()
+            ->openable()
+            ->previewable()
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
             ->visibility(config('fungsional-pro.s3.visibility'))
             ->maxSize(config('fungsional-pro.max_upload_file_size'))
@@ -339,8 +343,10 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
     {
         return FileUpload::make('skp_file')
             ->disk('s3')
-            ->label('File SKP')
+            ->label('File SKP dan Penilaian SKP')
             ->downloadable()
+            ->openable()
+            ->previewable()
             ->maxSize(config('fungsional-pro.max_upload_file_size'))
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))
@@ -373,19 +379,22 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->required(fn (Get $get) => static::isStartFrom2023($get));
     }
 
-    public static function getSKP2AkFileUploadField(): FileUpload|Component
+    public static function getSKP2AkFileUploadField(): Group|Component
     {
-        return FileUpload::make('x_skp2ak_file')
-            ->disk('s3')
-            ->label(__('labels.form.client.fields.x_skp2ak_file'))
-            ->downloadable()
-            ->maxSize(config('fungsional-pro.max_upload_file_size'))
-            ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
-            ->directory(config('fungsional-pro.s3.directory.pak_files'))
-            ->visibility(config('fungsional-pro.s3.visibility'))
-            ->helperText('Format file: PDF | Ukuran maksimal: 750 KB')
-            ->hidden(fn (Get $get) => ! static::isStartFrom2023($get))
-            ->required(fn (Get $get) => static::isStartFrom2023($get));
+        return Group::make([
+            FileUpload::make('x_skp2ak_file')
+                ->disk('s3')
+                ->label(__('labels.form.client.fields.x_skp2ak_file'))
+                ->downloadable()
+                ->openable()
+                ->previewable()
+                ->maxSize(config('fungsional-pro.max_upload_file_size'))
+                ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
+                ->directory(config('fungsional-pro.s3.directory.pak_files'))
+                ->visibility(config('fungsional-pro.s3.visibility'))
+                ->helperText('Jika konversi SKP lebih dari satu, unggah dalam satu file PDF gabungan sesuai nomor yang dicantumkan | Format file: PDF | Ukuran maksimal: 750 KB')
+                ->required(fn (Get $get) => static::isStartFrom2023($get)),
+        ])->hidden(fn (Get $get) => ! static::isStartFrom2023($get));
     }
 
     public static function getAccumulatedAKFileUploadField(): FileUpload|Component
@@ -394,6 +403,8 @@ class ClientPointCreate extends Page implements HasForms, HasInfolists
             ->disk('s3')
             ->label(__('labels.form.client.fields.x_accumulated_file'))
             ->downloadable()
+            ->openable()
+            ->previewable()
             ->maxSize(config('fungsional-pro.max_upload_file_size'))
             ->acceptedFileTypes(config('fungsional-pro.accepted_document_type'))
             ->directory(config('fungsional-pro.s3.directory.pak_files'))

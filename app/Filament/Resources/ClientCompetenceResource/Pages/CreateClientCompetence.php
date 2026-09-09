@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientCompetenceResource\Pages;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientCompetenceResource;
 use App\Models\Client;
 use Filament\Resources\Pages\CreateRecord;
@@ -9,6 +10,8 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class CreateClientCompetence extends CreateRecord
 {
+    use RedirectsLockedClientMenuAccess;
+
     protected static string $resource = ClientCompetenceResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -20,7 +23,7 @@ class CreateClientCompetence extends CreateRecord
 
     public function getTitle(): string|Htmlable
     {
-        return "Input Diklat/Pelatihan";
+        return 'Input Diklat/Pelatihan';
     }
 
     protected function getFormActions(): array
@@ -35,6 +38,5 @@ class CreateClientCompetence extends CreateRecord
             $this->getCancelFormAction()
                 ->label('Batal'),
         ];
-    } 
-
+    }
 }

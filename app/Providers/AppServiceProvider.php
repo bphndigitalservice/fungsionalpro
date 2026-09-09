@@ -6,6 +6,7 @@ use App\Subscribers\ClientEventSubscriber;
 use App\Subscribers\PointEventSubscriber;
 use App\Subscribers\UserEventSubscriber;
 use BezhanSalleh\FilamentShield\FilamentShield;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\RegistrationResponse;
 use Illuminate\Auth\AuthenticationException;
@@ -17,6 +18,9 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Client;
 use App\Observers\ClientObserver;
+use App\Support\OpenApi\MasterJfOpenApiDocumentTransformer;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,12 +58,10 @@ class AppServiceProvider extends ServiceProvider
         // silently fail. Prefer adding $fillable per model, then remove this.
         // Sensitive columns are still stripped in mutateFormData* / forceFill paths.
         Model::unguard();
+        // Never throw in production (would 500 Filament pages), but always log so
+        // N+1s that make every page slow are visible in prod logs.
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation): void {
-            if ($this->app->isProduction()) {
-                return;
-            }
-
             logger()->warning(sprintf(
                 'Lazy loading [%s] on [%s:%s]',
                 $relation,
@@ -75,5 +77,13 @@ class AppServiceProvider extends ServiceProvider
         Client::observe(ClientObserver::class);
 
         FilamentShield::prohibitDestructiveCommands($this->app->isProduction());
+
+        VerifyEmail::createUrlUsing(function ($notifiable) {
+            return Filament::getVerifyEmailUrl($notifiable);
+        });
+
+        Scramble::afterOpenApiGenerated(function (OpenApi $openApi): void {
+            MasterJfOpenApiDocumentTransformer::transform($openApi);
+        });
     }
 }

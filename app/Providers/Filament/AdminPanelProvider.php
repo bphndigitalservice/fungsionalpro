@@ -4,9 +4,10 @@ namespace App\Providers\Filament;
 
 use App\Filament\AvatarProviders\FungsionalProAvatarProvider;
 use App\Filament\Pages\Authx\EmailVerificationPrompt;
-use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Authx\Login;
+use App\Filament\Pages\Authx\Register;
 use App\Filament\Pages\Dashboard;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -39,6 +40,13 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification(EmailVerificationPrompt::class)
             ->passwordReset()
             ->profile(isSimple: false)
+            ->brandName(config('app.name'))
+            ->brandLogo(fn () => view('filament.components.brand'))
+            ->brandLogoHeight('2.75rem')
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn () => view('filament.components.brand-styles'),
+            )
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
@@ -54,6 +62,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label(__('labels.nav.client_management'))
                     ->icon('heroicon-o-users'),
+                NavigationGroup::make()
+                    ->label(__('labels.nav.ukom'))
+                    ->icon('heroicon-o-document-check'),
                 NavigationGroup::make()
                     ->label(__('Verifikasi'))
                     ->icon('heroicon-o-check'),
@@ -88,11 +99,11 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class
+                Authenticate::class,
             ])->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make(),
                 BannerPlugin::make()->persistsBannersInDatabase()
-                    ->navigationGroup(__("labels.nav.system"))
+                    ->navigationGroup(__('labels.nav.system'))
                     ->bannerManagerAccessPermission('banner-manager'),
             ])
             ->defaultThemeMode(ThemeMode::Light)
@@ -101,7 +112,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->defaultAvatarProvider(FungsionalProAvatarProvider::class)
             ->globalSearch(false)
-            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn() => view('filament.components.footer'));
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn () => view('filament.components.footer'));
 
     }
 }

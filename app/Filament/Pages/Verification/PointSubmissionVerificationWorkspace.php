@@ -38,40 +38,58 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
         return $table
             ->columns([
                 TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('client.identity.name')->label('Nama'),
-                TextColumn::make('client.nip')->label('NIP'),
+                TextColumn::make('client.identity.name')
+                    ->label('Nama')
+                    ->searchable(isIndividual: true),
+                TextColumn::make('client.nip')
+                    ->label('NIP')
+                    ->searchable(isIndividual: true),
                 TextColumn::make('client.agenciable.name')->label('Instansi'),
                 TextColumn::make('client.echelonable.name')->label('Unit Kerja'),
                 TextColumn::make('submission_type')->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('is_approved')
-                    ->label('Status Persetujuan')
-                    ->tooltip(fn (Model $record): ?string => $record->verifier_note)
+                    ->label('Status Verifikasi')
+                    ->badge()
                     ->state(function (Model $record) {
                         if ($record->status === PointSubmissionStatus::Submitted) {
-                            return 'Belum diproses';
+                            return 'Belum Diproses';
                         }
 
-                        return $record->is_approved;
+                        if ($record->status === PointSubmissionStatus::ShouldRevise) {
+                            return 'Rejected';
+                        }
+
+                        return 'Accepted';
                     })
-                    ->color(fn (Model $record) =>
-                        $record->status === PointSubmissionStatus::Submitted ? 'gray' : null
-                    )
-                    ->icon(fn (Model $record) =>
-                        $record->status === PointSubmissionStatus::Submitted ? 'heroicon-o-clock' : null
-                    ),
+                    ->color(function (Model $record) {
+                        if ($record->status === PointSubmissionStatus::Submitted) {
+                            return 'gray';
+                        }
+
+                        if ($record->status === PointSubmissionStatus::ShouldRevise) {
+                            return 'danger';
+                        }
+
+                        return 'success';
+                    })
+                    ->icon(function (Model $record) {
+                        if ($record->status === PointSubmissionStatus::Submitted) {
+                            return 'heroicon-o-clock';
+                        }
+
+                        if ($record->status === PointSubmissionStatus::ShouldRevise) {
+                            return 'heroicon-o-x-circle';
+                        }
+
+                        return 'heroicon-o-check-badge';
+                    })
+                    ->tooltip(fn (Model $record): ?string => $record->verifier_note),
 
                 TextColumn::make('verified_at')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                VerifyPointSubmissionAction::make()
-                    ->hidden(fn (Model $record) =>
-                        ! static::canVerifying() ||
-                        in_array($record->status, [
-                            PointSubmissionStatus::Verified,
-                            PointSubmissionStatus::ShouldRevise,
-                        ])
-                    ),
+                VerifyPointSubmissionAction::make(),
             ]);
     }
 
@@ -97,9 +115,7 @@ class PointSubmissionVerificationWorkspace extends Page implements HasInfolists,
             ])
             ->join('clients', 'client_point_submissions.client_id', '=', 'clients.id')
             ->joinSub($verifierAccess, 'va', function (JoinClause $join) {
-                $join->on('clients.c_role_id', '=', 'va.c_role_id')
-                    ->on('va.entity_type', '=', 'clients.agency_type')
-                    ->on('va.entity_id', '=', 'clients.agency_id');
+                VerifierAccess::joinClientAgencyMatch($join);
             })
             ->select('client_point_submissions.*')
             ->distinct();

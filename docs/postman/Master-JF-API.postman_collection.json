@@ -1,0 +1,424 @@
+{
+  "info": {
+    "_postman_id": "master-jf-api-fungsionalpro",
+    "name": "FungsionalPro — Master JF API",
+    "description": "Collection untuk `GET /api/v1/master-jf` — agregasi Jabatan Fungsional untuk integrasi Superapps.\n\n**Auth:** header `X-Api-Key` = env `SUPERAPPS_API_KEY`\n\n**Filter utama (Superapps):**\n- `province_id` / `provinsi` — daerah (hybrid)\n- `c_role_id` — jenis JF (1=Analis Hukum, 2=Penyuluh Hukum)\n- `type` — cluster effective: `central`, `local_province`, `local_regency`\n\n**Response:** array group per jenis JF × cluster, masing-masing punya `aggregate` (card) + daftar instansi (`name`, `client_count`).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-Api-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    },
+    {
+      "key": "province_id",
+      "value": "11"
+    },
+    {
+      "key": "c_role_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Ping",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ping",
+              "host": ["{{base_url}}"],
+              "path": ["ping"]
+            },
+            "description": "Cek API key valid dan route API aktif."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Master JF — Primary filters",
+      "item": [
+        {
+          "name": "All (no filter)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"]
+            },
+            "description": "Semua group JF × cluster yang punya data."
+          },
+          "response": []
+        },
+        {
+          "name": "Daerah — province_id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?province_id={{province_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "province_id",
+                  "value": "{{province_id}}",
+                  "description": "FK reg_provinces.id — hanya Pemda di provinsi ini"
+                }
+              ]
+            },
+            "description": "Filter daerah via FK. Hanya baris Pemda; K/L tidak muncul."
+          },
+          "response": []
+        },
+        {
+          "name": "Daerah — provinsi (text)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?provinsi=BALI",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "provinsi",
+                  "value": "BALI",
+                  "description": "Text match — hanya jika province_id IS NULL"
+                }
+              ]
+            },
+            "description": "Fallback daerah untuk baris tanpa FK province_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Jenis JF — c_role_id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?c_role_id={{c_role_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "c_role_id",
+                  "value": "{{c_role_id}}",
+                  "description": "1=Analis Hukum, 2=Penyuluh Hukum"
+                }
+              ]
+            },
+            "description": "Filter jenis Jabatan Fungsional."
+          },
+          "response": []
+        },
+        {
+          "name": "Cluster — central (K/L)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?type=central",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "central",
+                  "description": "Effective cluster — Kementerian/Lembaga"
+                }
+              ]
+            },
+            "description": "Semua K/L nasional. Filter daerah diabaikan jika digabung."
+          },
+          "response": []
+        },
+        {
+          "name": "Cluster — local_province (Pemda Provinsi)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?type=local_province",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "local_province"
+                }
+              ]
+            },
+            "description": "Hanya cluster Pemda tingkat provinsi."
+          },
+          "response": []
+        },
+        {
+          "name": "Cluster — local_regency (Pemda Kab/Kota)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?type=local_regency",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "local_regency"
+                }
+              ]
+            },
+            "description": "Hanya cluster Pemda tingkat kabupaten/kota."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Master JF — Combined filters",
+      "item": [
+        {
+          "name": "Daerah + Jenis JF + Cluster Pemda Provinsi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?province_id={{province_id}}&c_role_id={{c_role_id}}&type=local_province",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "province_id",
+                  "value": "{{province_id}}"
+                },
+                {
+                  "key": "c_role_id",
+                  "value": "{{c_role_id}}"
+                },
+                {
+                  "key": "type",
+                  "value": "local_province"
+                }
+              ]
+            },
+            "description": "Contoh 3 filter utama sekaligus — use case card Superapps."
+          },
+          "response": []
+        },
+        {
+          "name": "Daerah + Cluster central (daerah diabaikan)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?province_id={{province_id}}&type=central",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "province_id",
+                  "value": "{{province_id}}",
+                  "description": "Diabaikan karena type=central"
+                },
+                {
+                  "key": "type",
+                  "value": "central"
+                }
+              ]
+            },
+            "description": "Meski province_id diset, K/L nasional tetap tampil semua."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Master JF — Secondary filters",
+      "item": [
+        {
+          "name": "Search (nama/nip/instansi)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?search=hukum",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "hukum"
+                }
+              ]
+            },
+            "description": "Cari di nama, nip, instansi, unit_kerja."
+          },
+          "response": []
+        },
+        {
+          "name": "Jenjang",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?jenjang=Ahli%20Muda",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "jenjang",
+                  "value": "Ahli Muda",
+                  "description": "Match jabatan LIKE"
+                }
+              ]
+            },
+            "description": "Filter jenjang dari teks jabatan."
+          },
+          "response": []
+        },
+        {
+          "name": "Status aktif",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?status=active",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Filter status kepegawaian JF."
+          },
+          "response": []
+        },
+        {
+          "name": "Status kepegawaian PNS",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/master-jf?status_kepegawaian=PNS",
+              "host": ["{{base_url}}"],
+              "path": ["master-jf"],
+              "query": [
+                {
+                  "key": "status_kepegawaian",
+                  "value": "PNS"
+                }
+              ]
+            },
+            "description": "Filter PNS / PPPK."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

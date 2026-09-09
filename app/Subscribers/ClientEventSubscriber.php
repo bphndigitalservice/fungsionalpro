@@ -74,8 +74,8 @@ class ClientEventSubscriber
 
             if ($client->user) {
                 $client->user->notify(new IdentityVerificationNotification(
-                    $client, 
-                    'rejected', 
+                    $client,
+                    'rejected',
                     $event->getVerifierNotes()
                 ));
             }
@@ -98,7 +98,7 @@ class ClientEventSubscriber
         DB::beginTransaction();
         try {
             $client->forceFill([
-                'is_verified' => null,
+                'is_verified' => Verified::Unverified,
                 'verified_at' => null,
             ])->save();
 

@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\ClientActivityResource\Pages;
 
+use App\Concerns\Filament\RedirectsLockedClientMenuAccess;
 use App\Filament\Resources\ClientActivityResource;
-use Filament\Actions;
 use App\Models\Client;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateClientActivity extends CreateRecord
 {
-    protected static string $resource = ClientActivityResource::class;
+    use RedirectsLockedClientMenuAccess;
 
+    protected static string $resource = ClientActivityResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -31,9 +32,5 @@ class CreateClientActivity extends CreateRecord
             $this->getCancelFormAction()
                 ->label('Batal'),
         ];
-    }   
-
-
+    }
 }
-
-

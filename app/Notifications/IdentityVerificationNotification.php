@@ -12,8 +12,8 @@ class IdentityVerificationNotification extends Notification
     use Queueable;
 
     public function __construct(
-        protected $record, 
-        protected string $status, 
+        protected $record,
+        protected string $status,
         protected ?string $reason = null
     ) {}
 
@@ -25,12 +25,12 @@ class IdentityVerificationNotification extends Notification
     public function toDatabase($notifiable): array
     {
         $isAccepted = $this->status === 'accepted';
-        
+
         $statusTitle = $isAccepted ? 'Identitas Diverifikasi' : 'Verifikasi Identitas Ditolak';
         $statusText = $isAccepted ? 'telah berhasil diverifikasi' : 'gagal diverifikasi';
-        
+
         $bodyText = "Identitas Anda {$statusText}.";
-        
+
         if (!$isAccepted && $this->reason) {
             $bodyText .= " Alasan: {$this->reason}";
         }
@@ -43,7 +43,7 @@ class IdentityVerificationNotification extends Notification
             ->actions([
                 Action::make('view')
                     ->label('Lihat Profil')
-                    ->url(fn() => route('filament.admin.pages.client-profile-page')) 
+                    ->url(fn() => route('filament.admin.pages.client-profile-page', [], false))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

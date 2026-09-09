@@ -4,11 +4,38 @@ return [
     'nav' => [
         'client_management' => 'Manajemen Klien',
         'system' => 'Sistem',
+        'ukom' => 'Ukom Application',
         'references' => 'Referensi',
         'crole' => 'Jabatan Fungsional',
         'references_province' => 'Provinsi',
         'references_regency' => 'Kota / Kabupaten',
         'references_department' => 'Kementerian & Lembaga',
+    ],
+    'page' => [
+        'client_profile' => [
+            'verify_required' => 'Please complete and verify your Identitas first',
+        ],
+        'dashboard' => [
+            'verify_identity_required' => 'Please complete your Identitas and wait for it to be verified',
+        ],
+        'pengajuan_ukom' => [
+            'nav' => 'Ukom Application',
+            'title' => 'Ukom Application',
+            'verify_required' => 'Complete Identitas and wait for verification before applying for ukom',
+            'submit' => 'Kirim',
+            'submit_confirm' => 'Apakah Anda yakin akan mengirim pengajuan? Pengajuan hanya dapat dilakukan 1x hingga pengajuan diterima/ditolak',
+        ],
+        'riwayat_pengajuan_ukom' => [
+            'nav' => 'Riwayat Pengajuan',
+            'title' => 'Riwayat Pengajuan Ukom',
+            'empty' => 'Belum ada pengajuan Ukom.',
+        ],
+        'ukom_verification' => [
+            'nav' => 'Verify Ukom Applications',
+            'forward' => 'Teruskan ke Instansi pembina',
+            'forward_confirm' => 'Jika pengajuan ini diverifikasi, berkas akan diteruskan ke Instansi Pembina untuk verifikasi akhir.',
+            'forwarded' => 'Pengajuan diteruskan ke Instansi Pembina.',
+        ],
     ],
     'table' => [
         'client' => [
@@ -32,8 +59,8 @@ return [
     'form' => [
         'user' => [
             'heading' => [
-                'general' => 'Umum',
-                'general_description' => 'Name, email, and Password',
+                'general' => 'Credentials',
+                'general_description' => 'Name, email, and password',
                 'role' => 'Peran',
                 'role_description' => 'Peran',
                 'verification' => 'Verifikasi',
@@ -69,7 +96,7 @@ return [
                 'university_name' => 'Universitas / Institusi Pendidikan',
                 'program_name' => 'Jurusan',
                 'gpa' => 'IPK',
-                'certificate' => 'Ijazah/Transkrip',
+                'certificate' => 'Ijazah',
                 'nip' => 'NIP',
                 'crole_name' => 'Jabatan',
                 'crole_grade' => 'Jenjang',

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Concerns\Filament\ChecksPhotoUpload;
+use App\Concerns\Filament\GatesVerifiedClientOwnRecords;
 use App\Enums\EducationLevel;
 use App\Filament\Resources\ClientEducationResource\Pages;
 use App\Models\Client;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientEducationResource extends Resource
 {
-    use ChecksPhotoUpload;
+    use GatesVerifiedClientOwnRecords;
 
     protected static ?string $model = ClientEducation::class;
 
@@ -36,7 +36,7 @@ class ClientEducationResource extends Resource
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Select::make('level')
-                                    ->label(__('labels.form.client.fields.education_level'))
+                                    ->label(__('Jenjang Pendidikan'))
                                     ->options(EducationLevel::class)
                                     ->required(),
 
@@ -99,11 +99,11 @@ class ClientEducationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('level')
-                    ->label(__('labels.form.client.fields.education_level'))
+                    ->label(__('Jenjang Pendidikan'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('university_name')
-                    ->label(__('labels.form.client.fields.university_name'))
+                    ->label(__('Universitas'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('program_name')
@@ -122,7 +122,7 @@ class ClientEducationResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('level')
-                    ->label(__('labels.form.client.fields.education_level'))
+                    ->label(__('Jenjang Pendidikan'))
                     ->options(EducationLevel::class),
             ])
             ->actions([
