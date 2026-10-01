@@ -94,6 +94,9 @@ class MasterJfIndexTest extends TestCase
                 'data.0.cluster_label',
                 MasterJfAgencyApiMapper::clusterLabel(ClientCluster::Central->value),
             )
+            ->assertJsonPath('aggregate.total_jf', 3)
+            ->assertJsonPath('aggregate.by_jenjang.Ahli Muda', 2)
+            ->assertJsonPath('aggregate.by_jenjang.Ahli Pertama', 1)
             ->assertJsonPath('data.0.aggregate.total_jf', 2)
             ->assertJsonPath('data.0.data.0.agency_type', 'department')
             ->assertJsonPath('data.0.data.0.name', 'Kementerian Hukum')

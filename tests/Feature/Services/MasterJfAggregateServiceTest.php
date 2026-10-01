@@ -91,11 +91,102 @@ class MasterJfAggregateServiceTest extends TestCase
             'type' => ClientCluster::Central,
             'instansi' => 'KEMENTERIAN AGAMA',
         ]);
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'jabatan' => 'Analis Hukum Ahli Madya (PLT)',
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENTERIAN HUKUM',
+        ]);
 
         $result = app(MasterJfAggregateService::class)->aggregate(['jenjang' => 'Ahli Madya']);
 
         $this->assertCount(1, $result['data']);
         $this->assertSame(1, $result['data'][0]['aggregate']['total_jf']);
+    }
+
+    public function test_c_role_total_matches_the_list_page_fk_filter(): void
+    {
+        $analis = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+        $penyuluh = CRole::create(['role_name' => 'Penyuluh Hukum', 'active' => true]);
+
+        MasterJf::factory()->count(2)->create([
+            'c_role_id' => $analis->id,
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENTERIAN HUKUM',
+            'jabatan' => 'Penyuluh Hukum Ahli Muda',
+        ]);
+        MasterJf::factory()->create([
+            'c_role_id' => null,
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENTERIAN HUKUM',
+            'jabatan' => 'Analis Hukum Ahli Pertama',
+        ]);
+        MasterJf::factory()->create([
+            'c_role_id' => $penyuluh->id,
+            'type' => ClientCluster::LocalProvince,
+            'instansi' => 'Pemerintah Daerah Provinsi Bali',
+            'jabatan' => 'Penyuluh Hukum Ahli Pertama',
+        ]);
+
+        $filtered = app(MasterJfAggregateService::class)->aggregate(['c_role_id' => $analis->id]);
+        $filteredTotal = array_sum(array_column(array_column($filtered['data'], 'aggregate'), 'total_jf'));
+
+        $this->assertSame(2, $filtered['aggregate']['total_jf']);
+        $this->assertSame(2, $filteredTotal);
+        $this->assertSame(
+            [$analis->id],
+            array_values(array_unique(array_column($filtered['data'], 'c_role_id'))),
+        );
+
+        $unfiltered = app(MasterJfAggregateService::class)->aggregate([]);
+        $totals = [];
+        foreach ($unfiltered['data'] as $group) {
+            $totals[$group['c_role_id']] = ($totals[$group['c_role_id']] ?? 0) + $group['aggregate']['total_jf'];
+        }
+
+        $this->assertSame(2, $totals[$analis->id]);
+        $this->assertSame(1, $totals[$penyuluh->id]);
+    }
+
+    public function test_by_jenjang_matches_the_list_page_suffix_count(): void
+    {
+        $role = CRole::create(['role_name' => 'Analis Hukum', 'active' => true]);
+
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'jabatan' => 'Petugas Ahli Muda',
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENTERIAN HUKUM',
+        ]);
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'jabatan' => 'Analis Hukum Ahli Muda (PLT)',
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENTERIAN HUKUM',
+        ]);
+        MasterJf::factory()->create([
+            'c_role_id' => $role->id,
+            'jabatan' => 'Analis Hukum Ahli Madya',
+            'type' => ClientCluster::Central,
+            'instansi' => 'KEMENTERIAN AGAMA',
+        ]);
+
+        $result = app(MasterJfAggregateService::class)->aggregate(['c_role_id' => $role->id]);
+
+        $jenjang = [];
+        $total = 0;
+        foreach ($result['data'] as $group) {
+            $total += $group['aggregate']['total_jf'];
+            foreach ($group['aggregate']['by_jenjang'] as $label => $count) {
+                $jenjang[$label] = ($jenjang[$label] ?? 0) + $count;
+            }
+        }
+
+        $this->assertSame(3, $total);
+        $this->assertSame(1, $jenjang['Ahli Muda']);
+        $this->assertSame(1, $jenjang['Ahli Madya']);
+        $this->assertSame(0, $jenjang['Ahli Pertama']);
+        $this->assertSame(1, $jenjang['unknown']);
     }
 
     public function test_c_role_level_id_filter_resolves_level_to_jabatan_like(): void

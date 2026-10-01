@@ -17,13 +17,12 @@ use Illuminate\Support\Collection;
 class MasterJfAggregateService
 {
     /**
-     * @return array{data: list<array{c_role_id: int, c_role_label: string, cluster: string, cluster_label: string, aggregate: array, data: list<array{agency_type: ?string, agency_id: ?int, name: string, client_count: int}>}>}
+     * @return array{aggregate: array, data: list<array{c_role_id: int, c_role_label: string, cluster: string, cluster_label: string, aggregate: array, data: list<array{agency_type: ?string, agency_id: ?int, name: string, client_count: int}>}>}
      */
     public function aggregate(array $filters): array
     {
         $baseQuery = $this->buildFilteredQuery($filters);
         $rolesById = CRole::query()->pluck('role_name', 'id');
-        $rolesByName = $rolesById->flip();
         $clusterFilter = isset($filters['type']) ? (string) $filters['type'] : null;
 
         $rows = (clone $baseQuery)
@@ -40,7 +39,6 @@ class MasterJfAggregateService
                 'agency_type',
                 'agency_id',
             ])
-            ->with(['cRole:id,role_name'])
             ->get();
 
         $loadable = $rows->filter(function (MasterJf $row): bool {
@@ -55,6 +53,8 @@ class MasterJfAggregateService
 
         /** @var array<string, array{c_role_id: int, c_role_label: string, cluster: string, cluster_label: string, rows: Collection<int, MasterJf>}> $segments */
         $segments = [];
+        /** @var Collection<int, MasterJf> $included */
+        $included = collect();
 
         foreach ($rows as $row) {
             $clusterId = MasterJfClusterResolver::resolve(
@@ -75,12 +75,9 @@ class MasterJfAggregateService
                 continue;
             }
 
-            [$cRoleId, $cRoleLabel] = $this->resolveJfType(
-                $row->c_role_id,
-                $row->cRole?->role_name ?? MasterJfDisplay::inferRoleNameFromJabatan($row->jabatan),
-                $rolesById,
-                $rolesByName,
-            );
+            [$cRoleId, $cRoleLabel] = $this->resolveJfType($row->c_role_id, $rolesById);
+
+            $included->push($row);
 
             $key = $cRoleId.':'.$clusterId;
 
@@ -115,7 +112,10 @@ class MasterJfAggregateService
                 <=> [$b['c_role_id'], $this->clusterSortOrder($b['cluster'])];
         });
 
-        return ['data' => $groups];
+        return [
+            'aggregate' => $this->computeSliceAggregationsFromCollection($included),
+            'data' => $groups,
+        ];
     }
 
     public function buildFilteredQuery(array $filters): Builder
@@ -139,14 +139,14 @@ class MasterJfAggregateService
         if (isset($filters['c_role_level_id'])) {
             $level = CRoleLevel::query()->find($filters['c_role_level_id']);
             if ($level?->level) {
-                $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($level->level).'%']);
+                $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($level->level)]);
             } else {
                 $query->whereRaw('0 = 1');
             }
         }
 
         if ($jenjang = trim((string) ($filters['jenjang'] ?? ''))) {
-            $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($jenjang).'%']);
+            $query->whereRaw('LOWER(jabatan) LIKE ?', ['%'.strtolower($jenjang)]);
         }
 
         if (isset($filters['reg_grade_id'])) {
@@ -201,22 +201,26 @@ class MasterJfAggregateService
     }
 
     /**
+     * Same rule as the Master JF list filter: the stored `c_role_id` only.
+     * Jabatan text is not used to assign a role.
+     *
      * @param  Collection<int, string>  $rolesById
-     * @param  Collection<string, int>  $rolesByName
      * @return array{0: int, 1: string}
      */
-    protected function resolveJfType(mixed $cRoleId, mixed $roleName, Collection $rolesById, Collection $rolesByName): array
+    protected function resolveJfType(mixed $cRoleId, Collection $rolesById): array
     {
-        if ($cRoleId !== null && $rolesById->has($cRoleId)) {
-            return [(int) $cRoleId, (string) $rolesById[$cRoleId]];
+        if ($cRoleId === null || $cRoleId === '') {
+            return [0, 'unknown'];
         }
 
-        $label = trim((string) $roleName);
-        if ($label !== '' && $rolesByName->has($label)) {
-            return [$rolesByName[$label], $label];
+        $id = (int) $cRoleId;
+        $label = $rolesById->get($id) ?? $rolesById->get((string) $id);
+
+        if ($label === null) {
+            return [0, 'unknown'];
         }
 
-        return [0, 'unknown'];
+        return [$id, (string) $label];
     }
 
     protected function clusterSortOrder(string $clusterId): int
@@ -325,8 +329,17 @@ class MasterJfAggregateService
     /** @param array<string, int> $counts */
     protected function incrementJenjangCount(array &$counts, ?string $jabatan): void
     {
-        $jenjang = MasterJfDisplay::parseJenjangFromJabatan($jabatan) ?? 'unknown';
-        $counts[$jenjang] = ($counts[$jenjang] ?? 0) + 1;
+        $haystack = strtolower((string) $jabatan);
+
+        foreach (MasterJfDisplay::JENJANG_LABELS as $label) {
+            if ($haystack !== '' && str_ends_with($haystack, strtolower($label))) {
+                $counts[$label]++;
+
+                return;
+            }
+        }
+
+        $counts['unknown']++;
     }
 
     /** @param array<string, int> $counts @param list<string> $knownValues @return array<string, int> */
@@ -360,6 +373,7 @@ class MasterJfAggregateService
             $key = $key === null ? '' : (string) $key;
             if ($key === '' || ! in_array($key, $knownValues, true)) {
                 $unknown += (int) $total;
+
                 continue;
             }
             $result[$key] = (int) $total;
@@ -386,6 +400,7 @@ class MasterJfAggregateService
             $key = $key === null ? '' : trim((string) $key);
             if ($key === '') {
                 $unknown += (int) $total;
+
                 continue;
             }
             $result[$key] = (int) $total;

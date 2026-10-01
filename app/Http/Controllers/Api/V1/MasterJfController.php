@@ -21,8 +21,8 @@ class MasterJfController extends Controller
         description: <<<'DESC'
 Returns grouped aggregations of Jabatan Fungsional data for superapps dashboards.
 
-Each group represents one **jenis JF × cluster** combination and includes:
-- group-level `aggregate` (card metrics)
+`aggregate` is the filtered total, the same population as the Master JF list (every cluster). Each item in `data` is one **jenis JF × cluster** card:
+- group-level `aggregate` (that cluster only)
 - `data[]` instansi list with `agency_type`, `agency_id`, `name`, and `client_count`
 
 **Primary filters (superapps UX):**
@@ -37,8 +37,21 @@ DESC,
     )]
     #[Response(
         status: 200,
-        description: 'Grouped aggregations. `aggregate` exists only on each group/card — not on instansi items.',
+        description: 'Filtered total in `aggregate`, plus one group per jenis JF × cluster. Instansi items have no `aggregate`.',
         examples: [[
+            'aggregate' => [
+                'total_jf' => 4148,
+                'by_jenjang' => [
+                    'Ahli Pertama' => 2594,
+                    'Ahli Muda' => 1260,
+                    'Ahli Madya' => 282,
+                    'Ahli Utama' => 2,
+                    'unknown' => 10,
+                ],
+                'by_status' => ['active' => 4000, 'unknown' => 148],
+                'by_status_kepegawaian' => ['PNS' => 3000, 'PPPK' => 1000, 'unknown' => 148],
+                'by_pengangkatan' => ['Penyetaraan' => 500, 'unknown' => 3648],
+            ],
             'data' => [[
                 'c_role_id' => 1,
                 'c_role_label' => 'Analis Hukum',
